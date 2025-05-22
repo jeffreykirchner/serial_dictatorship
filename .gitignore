@@ -1,0 +1,8 @@
+logs/*
+_multi_user_socket_template_env/*
+.vscode/*
+*.pyc
+local_settings.py
+database_dumps/*
+iac/environment_variables.json
+iac/secrets.json

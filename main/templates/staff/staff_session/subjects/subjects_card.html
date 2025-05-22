@@ -1,0 +1,238 @@
+<div class="card" v-show="first_load_done">                  
+    <div class="card-header fw-bold">                
+        <span class="align-middle">
+            Subjects ([[session.session_players_order.length]])
+        </span>       
+
+        <span class="float-end"> 
+            
+            <a href='{%url "staff_session_subject_earnings" session.id %}' class='link-primary me-4' title='Open print earnings' v-if="session.started">
+                Print Earnings                
+            </a>
+
+            <a href='{%url "staff_session_parameters" session.id %}' class='link-primary' title='Open parameter set'>
+                [[session.started ? 'View': 'Edit']] Parameters                
+            </a>
+
+            <button type="button" 
+                    class="btn btn-outline-primary ms-4" 
+                    title="Remove Names and Student IDs" 
+                    v-on:click="send_anonymize_data()"
+                    v-if="session.started">
+                Anonymize Data <i class="far fa-address-card"></i>
+            </button>
+
+            <button type="button" 
+                    class="btn btn-outline-primary ms-4" 
+                    title="Upload Email List" 
+                    v-on:click="copy_earnings()"
+                    v-if="session.started">
+                Copy Earnings <span v-if="earnings_copied"><i class="fas fa-check"></i></span><span v-else><i class="fas fa-copy"></i></span>
+            </button>
+
+            <button type="button" 
+                    class="btn btn-outline-primary ms-2" 
+                    title="Upload Subject List" 
+                    v-on:click="show_send_email_list()"
+                    v-if="session.started">
+                
+                <span v-if="!session.parameter_set.prolific_mode">
+                    Upload Email List <i class="fas fa-upload"></i>
+                </span>
+                <span v-else>
+                    Upload Prolific ID List <i class="fas fa-upload"></i>
+                </span>
+            </button>
+
+            <button type="button" 
+                    class="btn btn-link ms-2" 
+                    title="Show Help Doc" 
+                    v-on:click="send_load_help_doc('Staff Subject List')">
+                <i class="far fa-question-circle"></i> 
+            </button>
+        </span>          
+    </div>
+    <div class="card-body" >        
+
+        <!-- player status -->
+        <div class="row justify-content-center">           
+            <div class="col-md-auto text-center">                
+                <div class="table-responsive">
+                <table class="table table-condensed"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" class = "">
+                                Client #
+                            </th>
+                            <th scope="col" class = "">
+                                ID Label
+                            </th>
+                            <th scope="col" class = "">
+                                <span v-if="!session.parameter_set.prolific_mode">
+                                    Name
+                                </span>
+                                <span v-else>
+                                    Prolific<br>Session ID
+                                </span>
+                            </th>                            
+                            <th scope="col" class = "text-center">
+                                <span v-if="!session.parameter_set.prolific_mode">
+                                    Student ID
+                                </span>
+                                <span v-else>
+                                    Prolific<br>Subject ID
+                                </span>
+                            </th>
+                            <th scope="col" class = "">
+                                <span v-if="!session.parameter_set.prolific_mode">
+                                    Email
+                                </span>
+                                <span v-else>
+                                    Study<br>Subject ID
+                                </span>
+                            </th>
+                            <th scope="col" class = "text-center">
+                                <span v-if="!session.parameter_set.prolific_mode">
+                                    Earnings
+                                </span>
+                                <span v-else>
+                                    Bonus<br>Earnings
+                                </span>
+                            </th>                       
+                            <th scope="col" class = "text-center">
+                                Shareable<br>Login Link
+                            </th> 
+                            <th scope="col" class = "text-center">
+                                Connected
+                            </th>
+                            <th scope="col" class = "text-center" v-show="session.world_state.current_experiment_phase == 'Instructions'">
+                                Instructions
+                            </th>
+                            <th scope="col" class = "text-center" v-if="session.parameter_set.survey_required">
+                                Survey Complete
+                            </th>   
+                            <th scope="col" class = "text-center">
+                                Instructions
+                            </th>                         
+                        </tr>
+                    </thead>
+                    <tbody id="player_list">
+                        <tr v-for="(p, index) in session.session_players_order" 
+                            v-bind:key="p"
+                            :set="temp_p=session.session_players[p]">
+                            <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
+                                [[temp_p.player_number]]
+                            </td>
+                            <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
+                                [[session.parameter_set.parameter_set_players[temp_p.parameter_set_player].id_label]]
+                            </td>
+                            <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
+                                [[temp_p.name=="" ? "---" : temp_p.name]]
+                            </td>                           
+                            <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
+                                [[temp_p.student_id=="" ? "---" : temp_p.student_id]]
+                            </td>
+                            <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
+                                <span v-if="!session.parameter_set.prolific_mode" v-on:click="show_edit_subject(p.id)">
+                                    [[(!temp_p.email || temp_p.email=="") ? "---" : temp_p.email]]
+                                </span>
+                                <span v-else>
+                                    [[temp_p.player_key]]
+                                </span>
+                            </td>
+                            <td class="player_table_cell text-nowrap">
+                                <span v-if="Object.keys(session.world_state).length > 0 && session.started">
+                                    [[get_earnings_display(session.world_state.session_players[p].earnings)]]
+                                </span>
+                                <span v-else>
+                                    ---
+                                </span>
+                            </td>                            
+                            <td class="player_table_cell text-nowrap">
+                                <a v-bind:href="temp_p.login_link">Login Link</a>
+                            </td>
+                            <td class="player_table_cell text-nowrap">
+                                <span v-if="temp_p.connected_count > 0" style="color: lightgreen;">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                <span v-else style="color: crimson;">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                            </td>
+                            <td class="player_table_cell text-nowrap" v-show="session.world_state.current_experiment_phase == 'Instructions'">
+                                [[temp_p.instructions_finished ? "Finished" : "Page " + temp_p.current_instruction.toString()]]
+                            </td>
+                            <td class="player_table_cell text-nowrap" v-if="session.parameter_set.survey_required">
+                                <span v-if="temp_p.survey_complete">Yes</span>
+                                <span v-else>No</span>
+                            </td>    
+                            <td class="player_table_cell text-nowrap">
+                                <a v-bind:href="'/staff-session-instructions/' + p +'/1/'" target="_blank">View</a>
+                            </td>                       
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" class="text-end">
+                               Average
+                            </td>
+                            <td class="text-center">
+                                [[get_average_earnings()]]
+                            </td>
+                            <td colspan="2" class="text-end">
+
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+            </div>
+        </div>  
+        
+        <!-- private links -->
+        <div v-if="!session.parameter_set.prolific_mode">
+            <div class="row justify-content-center">            
+                <div class="col-md-auto text-center">
+                    Private Login Links (do not share with subjects)
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto text-center">
+                    Next available connection:
+                </div>
+                <div class="col-md-auto text-center">
+                    <a href='{%url "subject_home_auto_connect" session.id_string%}' class = 'link-primary'>{{parameters.site_url}}{%url "subject_home_auto_connect" session.id_string%}</a>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-auto text-center">
+                    Login by client number:
+                </div>
+                <div class="col-md-auto text-center">
+                    <a href='{%url "subject_home_auto_connect" session.id_string%}[client_number]' class = 'link-primary'>{{parameters.site_url}}{%url "subject_home_auto_connect" session.id_string%}[client_number]</a>
+                </div>
+            </div>
+        </div>
+
+         <!-- auto login for prolific -->
+         <div v-else>
+            <div class="row justify-content-center">
+                <div class="col-md-3 text-end">
+                    Prolific auto-login link:
+                </div>
+                <div class="col-md-9 text-start">
+                    {{parameters.site_url}}{%url "subject_home_auto_connect_prolific" session.id_string%}{% verbatim %}?PROLIFIC_PID={{%PROLIFIC_PID%}}&SESSION_ID={{%SESSION_ID%}}{% endverbatim %}
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-3 text-end">
+                    Optional, Study Subject ID:<br>(log subject into this slot only)
+                </div>
+                <div class="col-md-9 text-start">
+                    {% verbatim %}&SUBJECT_ID=Study Subject ID{% endverbatim %}
+                </div>
+            </div>
+        </div>
+
+    </div>                    
+</div> 

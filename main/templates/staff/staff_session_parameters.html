@@ -1,0 +1,107 @@
+{%extends "base.html"%}
+{% load crispy_forms_tags %}
+
+{%block head%}
+<script>
+
+    document.addEventListener("DOMContentLoaded", function(){
+        {%include "staff/staff_session_parameters/staff_session_parameters.js"%}
+    });
+
+</script>
+<style>
+
+    canvas {
+        background-color: white; 
+        width: 100%;
+        height: 600px;
+    }
+
+    .player_table_row {
+        cursor: pointer;
+    }
+
+    .player_table_cell{
+        cursor: pointer;
+    }
+
+    .player_table_cell:hover {
+        background-color:#ececec;
+    }
+</style>
+
+{%endblock head%}
+
+{% block content %}
+
+
+<div class="row justify-content-lg-center" v-if="!first_load_done">
+    <div class="col text-end mb-4">
+        <i class="fas fa-cog fa-spin fa-2x"></i>
+    </div>
+</div>
+
+<!-- modals -->
+{%include "staff/staff_session_parameters/general_settings/edit_parameterset_modal.html"%}
+{%include "staff/staff_session_parameters/players/edit_parameterset_player_modal.html"%}
+{%include "staff/staff_session_parameters/control/upload_parameters_modal.html"%}
+{%include "staff/staff_session_parameters/control/import_parameters_modal.html"%}
+{%include "staff/staff_session_parameters/notices/edit_parameterset_notice_modal.html"%}
+{%include "staff/staff_session_parameters/walls/edit_parameterset_wall_modal.html"%}
+{%include "staff/staff_session_parameters/groups/edit_parameterset_group_modal.html"%}
+{%include "staff/staff_session_parameters/barriers/edit_parameterset_barrier_modal.html"%}
+{%include "staff/staff_session_parameters/grounds/edit_parameterset_ground_modal.html"%}
+{%include "help_modal.html"%}
+
+<!-- cards -->
+<div class="row justify-content-lg-center" v-cloak>
+    <div class="col-md">
+        <div class="row justify-content-lg-center">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/general_settings/general_settings_card.html"%} 
+            </div>
+        </div>
+        <div class="row justify-content-lg-center mt-4">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/walls/walls_card.html"%}  
+            </div>
+        </div>
+        <div class="row justify-content-lg-center mt-4">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/barriers/barriers_card.html"%}  
+            </div>
+        </div>
+    </div>
+    <div class="col">   
+        <div class="row justify-content-lg-center">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/players/players_card.html"%}   
+            </div>
+        </div>
+        <div class="row justify-content-lg-center mt-4">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/grounds/grounds_card.html"%}  
+            </div>
+        </div>                 
+    </div> 
+    <div class="col-md">
+        <div class="row justify-content-lg-center">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/control/control_card.html"%}  
+            </div>
+        </div>
+       
+        <div class="row justify-content-lg-center mt-4">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/notices/notices_card.html"%}
+            </div>
+        </div>
+
+        <div class="row justify-content-lg-center mt-4">
+            <div class="col-md">
+                {%include "staff/staff_session_parameters/groups/groups_card.html"%}
+            </div>
+    </div>              
+</div>
+                  
+{% endblock %}

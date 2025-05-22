@@ -1,0 +1,68 @@
+<div class="card" v-show="first_load_done">                  
+    <div class="card-header fw-bold">                
+        <span class="align-middle">Data</span>       
+            
+        <span class="float-end">
+            <span v-if="data_downloading"><i class="fas fa-spinner fa-spin"></i></span>
+       
+           <button type="button" class="btn btn-link ms-1" title="Show Help Doc" v-on:click="send_load_help_doc('Staff Data')">
+               <i class="far fa-question-circle"></i> 
+           </button>
+       </span>
+        
+    </div>
+    <div class="card-body"> 
+
+        <!-- summary data -->
+        <div class="row">
+            <div class="col-md text-center">
+                <button type="button"
+                        class="btn btn-outline-primary"
+                        v-on:click = "download_summary_data()"
+                        title="Download Summary Data"
+                        v-bind:disabled="reconnecting || working || session.started==false">
+                    Download Summary <i class="fas fa-scroll"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- actions data -->
+        <div class="row mt-2">
+            <div class="col-md text-center">
+                <button type="button"
+                        class="btn btn-outline-primary"
+                        v-on:click = "download_actions_data()"
+                        title="Download Action Data"
+                        v-bind:disabled="reconnecting || working || session.started==false">
+                    Download Actions <i class="fas fa-scroll"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- recruiter payments -->
+        <div class="row mt-2">
+            <div class="col-md text-center">
+                <button type="button"
+                        class="btn btn-outline-primary"
+                        v-on:click = "download_recruiter_data()"
+                        title="Download Recruiter Data"
+                        v-bind:disabled="reconnecting || working || session.started==false">
+                    Download Recruiter Payments <i class="fas fa-scroll"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- earnings -->
+        <div class="row mt-2">
+            <div class="col-md text-center">
+                <button type="button"
+                        class="btn btn-outline-primary"
+                        v-on:click = "download_payment_data()"
+                        title="Download Recruiter Data"
+                        v-bind:disabled="reconnecting || working || session.started==false">
+                    Download Earnings <i class="fas fa-scroll"></i>
+                </button>
+            </div>
+        </div>
+    </div>                    
+</div> 

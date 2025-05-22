@@ -1,0 +1,65 @@
+{% load crispy_forms_tags %}
+<!--End Game Modal -->
+<div class="modal fade " 
+     id="end_game_modal" 
+     data-bs-backdrop="static" 
+     data-bs-keyboard="false" 
+     tabindex="-1" 
+     aria-labelledby="end_game_modal" 
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header fw-bold">
+                The experiment is complete.
+            </div>
+            <div class="modal-body">
+                <div v-show="!session_player.name_submitted && !session.parameter_set.prolific_mode">
+                    <form id="endGameForm" v-on:submit.prevent="onSubmit">
+                        {% for i in end_game_form %}
+                        <div class="row">
+                            <div class = "col col-md-10 offset-md-1">  
+                                {{ i|as_crispy_field }}         
+                            </div>            
+                        </div> 
+                        {% endfor %}
+                    </form>
+                </div>
+
+                <div class="text-center" v-show="session_player.name_submitted || session.parameter_set.prolific_mode">
+                    <span class="fs-3 mt-4" v-if="!session.parameter_set.prolific_mode">
+                        Earnings: 
+                    </span>
+                    <span class="fs-3 mt-4" v-else>
+                        Bonus Earnings: 
+                    </span>
+                    <span class="fs-3 mt-4" v-if="session.started">$[[(Math.ceil(Number(session.world_state.session_players[session_player.id].earnings))/100).toFixed(2)]]</span>
+                </div>
+                
+            </div>
+            <div class="modal-footer">
+                
+                <button type="button"
+                        class="btn btn-outline-primary"
+                        v-on:click = "send_name()"
+                        title="Submit Name"
+                        v-if="!session_player.name_submitted && !session.parameter_set.prolific_mode"
+                        v-bind:disabled="reconnecting || working">
+                    Submit <i class="fas fa-sign-in-alt"></i>
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-primary"
+                        v-on:click = "post_session_link()"
+                        title="Press to continue"
+                        v-else-if="(session.parameter_set.prolific_mode) || 
+                                   (session.parameter_set.survey_required && 
+                                    session_player.survey_complete == false && 
+                                    session_player.name_submitted)"
+                        v-bind:disabled="reconnecting || working">
+                    Press here to continue <i class="fas fa-sign-in-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

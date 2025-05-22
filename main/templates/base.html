@@ -1,0 +1,117 @@
+{%load static%}
+
+<!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <title>Economic Science Institute</title>  
+        <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+        <link rel="apple-touch-icon" type="image/png" href="{% static 'apple-touch-icon-precomposed.png' %}">
+
+        <meta charset="UTF-8" CONTENT="NO-CACHE">
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.3/tinymce.min.js" integrity="sha512-VCEWnpOl7PIhbYMcb64pqGZYez41C2uws/M/mDdGPy+vtEJHd9BqbShE4/VNnnZdr7YCPOjd+CBmYca/7WWWCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+        
+        <!-- Styles -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment-with-locales.min.js" integrity="sha512-LGXaggshOkD/at6PFNcp2V2unf9LzFq6LE+sChH7ceMTDP0g2kn6Vxwgg7wkPP7AAtX+lmPqPdxB47A0Nz0cMQ==" crossorigin="anonymous"></script>
+       
+        {%if DEBUG%}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.min.js" integrity="sha512-rgrFBaGRHjj2cy6RtcWr21S4oSicNV/Y3qACuRZZIVdi6hGIXOKZeFTtzFFZCJ7cI4OrwbY7/FGVvaJ5hXJdJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        {%else%}
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.5.13/vue.global.prod.min.js" integrity="sha512-66fV4MXSQdGN0KQxZ0Bw627HalhTQYQbOoF24EtMXN2FaAoKMgAZ7nDi77d9xWwrRjEEUfE+7rxjTt+cA2IuJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        {%endif%}
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.8.4/axios.min.js" integrity="sha512-2A1+/TAny5loNGk3RBbk11FwoKXYOMfAK6R7r4CpQH7Luz4pezqEGcfphoNzB7SM4dixUoJsKkBsB6kg+dNE2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.6.6/pixi.js" integrity="sha512-QPLxcxvLpx8FgiwOcMV2o0LpAqjiBTsyc83Oi5QiroeIy3wXZcK6+cnxY6o4NvJPg2XLndH96Ubkb0kj4Mdk4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <script>                        
+
+            document.addEventListener("DOMContentLoaded", function(event) { 
+            
+            });
+        </script>
+
+        <style>
+            [v-cloak] {
+            display: none;
+            }
+        </style>
+
+        {%block head%}
+        {%endblock head%}        
+    </head>
+    <body style="font-size:16px"> 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <div id="app">
+            {% if user.is_authenticated %}
+            <nav class="navbar navbar-expand-lg navbar-light bg-light p-1 d-print-none" v-cloak>
+                <div class="container-fluid">
+                    <a class="navbar-brand">
+                        ESI - Template
+                    </a>
+                    
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav me-auto">                       
+                            <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'staff-home' %}"  data-placement="bottom" title="Session list">
+                                    Sessions <i class="fas fa-flask"></i>
+                                </a>
+                            </li>                                               
+                        </ul>
+                        <div class="d-flex dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                {{request.user.last_name}}, {{request.user.first_name}}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-lg-end" aria-labelledby="navbarDropdown">
+                                {%if user.is_staff%}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'admin:index' %}"  data-placement="bottom" title="Admin Panel">
+                                            <i class="fas fa-cogs fa-fw"></i> Admin
+                                        </a>
+                                    </li>
+                                {%endif%}
+                                {%if user.is_staff or user.profile.can_edit_instructions%}
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'staff-instructions' %}"  data-placement="bottom" title="Edit Instructions">
+                                            <i class="fas fa-scroll"></i> Edit Instructions
+                                        </a>
+                                    </li>
+                                {%endif%}
+                                
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'logout'%}"><i class="fas fa-sign-out-alt fa-fw"></i> Log Out</a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>    
+                                <li>
+                                    <a class="dropdown-item" href="{{ESI_AUTH_ACCOUNT_URL}}"><i class="far fa-user"></i> Profile</a>
+                                </li>                   
+                            </ul>
+                        </div>
+                        <div class="d-flex">
+                            
+                        </div>                
+                    </div>
+                </div>
+            </nav>
+            {%endif%}
+
+            <div class="container-fluid mt-4 mb-4">                    
+                {%block content%}
+                {%endblock content%}
+            </div>  
+        </div>
+   
+    </body>
+</html>

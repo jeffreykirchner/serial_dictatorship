@@ -1,0 +1,50 @@
+<div class="card" v-show="first_load_done">                  
+    <div class="card-header fw-bold">                
+        <span class="align-middle">Status</span>            
+
+    </div>
+    <div class="card-body">      
+        <div class="row">
+            <div class="col text-end pe-1">
+                Experiment Phase:
+            </div>
+            <div class="col text-start ps-1">
+                <span v-if="session.started">
+                    [[session.world_state.current_experiment_phase]]
+                </span>  
+                <span v-else>
+                    Not Started
+                </span>              
+            </div>
+        </div>
+        <div class="row">
+            <div class="col text-end pe-1">
+                Current Period:
+            </div>
+            <div class="col text-start ps-1">
+                <span v-if="session.world_state.hasOwnProperty('started')">
+                    [[session.world_state.current_period]] of [[session.parameter_set.period_count]]    
+                </span>
+                <span v-else>
+                   ---
+                </span>
+            </div>
+        </div>  
+        <div class="row">
+            <div class="col text-end pe-1">
+                Time Remaining:
+            </div>
+            <div class="col text-start ps-1">
+                <span v-if="session.world_state.finished">
+                    Complete
+                </span>
+                <span v-else-if="session.world_state.hasOwnProperty('started')">
+                    [[session.world_state.time_remaining]]    
+                </span>         
+                <span v-else>
+                   --- 
+                </span>      
+            </div>
+        </div>
+    </div>                    
+</div> 

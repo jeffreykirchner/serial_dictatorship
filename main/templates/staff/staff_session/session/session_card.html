@@ -1,0 +1,60 @@
+<div class="card" v-show="first_load_done">                  
+    <div class="card-header fw-bold">
+        <span class="align-middle">Session</span>      
+        
+        <span class="float-end">    
+            {%if user.is_superuser%}
+            <a href='/admin/main/session/{{session.id}}/change/' class='link-primary pe-4'>Lock/Share</a>
+            {%endif%}                        
+            <button class="btn btn-outline-primary" type="button" v-on:click = "show_edit_session()" title="Edit Session Info">
+                Edit <i class="far fa-edit"></i>
+            </button>
+        </span>
+        
+    </div>
+    <div class="card-body">    
+        <div class="row">
+            <div class="col-4" style="text-align: right;">
+                {{session_form.title.label}}:
+            </div>
+            <div class="col-md-8">
+                [[session.title]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4" style="text-align: right;">
+                Run Date:
+            </div>
+            <div class="col-md-8">
+                <span v-if="session.started">
+                    [[session.start_date]]
+                </span>
+                <span v-else>
+                    ---
+                </span>
+            </div>
+        </div>    
+        <div class="row">
+            <div class="col-md-4" style="text-align: right;">
+                Collaborators:
+            </div>
+            <div class="col-md-8" v-if="session.collaborators_order.length > 0">
+                <div v-for="(c,index) in session.collaborators_order" 
+                     v-bind:key = "c"
+                     :set="temp_p=session.collaborators[c]">
+                    [[temp_p]]<button title="Remove Collaborator" 
+                                      class="remove_collaborator_button text-danger" 
+                                      v-on:click="send_remove_collaborator(c)"
+                                      v-if="session.creator==user_id">x</button>
+
+                    <span v-if="index+1==session.collaborators_order.length && session.creator==user_id">
+                        <button class="add_collaborator_button text-success" type="button" v-on:click = "show_upload_collaborators_list_modal()" title="Add Collaborators">+</button> 
+                    </span>
+                </div>
+            </div>
+            <div class="col-md-8" v-else>
+                <button class="add_collaborator_button text-success" type="button" v-on:click = "show_upload_collaborators_list_modal()" title="Add Collaborators">+</button> 
+            </div>
+        </div>               
+    </div>                    
+</div>

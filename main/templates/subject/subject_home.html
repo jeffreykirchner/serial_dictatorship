@@ -1,0 +1,93 @@
+{%extends "base.html"%}
+{% load crispy_forms_tags %}
+
+{%block head%}
+<script>
+
+    document.addEventListener("DOMContentLoaded", function(){
+        {%include "subject/subject_home/subject_home.js"%}
+    });
+
+</script>
+
+<style>
+
+    .chat {       
+        width: 100%;
+        height: 300px;
+        word-breaK:break-word;
+        overflow-y:scroll;
+        background-color: ghostwhite;
+        display:flex; 
+        flex-direction:column-reverse;
+    }
+
+    .instructions{
+        height: 300px;
+        overflow-y:scroll;
+    }
+
+    .field {
+        height: 800px;
+        background-color: white; 
+        width: 100%;
+        max-width: 1850px;
+    }
+       
+</style>
+
+{%endblock head%}
+
+{% block content %}
+<div v-if="session">
+    <!-- modals -->
+    {%include "subject/subject_home/summary/end_game_modal.html"%}
+    {%include "subject/subject_home/the_stage/interaction_modal.html"%}
+    {%include "subject/subject_home/the_stage/interaction_start_modal.html"%}
+    {%include "help_modal.html"%}
+    
+    <div class="row justify-content-lg-center mt-4 mb-4" v-cloak v-show="!session.started">
+        <div class="col-md text-center fs-2 fw-bold">
+            The session has not started.
+        </div>
+    </div>
+   
+    <!-- instructions -->
+    <div class="row justify-content-lg-center mt-4" v-cloak v-show="session.world_state.current_experiment_phase == 'Instructions'">
+        <div class="col-md">
+            {%include "subject/subject_home/instructions_card.html"%}
+        </div>
+    </div>
+
+    <!-- the stage -->
+    <div class="row justify-content-lg-center mt-4" v-cloak v-show="session.world_state.current_experiment_phase != 'Done'">
+        <div class="col-md">
+            {%include "subject/subject_home/the_stage/the_stage_card.html"%}                
+        </div>
+    </div>
+
+    <div class="row justify-content-lg-center mt-4" v-cloak v-show="session.world_state.current_experiment_phase == 'Done'">
+        <div class="col-12 fs-4 fw-bold text-center">
+            <br>
+            <br>
+            <br>
+            <br>
+            The session is complete, thank you for your participation!              
+        </div>    
+    </div>
+
+    <div class="row justify-content-lg-center mt-4" v-cloak>
+        <div class="col-12 text-end text-muted">
+            <span class="align-middle">Client [[session_player.player_number]]</span>
+        </div>  
+    </div>    
+</div>
+<div v-else>
+    <div class="col text-end">
+        <i class="fas fa-cog fa-spin fa-2x"></i>
+    </div>
+</div>
+
+
+
+{% endblock %}
