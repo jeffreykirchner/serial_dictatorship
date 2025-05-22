@@ -9,7 +9,7 @@ Clone this repo into the new folder using the command:
 	
 ```
 cd new_folder_name
-git clone https://github.com/jeffreykirchner/multi_user_socket_template.git .
+git clone https://github.com/jeffreykirchner/serial_dictatorship.git .
 ```
 
 Install PostgreSQL and REDIS in WSL: https://learn.microsoft.com/en-us/windows/wsl/tutorials/wsl-database<br>
@@ -17,7 +17,7 @@ Install PostgreSQL and REDIS in WSL: https://learn.microsoft.com/en-us/windows/w
 Set up PostgreSQL in WSL:
 ```
 create user dbadmin with encrypted password 'password_here';
-create database multi_user_socket_template with owner dbadmin;
+create database serial_dictatorship with owner dbadmin;
 ```
 
 ## Project Setup

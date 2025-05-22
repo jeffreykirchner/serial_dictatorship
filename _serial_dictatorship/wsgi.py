@@ -1,5 +1,5 @@
 """
-WSGI config for _multi_user_socket_template project.
+WSGI config for _serial_dictatorship project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', '_multi_user_socket_template.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', '_serial_dictatorship.settings')
 
 application = get_wsgi_application()
