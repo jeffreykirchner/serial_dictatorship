@@ -428,9 +428,6 @@ let app = Vue.createApp({
                     app.session.world_state.session_players[p].current_location = server_location;
                 }
             }
-
-            //update barriers
-            app.update_barriers();
         },
        
         //do nothing on when enter pressed for post
@@ -455,7 +452,6 @@ let app = Vue.createApp({
         {%include "subject/subject_home/the_stage/transfer_beam.js"%}
         {%include "subject/subject_home/the_stage/wall.js"%}
         {%include "subject/subject_home/the_stage/move_objects.js"%}
-        {%include "subject/subject_home/the_stage/barriers.js"%}
         {%include "subject/subject_home/the_stage/ground.js"%}
         {%include "js/help_doc.js"%}
     
