@@ -177,7 +177,7 @@ class Session(models.Model):
                             "finished":False,
                             "session_periods":{str(i.id) : i.json() for i in self.session_periods.all()},
                             "session_periods_order" : list(self.session_periods.all().values_list('id', flat=True)),
-                            "tokens":{},}
+                            }
         
         inventory = {str(i):0 for i in list(self.session_periods.all().values_list('id', flat=True))}
 
@@ -187,18 +187,8 @@ class Session(models.Model):
         
         #session players
         for i in self.session_players.prefetch_related('parameter_set_player').all().values('id', 
-                                                                                            'parameter_set_player__start_x',
-                                                                                            'parameter_set_player__start_y',
                                                                                             'parameter_set_player__id' ):
             v = {}
-
-            v['current_location'] = {'x':i['parameter_set_player__start_x'], 'y':i['parameter_set_player__start_y']}
-            v['target_location'] = v['current_location']
-            v['inventory'] = inventory
-            v['tractor_beam_target'] = None
-            v['frozen'] = False
-            v['cool_down'] = 0
-            v['interaction'] = 0
             v['earnings'] = 0
             v['parameter_set_player_id'] = i['parameter_set_player__id']
             
@@ -208,34 +198,6 @@ class Session(models.Model):
         parameter_set  = self.parameter_set.json_for_session
 
         #tokens
-        tokens = {}
-        for i in self.session_periods.all():
-            tokens[str(i)] = {}
-
-            for j in range(self.parameter_set.tokens_per_period):
-                
-                go = True
-
-                #place token in random location over a grass area
-                while go:
-                    token = {"current_location" : {
-                            "x":random.randint(25, self.parameter_set.world_width-25),
-                            "y":random.randint(25, self.parameter_set.world_height-25)},
-                            "status":"available",}
-                    
-                    for g in parameter_set["parameter_set_grounds"]:
-                        ground = parameter_set["parameter_set_grounds"][g]
-                        if ground["texture"] == "grass_tex":
-                            if (token["current_location"]["x"] > ground["x"] and token["current_location"]["x"] < ground["x"] + ground["width"]) and \
-                               (token["current_location"]["y"] > ground["y"] and token["current_location"]["y"] < ground["y"] + ground["height"]):
-                                go = False
-                                break
-                
-                tokens[str(i)][str(j)] = token
-            
-
-        self.world_state["tokens"] = tokens
-
         self.save()
 
     def reset_experiment(self):

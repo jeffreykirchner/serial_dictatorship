@@ -6,9 +6,6 @@
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 axios.defaults.xsrfCookieName = "csrftoken";
 
-//let app.session.world_state = {};
-{%include "subject/subject_home/the_stage/pixi_globals.js"%}
-
 let worker = null;
 
 //vue app
@@ -223,7 +220,6 @@ let app = Vue.createApp({
                     break;
             }
             app.working = false;
-            app.process_the_feed(message_type, message_data);
         },
 
         /** send websocket message to server
@@ -273,7 +269,6 @@ let app = Vue.createApp({
                 }
                 });
             
-            app.setup_pixi();
             app.first_load_done = true;
         },
 
@@ -282,8 +277,7 @@ let app = Vue.createApp({
          */
         do_reload: function do_reload()
         {
-            app.setup_pixi_tokens_for_current_period();
-            app.setup_pixi_subjects();
+
         },
 
         /** send winsock request to get session info
@@ -297,9 +291,6 @@ let app = Vue.createApp({
         */
         take_get_session: function take_get_session(message_data){
             
-            app.destroy_pixi_tokens_for_all_periods();
-            app.destory_setup_pixi_subjects();
-
             app.session = message_data;
 
             app.session.world_state =  app.session.world_state;
@@ -402,31 +393,8 @@ let app = Vue.createApp({
 
             //update player earnings and inventory if period has changed
             if(message_data.period_is_over)
-            {
-                app.setup_pixi_tokens_for_current_period();
-                app.update_player_inventory();              
+            {               
                 app.take_update_earnings(message_data.earnings);  
-            }
-
-            //update player status
-            for(let p in message_data.session_player_status)
-            {
-                let session_player = message_data.session_player_status[p];
-                app.session.world_state.session_players[p].interaction = session_player.interaction;
-                app.session.world_state.session_players[p].frozen = session_player.frozen;
-                app.session.world_state.session_players[p].cool_down = session_player.cool_down;
-                app.session.world_state.session_players[p].tractor_beam_target = session_player.tractor_beam_target;
-            }
-
-            //update player location
-            for(let p in message_data.current_locations)
-            {
-                let server_location = message_data.current_locations[p];
-
-                if(app.get_distance(server_location, app.session.world_state.session_players[p].current_location) > 1000)
-                {
-                    app.session.world_state.session_players[p].current_location = server_location;
-                }
             }
         },
        
@@ -441,9 +409,6 @@ let app = Vue.createApp({
         {%include "staff/staff_session/summary/summary_card.js"%}
         {%include "staff/staff_session/data/data_card.js"%}
         {%include "staff/staff_session/interface/interface_card.js"%}
-        {%include "subject/subject_home/the_stage/pixi_setup.js"%}
-        {%include "subject/subject_home/the_stage/helpers.js"%}
-        {%include "subject/subject_home/the_stage/staff.js"%}
 
         {%include "js/help_doc.js"%}
     

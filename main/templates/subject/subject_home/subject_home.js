@@ -7,9 +7,6 @@ axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 axios.defaults.xsrfCookieName = "csrftoken";
 
 //global letiables
-let subject_status_overlay = {container:null, current_period_label:null, time_remaining_label:null, profit_label:null};
-let pixi_target = null;                        //target sprite for your avatar
-let pixi_mini_map = {container:null};               //mini map container
 let pixi_notices = {container:null, notices:{}};                         //notices
 let pixi_notices_key = 0;
 
@@ -19,8 +16,6 @@ let last_location_update = Date.now();          //last time location was updated
 document.addEventListener('contextmenu', event => event.preventDefault());
 
 let worker = null;
-
-{%include "subject/subject_home/the_stage/pixi_globals.js"%}
 
 //vue app
 let app = Vue.createApp({
@@ -40,9 +35,6 @@ let app = Vue.createApp({
 
                     form_ids: {{form_ids|safe}},
 
-                    chat_text : "",
-                    chat_button_label : "Chat",
-
                     end_game_modal_visible : false,
 
                     instructions : {{instructions|safe}},
@@ -52,46 +44,8 @@ let app = Vue.createApp({
 
                     // modals
                     end_game_modal : null,
-                    interaction_modal : null,
-                    insteration_start_modal : null,
                     help_modal : null,
-                    test_mode : {%if session.parameter_set.test_mode%}true{%else%}false{%endif%},
-
-                    //last time screen was tapped
-                    last_subject_pointer_tap : Date.now(),
-
-                    //pixi
-                    canvas_width  : null,
-                    canvas_height : null,
-                    move_speed : 5,
-                    animation_speed : 0.5,
-                    scroll_speed : 10,
-                    pixi_mode : "subject",
-                    pixi_scale : 1,
-                    stage_width : 10000,
-                    stage_height : 10000,
-                    scroll_direction : {x:0, y:0},
-                    draw_bounding_boxes: false,
-
-                    //selected avatar
-                    selected_player : {
-                        session_player:null,
-                        parameter_set_player:null,
-                        interaction_amount:null,
-                    },
-
-                    //forms
-                    interaction_form : {direction:null, amount:null},
-
-                    //test mode
-                    test_mode_location_target : null,
-
-                    //errors
-                    interaction_start_error: null,
-                    interaction_error: null,
-
-                    //open modals
-                    interaction_start_modal_open : false,
+                    test_mode : {%if session.parameter_set.test_mode%}true{%else%}false{%endif%},                   
                 }},
     methods: {
 
@@ -144,10 +98,7 @@ let app = Vue.createApp({
                     break;
                 case "update_reset_experiment":
                     app.take_reset_experiment(message_data);
-                    break;
-                case "update_chat":
-                    app.take_update_chat(message_data);
-                    break;
+                    break;               
                 case "update_time":
                     app.take_update_time(message_data);
                     break;
@@ -172,7 +123,6 @@ let app = Vue.createApp({
             }
 
             app.first_load_done = true;
-
             app.working = false;
         },
 
@@ -226,22 +176,6 @@ let app = Vue.createApp({
 
                 app.scroll_update();
             }
-
-            app.setup_pixi();            
-            app.auto_update_avatar_location();
-        },
-
-        /**
-         * if more than 5 seconds have passed since last location update, send location to server
-         */
-        auto_update_avatar_location: function auto_update_avatar_location()
-        {
-            if(Date.now() - app.last_location_update > 5000)
-            {
-                app.target_location_update();
-            }
-
-            setTimeout(app.auto_update_avatar_location, 5000);
         },
 
         /**
@@ -262,8 +196,6 @@ let app = Vue.createApp({
         *    @param message_data {json} session day in json format
         */
         take_get_session: function take_get_session(message_data){
-            app.destroy_pixi_tokens_for_all_periods();
-            app.destory_setup_pixi_subjects();
             
             app.session = message_data.session;
             app.session_player = message_data.session_player;
@@ -319,12 +251,7 @@ let app = Vue.createApp({
 
             app.end_game_modal.hide();        
             
-            app.interaction_modal.hide();
-            app.interaction_start_modal.hide();
             app.help_modal.hide();
-
-            app.setup_pixi_minimap();
-            app.remove_all_notices();
 
             app.notices_seen = [];
         },
@@ -364,80 +291,12 @@ let app = Vue.createApp({
                 app.show_end_game_modal();
             }            
 
-            Vue.nextTick(() => {
-                app.update_subject_status_overlay();
-            });
-
-
             //period has changed
             if(message_data.period_is_over)
             {
-                Vue.nextTick(() => {
-                    let current_location = app.session.world_state.session_players[app.session_player.id].current_location;
-
-                    app.add_text_emitters("+" + period_earnings + "¢", 
-                            current_location.x, 
-                            current_location.y,
-                            current_location.x,
-                            current_location.y-100,
-                            0xFFFFFF,
-                            28,
-                            null)                    
-                });          
-                
-                app.setup_pixi_tokens_for_current_period();
-                app.setup_pixi_minimap();
-                app.update_player_inventory();
-
-                //add break notice
-                if(app.session.world_state.current_period % app.session.parameter_set.break_frequency == 0)
-                {
-                    app.add_notice("Break Time: Interactions are disabled. Chat is enabled.", 
-                                    app.session.world_state.current_period,
-                                    app.session.parameter_set.period_length);
-                }
+               
             }
 
-            //update player states
-            for(let p in message_data.session_player_status)
-            {
-                let session_player = message_data.session_player_status[p];
-                app.session.world_state.session_players[p].interaction = session_player.interaction;
-                app.session.world_state.session_players[p].frozen = session_player.frozen;
-                app.session.world_state.session_players[p].cool_down = session_player.cool_down;
-                app.session.world_state.session_players[p].tractor_beam_target = session_player.tractor_beam_target;
-            }
-
-            //update player location
-            for(let p in message_data.current_locations)
-            {
-                if(p != app.session_player.id)
-                {
-                    let server_location = message_data.current_locations[p];
-
-                    if(app.get_distance(server_location, app.session.world_state.session_players[p].current_location) > 1000)
-                    {
-                        app.session.world_state.session_players[p].current_location = server_location;
-                    }
-                }
-            }
-
-            //add notices
-            for(let i in app.session.parameter_set.parameter_set_notices)
-            {
-                let notice = app.session.parameter_set.parameter_set_notices[i];
-
-                if(notice.start_period == app.session.world_state.current_period && 
-                   notice.start_time >= app.session.world_state.time_remaining &&
-                   app.notices_seen.indexOf(notice.id) === -1)
-                {
-                    app.add_notice(notice.text, notice.end_period, notice.end_time);
-                    app.notices_seen.push(notice.id);
-                }
-            }
-
-            //update any notices on screen
-            app.update_notices();
         },
 
         /**
@@ -501,9 +360,7 @@ let app = Vue.createApp({
             {
                 app.session.world_state = message_data.world_state;
                 
-                app.destory_setup_pixi_subjects();
                 app.do_reload();
-                app.remove_all_notices();
             }
         },
 
@@ -518,11 +375,9 @@ let app = Vue.createApp({
             //do nothing
         },
         
-        {%include "subject/subject_home/chat/chat_card.js"%}
         {%include "subject/subject_home/summary/summary_card.js"%}
         {%include "subject/subject_home/test_mode/test_mode.js"%}
         {%include "subject/subject_home/instructions/instructions_card.js"%}
-        {%include "subject/subject_home/the_stage/helpers.js"%}
         {%include "subject/subject_home/help_doc_subject.js"%}
 
         /** clear form error messages

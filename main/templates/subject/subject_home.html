@@ -12,26 +12,9 @@
 
 <style>
 
-    .chat {       
-        width: 100%;
-        height: 300px;
-        word-breaK:break-word;
-        overflow-y:scroll;
-        background-color: ghostwhite;
-        display:flex; 
-        flex-direction:column-reverse;
-    }
-
     .instructions{
         height: 300px;
         overflow-y:scroll;
-    }
-
-    .field {
-        height: 800px;
-        background-color: white; 
-        width: 100%;
-        max-width: 1850px;
     }
        
 </style>
@@ -42,8 +25,6 @@
 <div v-if="session">
     <!-- modals -->
     {%include "subject/subject_home/summary/end_game_modal.html"%}
-    {%include "subject/subject_home/the_stage/interaction_modal.html"%}
-    {%include "subject/subject_home/the_stage/interaction_start_modal.html"%}
     {%include "help_modal.html"%}
     
     <div class="row justify-content-lg-center mt-4 mb-4" v-cloak v-show="!session.started">
@@ -62,7 +43,7 @@
     <!-- the stage -->
     <div class="row justify-content-lg-center mt-4" v-cloak v-show="session.world_state.current_experiment_phase != 'Done'">
         <div class="col-md">
-            {%include "subject/subject_home/the_stage/the_stage_card.html"%}                
+                          
         </div>
     </div>
 
