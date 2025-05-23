@@ -28,13 +28,7 @@
                                 </th>         
                                 <th scope="col" class = "m-1 p-1">
                                     Group
-                                </th>
-                                <th scope="col" class = "m-1 p-1">
-                                    Location (X,Y)
-                                </th>
-                                <th scope="col" class = "m-1 p-1">
-                                    Color
-                                </th>      
+                                </th>    
                                 <th scope="col" class = "m-1 p-1">
                                     Instructions
                                 </th>              
@@ -59,15 +53,6 @@
                                                 temp_p.parameter_set_group in parameter_set.parameter_set_groups">
                                         [[parameter_set.parameter_set_groups[temp_p.parameter_set_group].name]]
                                     </span>
-                                </td>
-                                <td v-on:click="show_edit_parameter_set_player(p)" 
-                                    class="player_table_cell">
-                                    [[temp_p.start_x]], [[temp_p.start_y]]
-                                </td>
-                                <td v-on:click="show_edit_parameter_set_player(p)" 
-                                    class="player_table_cell"
-                                    v-bind:style="{color:temp_p.hex_color.replace('0x','#')}">
-                                    [[temp_p.hex_color]]
                                 </td>
                                 <td v-on:click="show_edit_parameter_set_player(p)" 
                                     class="player_table_cell">

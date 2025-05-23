@@ -165,22 +165,7 @@ let app = Vue.createApp({
                     break;
                 case "update_refresh_screens":
                     app.take_refresh_screens(message_data);
-                    break;
-                case "update_target_location_update":
-                    app.take_target_location_update(message_data);
-                    break;
-                case "update_collect_token":
-                    app.take_collect_token(message_data);
-                    break;
-                case "update_tractor_beam":
-                    app.take_tractor_beam(message_data);
-                    break;
-                case "update_interaction":
-                    app.take_interaction(message_data);
-                    break;
-                case "update_cancel_interaction":
-                    app.take_cancel_interaction(message_data);
-                    break;
+                    break;               
                 case "update_rescue_subject":
                     app.take_rescue_subject(message_data);
                     break;
@@ -210,13 +195,10 @@ let app = Vue.createApp({
         do_first_load: function do_first_load()
         {           
             app.end_game_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('end_game_modal'), {keyboard: false})   
-            app.interaction_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('interaction_modal'), {keyboard: false})
-            app.interaction_start_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('interaction_start_modal'), {keyboard: false})          
+           
             app.help_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('help_modal'), {keyboard: false})
             
             document.getElementById('end_game_modal').addEventListener('hidden.bs.modal', app.hide_end_game_modal);
-            document.getElementById('interaction_modal').addEventListener('hidden.bs.modal', app.hide_interaction_modal);
-            document.getElementById('interaction_start_modal').addEventListener('hidden.bs.modal', app.hide_interaction_start_modal);
 
             {%if session.parameter_set.test_mode%} setTimeout(app.do_test_mode, app.random_number(1000 , 1500)); {%endif%}
 
@@ -267,12 +249,7 @@ let app = Vue.createApp({
          */
         do_reload: function do_reload()
         {
-            app.setup_pixi_tokens_for_current_period();
-            app.setup_pixi_ground();
-            app.setup_pixi_subjects();
-            app.setup_pixi_wall();
-            app.update_subject_status_overlay();
-            app.setup_pixi_minimap();
+
         },
 
         /** send winsock request to get session info
@@ -545,19 +522,7 @@ let app = Vue.createApp({
         {%include "subject/subject_home/summary/summary_card.js"%}
         {%include "subject/subject_home/test_mode/test_mode.js"%}
         {%include "subject/subject_home/instructions/instructions_card.js"%}
-        {%include "subject/subject_home/the_stage/pixi_setup.js"%}
-        {%include "subject/subject_home/the_stage/token.js"%}
-        {%include "subject/subject_home/the_stage/avatar.js"%}
         {%include "subject/subject_home/the_stage/helpers.js"%}
-        {%include "subject/subject_home/the_stage/subject.js"%}
-        {%include "subject/subject_home/the_stage/mini_map.js"%}
-        {%include "subject/subject_home/the_stage/subject_overlay.js"%}
-        {%include "subject/subject_home/the_stage/text_emitter.js"%}
-        {%include "subject/subject_home/the_stage/transfer_beam.js"%}
-        {%include "subject/subject_home/the_stage/notices.js"%}
-        {%include "subject/subject_home/the_stage/wall.js"%}
-        {%include "subject/subject_home/the_stage/move_objects.js"%}
-        {%include "subject/subject_home/the_stage/ground.js"%}
         {%include "subject/subject_home/help_doc_subject.js"%}
 
         /** clear form error messages
