@@ -6,6 +6,8 @@ from django import forms
 
 from main.models import ParameterSet
 
+from main.globals import ExperimentMode
+
 import  main
 
 class ParameterSetForm(forms.ModelForm):
@@ -23,6 +25,23 @@ class ParameterSetForm(forms.ModelForm):
                                        widget=forms.NumberInput(attrs={"v-model":"parameter_set.period_length",
                                                                        "step":"1",
                                                                        "min":"1"}))
+    
+    group_size = forms.IntegerField(label='Group Size',
+                                      min_value=1,
+                                      widget=forms.NumberInput(attrs={"v-model":"parameter_set.group_size",
+                                                                     "step":"1",
+                                                                     "min":"1"}))
+
+    possible_values = forms.CharField(label='Possible Values',
+                                       required=False,
+                                       help_text='Comma separated list of possible values, e.g. 0.00,0.25 ...',
+                                       widget=forms.TextInput(attrs={"v-model":"parameter_set.possible_values",
+                                                                     "placeholder":"1,2,3,4"}))
+    
+    experiment_mode = forms.ChoiceField(label='Experiment Mode',
+                                        choices=ExperimentMode.choices,
+                                        widget=forms.Select(attrs={"v-model":"parameter_set.experiment_mode",}))
+
 
     show_instructions = forms.ChoiceField(label='Show Instructions',
                                           choices=((1, 'Yes'), (0,'No' )),
@@ -57,7 +76,7 @@ class ParameterSetForm(forms.ModelForm):
 
     class Meta:
         model=ParameterSet
-        fields =['period_count', 'period_length',
+        fields =['period_count', 'period_length', 'group_size', 'possible_values', 'experiment_mode',
                  'show_instructions', 
                  'survey_required', 'survey_link', 'prolific_mode', 'prolific_completion_link', 'reconnection_limit',
                  'test_mode']

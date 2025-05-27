@@ -13,6 +13,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from main.models import InstructionSet
 
+from main.globals import ExperimentMode
+
 import main
 
 class ParameterSet(models.Model):
@@ -21,6 +23,9 @@ class ParameterSet(models.Model):
     '''    
     period_count = models.IntegerField(verbose_name='Number of periods', default=20)                          #number of periods in the experiment
     period_length = models.IntegerField(verbose_name='Period Length, Production', default=60           )      #period length in seconds
+    group_size = models.IntegerField(verbose_name='Group Size', default=4)                                       #number of players in a group
+    possible_values = models.CharField(max_length=1000, default='0.00,0.25,0.50,0.75,1.00,1.25', verbose_name='Possible Values', blank=True, null=True) #possible values for the game
+    experiment_mode = models.CharField(max_length=20, choices=ExperimentMode.choices, default=ExperimentMode.SIMULTANEOUS, verbose_name='Experiment Mode') #experiment mode, simultaneous or sequential
 
     show_instructions = models.BooleanField(default=True, verbose_name='Show Instructions')                   #if true show instructions
 
@@ -58,6 +63,9 @@ class ParameterSet(models.Model):
         try:
             self.period_count = new_ps.get("period_count")
             self.period_length = new_ps.get("period_length")
+            self.group_size = new_ps.get("group_size", 4)
+            self.possible_values = new_ps.get("possible_values", "0.00,0.25,0.50,0.75,1.00,1.25")
+            self.experiment_mode = new_ps.get("experiment_mode", ExperimentMode.SIMULTANEOUS)
 
             self.show_instructions = True if new_ps.get("show_instructions") else False
 
@@ -178,6 +186,9 @@ class ParameterSet(models.Model):
                 
         self.json_for_session["period_count"] = self.period_count
         self.json_for_session["period_length"] = self.period_length
+        self.json_for_session["group_size"] = self.group_size
+        self.json_for_session["possible_values"] = self.possible_values
+        self.json_for_session["experiment_mode"] = self.experiment_mode
 
         self.json_for_session["show_instructions"] = 1 if self.show_instructions else 0
 

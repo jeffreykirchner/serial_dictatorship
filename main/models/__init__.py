@@ -14,6 +14,7 @@ from .help_docs_subject import HelpDocsSubject
 
 from .parameter_set import ParameterSet
 from .parameter_set_group import ParameterSetGroup
+from .parameter_set_group_period import ParameterSetGroupPeriod
 from .parameter_set_player import ParameterSetPlayer
 from .parameter_set_notice import ParameterSetNotice
 

@@ -22,3 +22,10 @@ class ExperimentPhase(models.TextChoices):
     RUN = 'Run', _('Run')
     NAMES = 'Names', _('Names')
     DONE = 'Done', _('Done')
+
+class ExperimentMode(models.TextChoices):
+    '''
+    experiment modes
+    '''
+    SIMULTANEOUS = 'Simultaneous', _('Simultaneous')
+    SEQUENTIAL = 'Sequential', _('Sequential')
