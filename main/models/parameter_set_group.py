@@ -48,7 +48,27 @@ class ParameterSetGroup(models.Model):
         default setup
         '''    
         self.save()
-    
+
+    def update_parameter_set_group_periods(self):
+        '''
+        update parameter set group periods
+        '''
+        from main.models import ParameterSetGroupPeriod
+
+        period_count = self.parameter_set.period_count
+
+        if period_count> self.parameter_set_group_periods.count():
+            # create new periods if needed
+            for i in range(self.parameter_set_group_periods.count(), period_count):
+                period = ParameterSetGroupPeriod(parameter_set_group=self, period_number=i+1)
+                period.save()
+                period.setup()
+        else:
+            # remove excess periods
+            for period in self.parameter_set_group_periods.order_by('-period_number'):
+                if period.period_number > period_count:
+                    period.delete()
+
     def update_json_local(self):
         '''
         update parameter set json

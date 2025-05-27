@@ -44,7 +44,6 @@ class ParameterSetPlayerAdmin(admin.ModelAdmin):
         return False
 
     readonly_fields=['parameter_set']
-    list_display = ['id_label']
 
     inlines = [
         
@@ -59,7 +58,7 @@ class ParameterSetPlayerInline(admin.TabularInline):
     model = ParameterSetPlayer
     can_delete = True   
     show_change_link = True
-    fields = ['id_label', 'player_number']
+    fields = ['player_number']
 
 @admin.register(ParameterSet)
 class ParameterSetAdmin(admin.ModelAdmin):
@@ -137,16 +136,15 @@ class SessionPlayerInline(admin.TabularInline):
     def has_add_permission(self, request, obj=None):
         return False
     
-    @admin.display(description='Player ID')
-    def get_parameter_set_player_id_label(self, obj):
-        return obj.parameter_set_player.id_label
+    # @admin.display(description='Player ID')
+    # def get_parameter_set_player_id_label(self, obj):
+    #     return obj.parameter_set_player.id_label
 
     extra = 0  
     model = SessionPlayer
     can_delete = False   
     show_change_link = True
-    fields = ['get_parameter_set_player_id_label', 'name', 'student_id', 'email', 'name_submitted', 'survey_complete']
-    readonly_fields = ('get_parameter_set_player_id_label',)
+    fields = ['name', 'student_id', 'email', 'name_submitted', 'survey_complete']
 
 @admin.register(SessionEvent)
 class SessionEventAdmin(admin.ModelAdmin):

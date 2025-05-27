@@ -65,9 +65,6 @@
                                 Client #
                             </th>
                             <th scope="col" class = "">
-                                ID Label
-                            </th>
-                            <th scope="col" class = "">
                                 <span v-if="!session.parameter_set.prolific_mode">
                                     Name
                                 </span>
@@ -122,10 +119,7 @@
                             :set="temp_p=session.session_players[p]">
                             <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
                                 [[temp_p.player_number]]
-                            </td>
-                            <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
-                                [[session.parameter_set.parameter_set_players[temp_p.parameter_set_player].id_label]]
-                            </td>
+                            </td>                            
                             <td class="player_table_cell text-nowrap" v-on:click="show_edit_subject(p)">
                                 [[temp_p.name=="" ? "---" : temp_p.name]]
                             </td>                           

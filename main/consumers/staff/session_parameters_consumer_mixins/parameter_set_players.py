@@ -130,7 +130,6 @@ def take_add_parameterset_player(data):
     parameter_set_player = main.models.ParameterSetPlayer()
     parameter_set_player.parameter_set = parameter_set
     parameter_set_player.player_number = parameter_set.parameter_set_players.count() + 1
-    parameter_set_player.id_label = parameter_set_player.player_number
     parameter_set_player.save()
 
     parameter_set.update_json_fk(update_players=True)

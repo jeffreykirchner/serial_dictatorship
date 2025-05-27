@@ -1,6 +1,7 @@
 '''
 parameterset group period
 '''
+import random
 
 from django.db import models
 from django.core.serializers.json import DjangoJSONEncoder
@@ -14,7 +15,7 @@ class ParameterSetGroupPeriod(models.Model):
     parameter set group period
     '''
 
-    parameter_set_group = models.ForeignKey(ParameterSetGroup, on_delete=models.CASCADE, related_name="parameter_set_groups")
+    parameter_set_group = models.ForeignKey(ParameterSetGroup, on_delete=models.CASCADE, related_name="parameter_set_group_periods")
 
     period_number = models.PositiveIntegerField(default=1, blank=True, null=True)
     values = models.JSONField(default=dict, blank=True, null=True, encoder=DjangoJSONEncoder)
@@ -28,7 +29,7 @@ class ParameterSetGroupPeriod(models.Model):
     class Meta:
         verbose_name = 'Parameter Set Group Period'
         verbose_name_plural = 'Parameter Set Group Periods'
-        ordering = ['period_number']
+        ordering = ['parameter_set_group__name', 'period_number']
         
     def from_dict(self, new_ps):
         '''
@@ -48,7 +49,20 @@ class ParameterSetGroupPeriod(models.Model):
     def setup(self):
         '''
         default setup
-        '''    
+        '''
+        possible_values = self.parameter_set_group.parameter_set.possible_values.split(",")
+        for i in possible_values:
+            i = i.strip()
+
+        self.values = {}
+
+        #randomly assign values from possible values
+        for i in range(self.parameter_set_group.parameter_set.group_size):
+            index = random.randint(0, len(possible_values) - 1)
+
+            self.values[i+1] = possible_values[index]
+            possible_values.pop(index)
+
         self.save()
     
     def update_json_local(self):

@@ -12,9 +12,6 @@ class ParameterSetPlayerForm(forms.ModelForm):
     '''
     parameterset player edit form
     '''
-
-    id_label = forms.CharField(label='Label Used in Chat',
-                               widget=forms.TextInput(attrs={"v-model":"current_parameter_set_player.id_label",}))
     
     parameter_set_group = forms.ModelChoiceField(label='Group',
                                                  queryset=ParameterSetGroup.objects.none(),
@@ -27,5 +24,5 @@ class ParameterSetPlayerForm(forms.ModelForm):
 
     class Meta:
         model=ParameterSetPlayer
-        fields =['id_label', 'parameter_set_group', 'instruction_set']
+        fields =['parameter_set_group', 'instruction_set']
     

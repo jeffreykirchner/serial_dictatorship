@@ -20,14 +20,13 @@ class ParameterSetPlayer(models.Model):
     parameter_set_group = models.ForeignKey(ParameterSetGroup, on_delete=models.SET_NULL, related_name="parameter_set_players_b", blank=True, null=True)
     instruction_set = models.ForeignKey(InstructionSet, on_delete=models.SET_NULL, related_name="parameter_set_players_c", blank=True, null=True)
 
-    id_label = models.CharField(verbose_name='ID Label', max_length=2, default="1")      #id label shown on screen to subjects
     player_number = models.IntegerField(verbose_name='Player number', default=0)         #player number, from 1 to N 
 
     timestamp = models.DateTimeField(auto_now_add=True)
     updated= models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return str(self.id_label)
+        return str(self.player_number)
     
     class Meta:
         verbose_name = 'Parameter Set Player'
@@ -40,7 +39,6 @@ class ParameterSetPlayer(models.Model):
         source : dict object of parameterset player
         '''
 
-        self.id_label = new_ps.get("id_label")[:2]
         self.player_number = new_ps.get("player_number")
 
         self.save()
@@ -81,7 +79,7 @@ class ParameterSetPlayer(models.Model):
             "instruction_set_label" : self.instruction_set.label if self.instruction_set else "---",
 
             "player_number" : self.player_number,
-            "id_label" : self.id_label,
+
         }
     
     def get_json_for_subject(self, update_required=False):

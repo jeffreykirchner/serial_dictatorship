@@ -23,7 +23,7 @@ class SessionPlayerPeriod(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Player {self.session_player.parameter_set_player.id_label}, Period {self.session_period.period_number}"
+        return f"Player {self.session_player.parameter_set_player.player_number}, Period {self.session_period.period_number}"
 
     class Meta:
         
@@ -39,11 +39,9 @@ class SessionPlayerPeriod(models.Model):
         take csv writer and add row
         '''
 
-
         writer.writerow([self.session_period.session.id,
                          self.session_period.period_number,
                          self.session_player.player_number,
-                         self.session_player.parameter_set_player.id_label,
                          self.earnings,])
         
     def json_for_subject(self):

@@ -91,6 +91,14 @@ class ParameterSet(models.Model):
 
                 new_parameter_set_groups_map[i] = p.id
 
+            #update parameter set group periods
+            main.models.ParameterSetGroupPeriods.objects.filter(parameter_set_group__parameter_set=self).delete()
+            new_parameter_set_group_periods = new_ps.get("parameter_set_group_periods")
+            for i in new_parameter_set_group_periods:
+                p = main.models.ParameterSetGroupPeriod.objects.create(parameter_set_group_id=new_parameter_set_groups_map[str(i["parameter_set_group"])])
+                v = new_parameter_set_group_periods[i]
+                p.from_dict(v)
+
             #parameter set players
             self.parameter_set_players.all().delete()
 
@@ -148,7 +156,7 @@ class ParameterSet(models.Model):
         player = main.models.ParameterSetPlayer()
         player.parameter_set = self
         player.player_number = self.parameter_set_players.count() + 1
-        player.id_label = player.player_number
+
         player.save()
 
         self.update_json_fk(update_players=True)
@@ -206,7 +214,8 @@ class ParameterSet(models.Model):
     
     def update_json_fk(self, update_players=False, 
                              update_notices=False, 
-                             update_groups=False):
+                             update_groups=False,
+                             update_group_periods=False):
         '''
         update json model
         '''
@@ -222,6 +231,10 @@ class ParameterSet(models.Model):
             self.json_for_session["parameter_set_groups_order"] = list(self.parameter_set_groups.all().values_list('id', flat=True))
             self.json_for_session["parameter_set_groups"] = {str(p.id) : p.json() for p in self.parameter_set_groups.all()}
 
+        if update_group_periods:
+            self.json_for_session["parameter_set_group_periods_order"] = list(main.models.ParameterSetGroupPeriod.objects.filter(parameter_set_group__parameter_set=self).values_list('id', flat=True))
+            self.json_for_session["parameter_set_group_periods"] = {str(p.id) : p.json() for p in main.models.ParameterSetGroupPeriod.objects.filter(parameter_set_group__parameter_set=self)}
+
         self.save()
 
     def json(self, update_required=False):
@@ -234,7 +247,8 @@ class ParameterSet(models.Model):
             self.update_json_local()
             self.update_json_fk(update_players=True, 
                                 update_notices=True,
-                                update_groups=True)
+                                update_groups=True,
+                                update_group_periods=True)
 
         return self.json_for_session
     

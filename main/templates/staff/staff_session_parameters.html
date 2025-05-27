@@ -48,6 +48,7 @@
 {%include "staff/staff_session_parameters/control/import_parameters_modal.html"%}
 {%include "staff/staff_session_parameters/notices/edit_parameterset_notice_modal.html"%}
 {%include "staff/staff_session_parameters/groups/edit_parameterset_group_modal.html"%}
+{%include "staff/staff_session_parameters/group_periods/edit_parameterset_group_period_modal.html"%}
 
 {%include "help_modal.html"%}
 
@@ -76,7 +77,7 @@
         </div>
         <div class="row justify-content-lg-center mt-4">
             <div class="col-md">
-
+               {%include "staff/staff_session_parameters/groups/groups_card.html"%}
             </div>
         </div>                 
     </div> 
@@ -89,14 +90,9 @@
        
         <div class="row justify-content-lg-center mt-4">
             <div class="col-md">
-                
+                 {%include "staff/staff_session_parameters/group_periods/group_periods_card.html"%}
             </div>
         </div>
-
-        <div class="row justify-content-lg-center mt-4">
-            <div class="col-md">
-                {%include "staff/staff_session_parameters/groups/groups_card.html"%}
-            </div>
     </div>              
 </div>
                   

@@ -1,0 +1,74 @@
+<div class="card">                  
+    <div class="card-header fw-bold">                
+        <span class="align-middle">
+            Group Periods ([[ Object.keys(parameter_set.parameter_set_group_periods).length]]) 
+        </span>      
+
+        <span class="float-end">
+            <button class="btn btn-outline-success btn-sm"
+                    type="button"
+                    title="Update and randomize values"
+                    v-bind:disabled="session.started || reconnecting || working"
+                    v-on:click="send_auto_fill_parameter_set_group_periods()">
+                    Auto-fill <i class="fas fa-random"></i>
+            </button>
+
+            <button type="button" class="btn btn-link ms-4" title="Show Help Doc" v-on:click="send_load_help_doc('Staff Parameters group_periods')">
+                <i class="far fa-question-circle"></i> 
+            </button>
+        </span> 
+                
+    </div>
+    <div class="card-body" >        
+
+        <div class="row justify-content-center">
+            <!-- group period settings -->
+            <div class="col-md-auto text-center">                
+                <div class="table-responsive">
+                    <table class="table table-condensed"> 
+                        <thead>
+                            <tr>
+                                <th scope="col" class = "m-1 p-1">
+                                    Group
+                                </th>           
+                                <th scope="col" class = "m-1 p-1">
+                                    Period
+                                </th>
+                                <th scope="col" 
+                                    class = "m-1 p-1"
+                                    v-for="(p, index) in parameter_set.group_size">
+                                    Value [[index + 1]]
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="group_list">                            
+                            <tr v-for="(i, index) in parameter_set.parameter_set_group_periods_order" 
+                                v-bind:key="index"
+                                :set="temp_p=parameter_set.parameter_set_group_periods[i]"
+                                v-on:click="">
+                                <td class = "m-1 p-1">
+                                    [[ parameter_set.parameter_set_groups[temp_p.parameter_set_group].name ]]
+                                </td>
+                                <td class = "m-1 p-1">
+                                    [[ temp_p.period_number ]]
+                                </td>
+
+                                <td class = "m-1 p-1"
+                                    v-for="(p, index2) in temp_p.values">
+                                    [[p]]
+                                </td>
+
+                            </tr>    
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+        </div>  
+
+        <div class="row justify-content-center">
+            
+        </div>
+        
+    </div>                    
+</div> 

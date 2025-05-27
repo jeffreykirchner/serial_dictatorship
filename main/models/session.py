@@ -283,48 +283,7 @@ class Session(models.Model):
 
             writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
 
-            session_players_list = self.session_players.all().values('id','parameter_set_player__id_label')
-           
-            top_row = ["Session ID", "Period", "Client #", "Label", "Earnings ¢"]
-            for i in session_players_list:
 
-                top_row.append(f'Cherries I Sent To {i["parameter_set_player__id_label"]}')
-                top_row.append(f'Cherries I Took From {i["parameter_set_player__id_label"]}')
-
-                top_row.append(f'Cherries {i["parameter_set_player__id_label"]} Sent To Me')
-                top_row.append(f'Cherries {i["parameter_set_player__id_label"]} Took From Me')
-
-            writer.writerow(top_row)
-
-            world_state = self.world_state
-            parameter_set_players = {}
-            for i in self.session_players.all().values('id','parameter_set_player__id_label'):
-                parameter_set_players[str(i['id'])] = i
-
-            # logger.info(parameter_set_players)
-
-            for period_number, period in enumerate(world_state["session_periods"]):
-                summary_data = self.session_periods.get(id=period).summary_data
-
-                for player_number, player in enumerate(world_state["session_players"]):
-                    player_s = str(player)
-                    summary_data_player = summary_data[player_s]
-                    temp_row = [self.id, 
-                                period_number+1, 
-                                player_number+1,
-                                parameter_set_players[player_s]["parameter_set_player__id_label"],
-                                summary_data_player["earnings"],
-                                ]
-                    
-                    for p in world_state["session_players"]:
-                        p_s = str(p)
-                        temp_row.append(summary_data_player["interactions"][p_s]["cherries_i_sent"])
-                        temp_row.append(summary_data_player["interactions"][p_s]["cherries_i_took"])
-                        temp_row.append(summary_data[p_s]["interactions"][player_s]["cherries_i_sent"])
-                        temp_row.append(summary_data[p_s]["interactions"][player_s]["cherries_i_took"])
-                    
-                    writer.writerow(temp_row)
-                    
             v = output.getvalue()
             output.close()
 
@@ -338,30 +297,6 @@ class Session(models.Model):
 
             writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
 
-            writer.writerow(["Session ID", "Period", "Time", "Client #", "Label", "Action","Info (Plain)", "Info (JSON)", "Timestamp"])
-
-            # session_events =  main.models.SessionEvent.objects.filter(session__id=self.id).prefetch_related('period_number', 'time_remaining', 'type', 'data', 'timestamp')
-            # session_events = session_events.select_related('session_player')
-
-            world_state = self.world_state
-            parameter_set_players = {}
-            for i in self.session_players.all().values('id','player_number','parameter_set_player__id_label'):
-                parameter_set_players[str(i['id'])] = i
-
-            session_players = {}
-            for i in self.session_players.all().values('id','player_number','parameter_set_player__id_label'):
-                session_players[str(i['id'])] = i
-
-            for p in self.session_events.exclude(type="time").exclude(type="world_state").exclude(type='target_locations'):
-                writer.writerow([self.id,
-                                p.period_number, 
-                                p.time_remaining, 
-                                parameter_set_players[str(p.session_player_id)]["player_number"], 
-                                parameter_set_players[str(p.session_player_id)]["parameter_set_player__id_label"], 
-                                p.type, 
-                                self.action_data_parse(p.type, p.data, session_players),
-                                p.data, 
-                                p.timestamp])
             
             v = output.getvalue()
             output.close()
@@ -372,18 +307,6 @@ class Session(models.Model):
         '''
         return plain text version of action
         '''
-
-        if type == "chat":
-            nearby_text = ""
-            for i in data["nearby_players"]:
-                if nearby_text != "":
-                    nearby_text += ", "
-                nearby_text += f'{session_players[str(i)]["parameter_set_player__id_label"]}'
-
-            temp_s = re.sub("\n", " ", data["text"])
-            return f'{temp_s} @  {nearby_text}'
-        elif type == "help_doc":
-            return data
 
         return ""
     

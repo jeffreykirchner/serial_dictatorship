@@ -165,8 +165,7 @@ let app = Vue.createApp({
         {%include "staff/staff_session_parameters/players/players.js"%}
         {%include "staff/staff_session_parameters/notices/notices.js"%}
         {%include "staff/staff_session_parameters/groups/groups.js"%}
-
-
+        {%include "staff/staff_session_parameters/group_periods/group_periods.js"%}
         {%include "js/help_doc.js"%}
     
         /** clear form error messages
