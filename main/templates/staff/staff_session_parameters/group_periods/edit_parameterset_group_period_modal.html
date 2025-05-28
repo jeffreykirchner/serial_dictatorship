@@ -11,11 +11,11 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">                
-                Group Periods <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                Group Period <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="parameter_set_group_form" v-on:submit.prevent="onSubmit">
-                    {% for i in parameter_set_group_form %}
+                    {% for i in parameter_set_group_period_form %}
                     <div class="row">
                         <div class = "col col-md-10 offset-md-1">  
                             {{ i|as_crispy_field }}         
@@ -26,16 +26,9 @@
             </div>
             <div class="modal-footer">
                 <button type="button"
-                        class="btn btn-outline-danger"
-                        title="Remove group from parameter set."
-                        v-on:click = "send_remove_parameter_set_group()"
-                        v-bind:disabled="reconnecting || working">
-                    Delete group <i class="far fa-trash-alt"></i>
-                </button>
-                <button type="button"
                         class="btn btn-outline-primary"
                         title="Update group settings."
-                        v-on:click = "send_update_parameter_set_group()"
+                        v-on:click = "send_update_parameter_set_group_period()"
                         v-bind:disabled="reconnecting || working">
                     Update <i class="fas fa-sign-in-alt"></i>
                 </button>

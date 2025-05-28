@@ -18,7 +18,7 @@ class ParameterSetGroupPeriod(models.Model):
     parameter_set_group = models.ForeignKey(ParameterSetGroup, on_delete=models.CASCADE, related_name="parameter_set_group_periods")
 
     period_number = models.PositiveIntegerField(default=1, blank=True, null=True)
-    values = models.JSONField(default=dict, blank=True, null=True, encoder=DjangoJSONEncoder)
+    values = models.CharField("0.00,0.25,0.75,1.00", max_length=1000, blank=True, null=True)
     
     timestamp = models.DateTimeField(auto_now_add=True)
     updated= models.DateTimeField(auto_now=True)
@@ -54,13 +54,17 @@ class ParameterSetGroupPeriod(models.Model):
         for i in possible_values:
             i = i.strip()
 
-        self.values = {}
+        self.values = ""
 
         #randomly assign values from possible values
         for i in range(self.parameter_set_group.parameter_set.group_size):
             index = random.randint(0, len(possible_values) - 1)
 
-            self.values[i+1] = possible_values[index]
+            if self.values == "":
+                self.values = possible_values[index]
+            else:
+                self.values += "," + possible_values[index]
+           
             possible_values.pop(index)
 
         self.save()

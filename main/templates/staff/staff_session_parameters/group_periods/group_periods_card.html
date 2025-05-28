@@ -45,16 +45,17 @@
                             <tr v-for="(i, index) in parameter_set.parameter_set_group_periods_order" 
                                 v-bind:key="index"
                                 :set="temp_p=parameter_set.parameter_set_group_periods[i]"
-                                v-on:click="">
-                                <td class = "m-1 p-1">
+                                v-on:click="show_edit_parameter_set_group_period(i)">
+                                <td class = "player_table_cell">
                                     [[ parameter_set.parameter_set_groups[temp_p.parameter_set_group].name ]]
                                 </td>
-                                <td class = "m-1 p-1">
+                                <td class = "player_table_cell">
                                     [[ temp_p.period_number ]]
                                 </td>
 
-                                <td class = "m-1 p-1"
-                                    v-for="(p, index2) in temp_p.values">
+                                <td class = "player_table_cell"
+                                    v-for="(p, index2) in temp_p.values.split(',')"
+                                    v-bind:key="index2">
                                     [[p]]
                                 </td>
 

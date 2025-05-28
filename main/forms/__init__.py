@@ -12,6 +12,7 @@ from .parameter_set_form import ParameterSetForm
 from .parameter_set_player_form import ParameterSetPlayerForm
 from .parameter_set_notice_form import ParameterSetNoticeForm
 from .parameter_set_group_form import ParameterSetGroupForm
+from .parameter_set_group_period_form import ParameterSetGroupPeriodForm
 
 from .session_player_name_etc_form import StaffEditNameEtcForm
 

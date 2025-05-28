@@ -30,6 +30,10 @@ let app = Vue.createApp({
                         id:0,
                     },
 
+                    current_parameter_set_group_period : {
+                        id:0,
+                    },
+
 
                     parameterset_form_ids: {{parameterset_form_ids|safe}},
 
@@ -45,6 +49,7 @@ let app = Vue.createApp({
                     edit_parameterset_player_modal : null,
                     edit_parameterset_notice_modal : null,
                     edit_parameterset_group_modal : null,
+                    edit_parameterset_group_period_modal : null,
                     upload_parameter_set_modal : null,
 
                     //form paramters
@@ -124,6 +129,7 @@ let app = Vue.createApp({
             app.upload_parameter_set_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('upload_parameter_set_modal'), {keyboard: false})   
             app.edit_parameterset_notice_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit_parameterset_notice_modal'), {keyboard: false})
             app.edit_parameterset_group_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit_parameterset_group_modal'), {keyboard: false})
+            app.edit_parameterset_group_period_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('edit_parameterset_group_period_modal'), {keyboard: false})
 
             document.getElementById('import_parameters_modal').addEventListener('hidden.bs.modal', app.hide_import_parameters);
             document.getElementById('edit_parameterset_modal').addEventListener('hidden.bs.modal', app.hide_edit_parameter_set);
@@ -172,9 +178,9 @@ let app = Vue.createApp({
         */
         clear_main_form_errors: function clear_main_form_errors(){
             
-            for(let item in app.session)
+            for(let item in app.parameterset_form_ids)
             {
-                let e = document.getElementById("id_errors_" + item);
+                let e = document.getElementById("id_errors_" + app.parameterset_form_ids[item]);
                 if(e) e.remove();
             }
         },
