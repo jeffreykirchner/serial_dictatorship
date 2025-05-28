@@ -21,6 +21,7 @@ class ParameterSetPlayer(models.Model):
     instruction_set = models.ForeignKey(InstructionSet, on_delete=models.SET_NULL, related_name="parameter_set_players_c", blank=True, null=True)
 
     player_number = models.IntegerField(verbose_name='Player number', default=0)         #player number, from 1 to N 
+    group_index = models.IntegerField(verbose_name='Group index', default=0)             #group index, from 1 to N, id within group
 
     timestamp = models.DateTimeField(auto_now_add=True)
     updated= models.DateTimeField(auto_now=True)
@@ -40,6 +41,7 @@ class ParameterSetPlayer(models.Model):
         '''
 
         self.player_number = new_ps.get("player_number")
+        self.group_index = new_ps.get("group_index")
 
         self.save()
         
@@ -79,6 +81,7 @@ class ParameterSetPlayer(models.Model):
             "instruction_set_label" : self.instruction_set.label if self.instruction_set else "---",
 
             "player_number" : self.player_number,
+            "group_index" : self.group_index,
 
         }
     

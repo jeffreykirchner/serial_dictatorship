@@ -27,6 +27,9 @@
                                     Group
                                 </th>    
                                 <th scope="col" class = "m-1 p-1">
+                                    Group Index
+                                </th>    
+                                <th scope="col" class = "m-1 p-1">
                                     Instructions
                                 </th>              
                             </tr>
@@ -46,6 +49,10 @@
                                                 temp_p.parameter_set_group in parameter_set.parameter_set_groups">
                                         [[parameter_set.parameter_set_groups[temp_p.parameter_set_group].name]]
                                     </span>
+                                </td>
+                                <td v-on:click="show_edit_parameter_set_player(p)" 
+                                    class="player_table_cell">
+                                    [[temp_p.group_index]]
                                 </td>
                                 <td v-on:click="show_edit_parameter_set_player(p)" 
                                     class="player_table_cell">
@@ -72,4 +79,4 @@
         </div>
         
     </div>                    
-</div> 
+</div>

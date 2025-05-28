@@ -17,6 +17,11 @@ class ParameterSetPlayerForm(forms.ModelForm):
                                                  queryset=ParameterSetGroup.objects.none(),
                                                  widget=forms.Select(attrs={"v-model":"current_parameter_set_player.parameter_set_group",}))
     
+    group_index = forms.IntegerField(label='Group Index',
+                                     help_text='ID within the group',
+                                     min_value=1,
+                                     widget=forms.NumberInput(attrs={"v-model":"current_parameter_set_player.group_index",}))  
+      
     instruction_set = forms.ModelChoiceField(label='instruction_set',
                                              empty_label=None,
                                              queryset=InstructionSet.objects.all(),
@@ -24,5 +29,5 @@ class ParameterSetPlayerForm(forms.ModelForm):
 
     class Meta:
         model=ParameterSetPlayer
-        fields =['parameter_set_group', 'instruction_set']
+        fields =['parameter_set_group', 'group_index', 'instruction_set']
     
