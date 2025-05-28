@@ -379,6 +379,10 @@ let app = Vue.createApp({
         {%include "subject/subject_home/test_mode/test_mode.js"%}
         {%include "subject/subject_home/instructions/instructions_card.js"%}
         {%include "subject/subject_home/help_doc_subject.js"%}
+        {%include "subject/subject_home/choices/choices.js"%}
+        {%include "subject/subject_home/helpers.js"%}
+
+
 
         /** clear form error messages
         */
@@ -416,7 +420,7 @@ let app = Vue.createApp({
          * handle window resize event
          */
         handleResize: function handleResize(){
-            app.update_subject_status_overlay();
+            
         },
 
     },

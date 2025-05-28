@@ -164,6 +164,8 @@ class Session(models.Model):
         '''
         setup world state
         '''
+        parameter_set  = self.parameter_set.json_for_session
+        
         self.world_state = {"last_update":str(datetime.now()), 
                             "last_store":str(datetime.now()),
                             "session_players":{},
@@ -180,24 +182,29 @@ class Session(models.Model):
                             }
         
         inventory = {str(i):0 for i in list(self.session_periods.all().values_list('id', flat=True))}
+        groups = {i:{"session_players":{},"values":{}} for i in parameter_set["parameter_set_groups"]}
 
         #session periods
         for i in self.world_state["session_periods"]:
             self.world_state["session_periods"][i]["consumption_completed"] = False
         
         #session players
-        for i in self.session_players.prefetch_related('parameter_set_player').all().values('id', 
+        for i in self.session_players.prefetch_related('parameter_set_player').all().values('id',                                                                 
                                                                                             'parameter_set_player__id' ):
             v = {}
             v['earnings'] = 0
             v['parameter_set_player_id'] = i['parameter_set_player__id']
-            
             self.world_state["session_players"][str(i['id'])] = v
             self.world_state["session_players_order"].append(i['id'])
-        
-        parameter_set  = self.parameter_set.json_for_session
 
-        #tokens
+            parameter_set_player = parameter_set["parameter_set_players"][str(i['parameter_set_player__id'])]
+            parameter_set_group_id = parameter_set_player['parameter_set_group']
+
+            groups[str(parameter_set_group_id)]['session_players'][str(i['id'])] = {}
+
+
+        self.world_state["groups"] = groups
+
         self.save()
 
     def reset_experiment(self):
