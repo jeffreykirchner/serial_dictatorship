@@ -182,7 +182,7 @@ class Session(models.Model):
                             }
         
         inventory = {str(i):0 for i in list(self.session_periods.all().values_list('id', flat=True))}
-        groups = {i:{"session_players":{},"values":{}} for i in parameter_set["parameter_set_groups"]}
+        groups = {i:{"session_players":{}, "session_players_order":[], "values":{}} for i in parameter_set["parameter_set_groups"]}
 
         #session periods
         for i in self.world_state["session_periods"]:
@@ -201,7 +201,36 @@ class Session(models.Model):
             parameter_set_group_id = parameter_set_player['parameter_set_group']
 
             groups[str(parameter_set_group_id)]['session_players'][str(i['id'])] = {}
+            groups[str(parameter_set_group_id)]['session_players_order'].append(i['id'])
 
+        #period groups
+        for i in parameter_set["parameter_set_group_periods"]:
+            parameter_set_group_period = parameter_set["parameter_set_group_periods"][i]
+            group = groups[str(parameter_set_group_period["parameter_set_group"])]
+            period_number = parameter_set_group_period["period_number"]
+
+            #values
+            group["values"][str(period_number)] = parameter_set_group_period["values"].split(",")
+
+            #trim values
+            group["values"][str(period_number)] = [v.strip() for v in group["values"][str(period_number)]]
+            
+            #priority scores
+            priority_scores = parameter_set_group_period["priority_scores"].split(",")
+            priority_scores = [v.strip() for v in priority_scores if v.strip().isdigit()]
+
+            #player order
+            player_order = parameter_set_group_period["player_order"].split(",")
+            player_order = [v.strip() for v in player_order if v.strip().isdigit()]
+
+            group["priority_scores"] = priority_scores
+            group["player_order"] = player_order
+            
+            for j in range(len(priority_scores)): 
+                session_player_id = group["session_players_order"][j]               
+                group["session_players"][str(session_player_id)][str(period_number)] = {"priority_score":priority_scores[j],
+                                                                                        "order":player_order[j],}
+                                                                
 
         self.world_state["groups"] = groups
 

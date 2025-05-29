@@ -19,7 +19,9 @@ class ParameterSetGroupPeriod(models.Model):
 
     period_number = models.PositiveIntegerField(default=1, blank=True, null=True)
     values = models.CharField("0.00,0.25,0.75,1.00", max_length=1000, blank=True, null=True)
-    
+    priority_scores = models.CharField("2,3,4,5", max_length=1000, blank=True, null=True)
+    player_order = models.CharField("1,2,3,4", max_length=1000, blank=True, null=True)
+
     timestamp = models.DateTimeField(auto_now_add=True)
     updated= models.DateTimeField(auto_now=True)
 
@@ -38,7 +40,9 @@ class ParameterSetGroupPeriod(models.Model):
         '''       
         
         self.period_number = new_ps.get("period_number", 1)
-        self.values = new_ps.get("values", {})
+        self.values = new_ps.get("values", {1,2,3,4})
+        self.priority_scores = new_ps.get("priority_scores", "1,2,3,4")
+        self.player_order = new_ps.get("player_order", "1,2,3,4")
         
         self.save()
         
@@ -66,6 +70,23 @@ class ParameterSetGroupPeriod(models.Model):
                 self.values += "," + possible_values[index]
            
             possible_values.pop(index)
+        
+        #randomly assign priority scores       
+        self.priority_scores = ""
+        for i in range(self.parameter_set_group.parameter_set.group_size):
+            score = random.randint(1, self.parameter_set_group.parameter_set.max_priority_score)
+            if self.priority_scores == "":
+                self.priority_scores = str(score)
+            else:
+                self.priority_scores += "," + str(score)
+        
+        #assign player order based on priority scores, with highest score first, ties broken by random order
+        if self.priority_scores:
+            scores = list(map(int, self.priority_scores.split(",")))
+            order = sorted(range(len(scores)), key=lambda k: (-scores[k], random.random()))
+            self.player_order = ",".join(str(i + 1) for i in order)
+        else:
+            self.player_order = ",".join(str(i + 1) for i in range(self.parameter_set_group.parameter_set.group_size))
 
         self.save()
     
@@ -89,8 +110,9 @@ class ParameterSetGroupPeriod(models.Model):
             "id" : self.id,
             "parameter_set_group" : self.parameter_set_group.id if self.parameter_set_group else None,
             "period_number" : self.period_number,
-            "values" : self.values if self.values else {},
-
+            "values" : self.values if self.values else None,
+            "priority_scores" : self.priority_scores if self.priority_scores else None,
+            "player_order" : self.player_order if self.player_order else None,
         }
     
     def get_json_for_subject(self, update_required=False):
