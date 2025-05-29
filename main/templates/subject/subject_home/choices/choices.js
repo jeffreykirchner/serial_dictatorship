@@ -14,6 +14,16 @@ get_current_choices : function get_current_choices() {
 },
 
 /**
+ * return the current priority score
+ */
+get_current_priority_score : function get_current_priority_score() {
+    let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
+    let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
+
+    return group.session_players[app.session_player.id][app.session.world_state.current_period.toString()].priority_score;
+},
+
+/**
 validate and submit subject choices to the server
  */
 submit_choices : function submit_choices() {

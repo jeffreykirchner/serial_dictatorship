@@ -116,7 +116,7 @@ class SubjectUpdatesMixin():
         
         logger = logging.getLogger(__name__)
         
-        event_data =  event["message_text"]
+        event_data = event["message_text"]
 
         try:
             choices = event_data["choices"]    
@@ -129,10 +129,33 @@ class SubjectUpdatesMixin():
 
         self.world_state_local["choices"][str(player_id)] = choices
 
+        await self.store_world_state(force_store=True)
+
+        self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                    session_player_id=player_id,
+                                    type=event['type'],
+                                    period_number=self.world_state_local["current_period"],
+                                    time_remaining=self.world_state_local["time_remaining"],
+                                    data=event_data,))
+        
+        await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+        self.session_events = []
+
         #check if all players have made choices
         if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
             #all players have made choices, send to server
-            await self.send_message(message_to_self=None, message_to_group=self.world_state_local,
+            outcome = {}
+            groups = self.world_state_local["groups"]
+
+            for g in groups:
+                outcome[g] = {"payments": {}}
+                group = groups[g]
+                for p in group["session_players_order"]:
+                    player_id = group["session_players_order"][p]
+            
+            result = {}
+
+            await self.send_message(message_to_self=None, message_to_group=result,
                                     message_type="result", send_to_client=False, send_to_group=True)
         else:
             #not all players have made choices, update subject screen

@@ -43,7 +43,7 @@
                                 [[ String.fromCharCode(65 + index) ]]
                             </td>
                             <td class="text-nowrap fs-4">
-                                $[[p]]
+                                $[[p.value]]
                             </td>                            
                             <td class="text-nowrap">
                                 <input type="number" 
@@ -61,6 +61,20 @@
                 </div>
             </div>
         </div>  
+
+        <!-- priority score -->
+        <div class="row justify-content-center mb-3">
+            <div class="col-md text-center">
+                <span class="text-muted fs-4">
+                    Priority Score: [[ get_current_priority_score() ]]
+                </span>
+                <br>
+                <span class="text-muted">
+                    (Highest priority score gets their first choice)
+                </span>
+
+            </div>
+        </div>
         
         <div class="row justify-content-center">
             <div v-if="!waiting_for_others" 

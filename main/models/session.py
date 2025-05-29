@@ -213,7 +213,7 @@ class Session(models.Model):
             group["values"][str(period_number)] = parameter_set_group_period["values"].split(",")
 
             #trim values
-            group["values"][str(period_number)] = [v.strip() for v in group["values"][str(period_number)]]
+            group["values"][str(period_number)] = [{"value":v.strip(),"owner":None } for v in group["values"][str(period_number)]]
             
             #priority scores
             priority_scores = parameter_set_group_period["priority_scores"].split(",")
