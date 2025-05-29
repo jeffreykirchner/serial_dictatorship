@@ -234,6 +234,10 @@ class Session(models.Model):
 
         self.world_state["groups"] = groups
 
+        # current player choices and results
+        self.world_state["choices"] = {}
+        self.world_state["outcomes"] = {}
+
         self.save()
 
     def reset_experiment(self):

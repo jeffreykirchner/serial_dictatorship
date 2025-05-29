@@ -4,8 +4,46 @@
 get_current_choices : function get_current_choices() {
     let choice_list = [];
 
-    let choices = app.session.world_state.parameter_set.
+    // let choices = app.session.world_state.parameter_set.
 
+    let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
 
-    return choice_list = [];
+    let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
+
+    return group.values[app.session.world_state.current_period.toString()];
 },
+
+/**
+validate and submit subject choices to the server
+ */
+submit_choices : function submit_choices() {
+    //all choices must be ranked
+    let current_choices = app.get_current_choices();
+    if (app.choices.length < current_choices.length) {
+        app.choices_error_message = "You must rank all choices.";
+        return;
+    }
+
+    //choices must be an integer greater than 0 and less than or equal to the number of get_current_choices().length
+    //each choice must be unique
+    let choice_set = new Set(app.choices);
+    if (choice_set.size !== app.choices.length) {
+        app.choices_error_message = "You must rank each choice uniquely.";
+        return;
+    }
+    for (let i = 0; i < app.choices.length; i++) {
+        if (app.choices[i] < 1 || app.choices[i] > current_choices.length) {
+            app.choices_error_message = "You must rank each choice between 1 and " + current_choices.length + ".";
+            return;
+        }
+    }
+    app.choices_error_message = "";
+    app.waiting_for_others = true;
+
+    app.send_message("choices", 
+                    {"choices": app.choices},
+                     "group"); 
+},
+
+
+    

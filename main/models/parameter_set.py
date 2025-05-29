@@ -94,11 +94,11 @@ class ParameterSet(models.Model):
                 new_parameter_set_groups_map[i] = p.id
 
             #update parameter set group periods
-            main.models.ParameterSetGroupPeriods.objects.filter(parameter_set_group__parameter_set=self).delete()
+            main.models.ParameterSetGroupPeriod.objects.filter(parameter_set_group__parameter_set=self).delete()
             new_parameter_set_group_periods = new_ps.get("parameter_set_group_periods")
             for i in new_parameter_set_group_periods:
-                p = main.models.ParameterSetGroupPeriod.objects.create(parameter_set_group_id=new_parameter_set_groups_map[str(i["parameter_set_group"])])
                 v = new_parameter_set_group_periods[i]
+                p = main.models.ParameterSetGroupPeriod.objects.create(parameter_set_group_id=new_parameter_set_groups_map[str(v["parameter_set_group"])])
                 p.from_dict(v)
 
             #parameter set players
@@ -149,6 +149,8 @@ class ParameterSet(models.Model):
 
         for i in self.parameter_set_players.all():
             i.setup()
+
+        self.json(update_required=True)
 
     def add_player(self):
         '''

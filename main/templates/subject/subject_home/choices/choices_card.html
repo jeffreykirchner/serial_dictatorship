@@ -1,7 +1,7 @@
 <div class="card" v-show="first_load_done">                  
     <div class="card-header fw-bold">                
         <span class="align-middle">
-            Choices
+            Rank the Prizes
         </span>       
 
         <span class="float-end"> 
@@ -30,17 +30,30 @@
                                 Value ($)
                             </th>                            
                             <th scope="col" class = "text-center">
-                                Rank your choices
+                                Rank the prizes from 1 to [[get_current_choices().length]]<br>
+                                (1 = most preferred)
                             </th>                                                 
                         </tr>
                     </thead>
                     <tbody id="choice_list">
                         <tr v-for="(p, index) in get_current_choices()" 
-                            v-bind:key="index">
-                            <td class="text-nowrap">
-                                [[p]]
+                            v-bind:key="index">                            
+                            <td class="text-nowrap fs-4">
+                               <!-- convert index value of 0 to ascii A -->
+                                [[ String.fromCharCode(65 + index) ]]
+                            </td>
+                            <td class="text-nowrap fs-4">
+                                $[[p]]
                             </td>                            
-                                                                        
+                            <td class="text-nowrap">
+                                <input type="number" 
+                                       class="form-control form-control-lg text-center fw-bold" 
+                                       v-model="choices[index]" 
+                                       v-bind:disabled="waiting_for_others"
+                                       min="1" 
+                                       v-bind:max="get_current_choices().length"
+                                       :placeholder="'1 - ' + get_current_choices().length" />
+                            </td>                                            
                         </tr>
                     </tbody>
                     
@@ -50,11 +63,32 @@
         </div>  
         
         <div class="row justify-content-center">
-            <div class="col-md text-center">
-                submit button
+            <div v-if="!waiting_for_others" 
+                class="col-md text-center">
+                <button type="button" 
+                        class="btn btn-primary btn-lg" 
+                        v-on:click="submit_choices()">
+                    Submit Choices
+                </button>
+            </div>
+            <div v-else 
+                class="col-md text-center">
+                <button type="button" 
+                        class="btn btn-secondary btn-lg" 
+                        disabled>
+                    Waiting for others
+                </button>
             </div>
         </div>
-            
+
+        <!-- submit choices error message -->
+        <div class="row justify-content-center mt-3">
+            <div class="col-md text-center fs-4">
+                <span class="text-danger" v-if="choices_error_message">
+                    Error: [[ choices_error_message ]]
+                </span>
+            </div>
+        </div>
 
     </div>                    
 </div> 

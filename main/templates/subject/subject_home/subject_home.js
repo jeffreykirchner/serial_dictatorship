@@ -42,6 +42,10 @@ let app = Vue.createApp({
 
                     notices_seen: [],
 
+                    choices : [],
+                    choices_error_message : null,
+                    waiting_for_others : false, //true if waiting for other players to make choices
+
                     // modals
                     end_game_modal : null,
                     help_modal : null,
