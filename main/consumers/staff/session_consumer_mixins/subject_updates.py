@@ -130,15 +130,24 @@ class SubjectUpdatesMixin():
         self.world_state_local["choices"][str(player_id)] = choices
 
         #check if all players have made choices
-        if len(self.world_state_local["choices"]) == len(self.parameterset_local["session_players_order"]):
+        if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
             #all players have made choices, send to server
             await self.send_message(message_to_self=None, message_to_group=self.world_state_local,
-                                    message_type="choices", send_to_client=False, send_to_group=True)
+                                    message_type="result", send_to_client=False, send_to_group=True)
         else:
             #not all players have made choices, update subject screen
             # await self.send_message(message_to_self={"choices": self.world_state_local["choices"]},
             #                         message_to_group=None, message_type="choices", send_to_client=True, send_to_group=False)
             pass
+    
+    async def update_result(self, event):
+        '''
+        send the result of the period choices to the subject screens
+        '''
+        event_data = json.loads(event["group_data"])
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
 
    
                                       
