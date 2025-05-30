@@ -193,6 +193,8 @@ class Session(models.Model):
                                                                                             'parameter_set_player__id' ):
             v = {}
             v['earnings'] = 0
+            v['status'] = "playing"
+            v['history'] = {}
             v['parameter_set_player_id'] = i['parameter_set_player__id']
             self.world_state["session_players"][str(i['id'])] = v
             self.world_state["session_players_order"].append(i['id'])
