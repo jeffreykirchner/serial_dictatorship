@@ -106,6 +106,10 @@ class InterfaceMixin():
 
         event_data = json.loads(event["group_data"])
 
+        period_results = event_data["period_results"][str(self.session_player_id)]
+
+        event_data = {"period_results": period_results,}
+
         await self.send_message(message_to_self=event_data, message_to_subjects=None, message_to_staff=None, 
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
 

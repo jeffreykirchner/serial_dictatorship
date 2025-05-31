@@ -146,19 +146,50 @@ class SubjectUpdatesMixin():
             #all players have made choices, send to server
             outcome = {}
             groups = self.world_state_local["groups"]
+            current_period = self.world_state_local["current_period"]
 
             for i in self.world_state_local["session_players"]:
                 player = self.world_state_local["session_players"][i]
                 player["status"] = "ready to go on"
 
+            period_results = {}
             for g in groups:
                 outcome[g] = {"payments": {}}
                 group = groups[g]
                 for p in group["session_players_order"]:
-                    player_id = group["session_players_order"][p]
-                    player_choices = self.world_state_local["choices"][str(player_id)]
-            
-            result = {}
+                    # player_id = self.world_state_local["session_players"][str(p)]
+                    player_choices = self.world_state_local["choices"][str(p)]
+
+                    #loop through group[values][current_period] and find the next available value according to rank
+                    outer_break = False
+                    for i in range(len(player_choices)):
+                        for c in player_choices:
+                            if c == i+1 and not group["values"][str(current_period)][i]["owner"]:
+                                group["values"][str(current_period)][i]["owner"] = p
+                                period_results[str(p)] = {}
+                                period_results[str(p)]["prize"] = group["values"][str(current_period)][i]["value"]
+                                outer_break = True
+                                break
+                        
+                        if outer_break:
+                            break
+                    
+                    #store period results
+                    period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
+                    period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
+                    
+                    period_results[str(p)]["values"] = []
+                    for i in range(len(player_choices)):
+                        period_results[str(p)]["values"].append({
+                            "value": group["values"][str(current_period)][i]["value"],
+                            "rank": player_choices[i],
+                        })
+
+                    session_player = await SessionPlayer.objects.aget(id=p)
+                    session_player.period_results[str(current_period)] = period_results[str(p)]
+                    await session_player.asave()
+
+            result = {"period_results": period_results,}
 
             await self.send_message(message_to_self=None, message_to_group=result,
                                     message_type="result", send_to_client=False, send_to_group=True)

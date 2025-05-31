@@ -12,6 +12,7 @@ from decimal import Decimal
 from django.db import models
 from django.urls import reverse
 from django.db.models import Q
+from django.core.serializers.json import DjangoJSONEncoder
 
 from main.models import Session
 from main.models import ParameterSetPlayer
@@ -43,6 +44,8 @@ class SessionPlayer(models.Model):
 
     survey_complete = models.BooleanField(default=False, verbose_name="Survey Complete")                 #subject has completed the survey  
 
+    period_results = models.JSONField(encoder=DjangoJSONEncoder, null=True, blank=True, verbose_name="Period Results")  #results of the periods for this subject
+
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -73,6 +76,8 @@ class SessionPlayer(models.Model):
         self.current_instruction = 1
         self.current_instruction_complete = 0
         self.instructions_finished = False
+
+        self.period_results = {}
 
         self.save()
     
@@ -178,6 +183,8 @@ class SessionPlayer(models.Model):
             "survey_complete" : self.survey_complete,
             "survey_link" : self.get_survey_link(),
 
+            "period_results" : self.period_results if self.period_results else {},
+
         }
     
     def json_for_subject(self, session_player):
@@ -191,6 +198,8 @@ class SessionPlayer(models.Model):
             "player_number" : self.player_number,
             "new_chat_message" : False,           #true on client side when a new un read message comes in
             "parameter_set_player" : self.parameter_set_player.id,
+
+           
         }
 
     def json_min(self, session_player_notice=None):

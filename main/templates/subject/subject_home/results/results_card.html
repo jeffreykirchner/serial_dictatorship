@@ -1,0 +1,66 @@
+<div class="card" v-show="first_load_done">                  
+    <div class="card-header fw-bold">                
+        <span class="align-middle">
+           Results
+        </span>       
+
+        <span class="float-end"> 
+        
+            <button type="button" 
+                    class="btn btn-link ms-2" 
+                    title="Show Help Doc" 
+                    v-on:click="send_load_help_doc_subject('subject_results')">
+                <i class="far fa-question-circle"></i> 
+            </button>
+        </span>          
+    </div>
+    <div class="card-body" >        
+
+        <!-- chocies -->
+        <div class="row justify-content-center">           
+            <div class="col-md text-center">                
+                <div class="table-responsive">
+                <table class="table table-condensed"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" class = "">
+                                Period
+                            </th>
+                            <th scope="col" class = "">
+                                Values (Your Ranking)
+                            </th>                            
+                            <th scope="col" class = "text-center">
+                               Your Priority Score
+                            </th>
+                            <th scope="col" class = "text-center">
+                               Your Prize
+                            </th>                                                 
+                        </tr>
+                    </thead>
+                    <tbody id="choice_list">
+                        <tr v-for="(p, index) in session_player.period_results" 
+                            v-bind:key="index">                            
+                            <td class="text-nowrap fs-5">
+                               [[index]]
+                            </td>
+                            <td class="text-nowrap fs-5">
+                               <span v-for="(v, idx) in p.values" v-bind:key="idx">
+                                   $[[v.value]] ([[v.rank]]) [[ idx < p.values.length - 1 ? ', ' : '' ]]
+                               </span>
+                            </td>                            
+                            <td class="text-nowrap fs-5">
+                                 [[ p.priority_score ]]
+                            </td>                      
+                            <td class="text-nowrap fs-5">
+                                $[[p.prize]]    
+                            </td>              
+                        </tr>
+                    </tbody>
+                    
+                </table>
+                </div>
+            </div>
+        </div>  
+
+    </div>                    
+</div> 

@@ -121,8 +121,8 @@ let app = Vue.createApp({
                 case "update_refresh_screens":
                     app.take_refresh_screens(message_data);
                     break;               
-                case "update_rescue_subject":
-                    app.take_rescue_subject(message_data);
+                case "update_result":
+                    app.take_results(message_data);
                     break;
             }
 
@@ -385,7 +385,7 @@ let app = Vue.createApp({
         {%include "subject/subject_home/help_doc_subject.js"%}
         {%include "subject/subject_home/choices/choices.js"%}
         {%include "subject/subject_home/helpers.js"%}
-
+        {%include "subject/subject_home/results/results.js"%}
 
 
         /** clear form error messages

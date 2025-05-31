@@ -45,6 +45,9 @@
         <div class="col-md-4">
             {%include "subject/subject_home/choices/choices_card.html"%}
         </div>
+        <div class="col-md-6">
+            {%include "subject/subject_home/results/results_card.html"%}
+        </div>
     </div>
 
     <div class="row justify-content-lg-center mt-4" v-cloak v-show="session.world_state.current_experiment_phase == 'Done'">

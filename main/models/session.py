@@ -217,13 +217,13 @@ class Session(models.Model):
             #trim values
             group["values"][str(period_number)] = [{"value":v.strip(),"owner":None } for v in group["values"][str(period_number)]]
             
-            #priority scores
+            # #priority scores
             priority_scores = parameter_set_group_period["priority_scores"].split(",")
-            priority_scores = [v.strip() for v in priority_scores if v.strip().isdigit()]
+            # priority_scores = [v.strip() for v in priority_scores if v.strip().isdigit()]
 
-            #player order
+            # #player order
             player_order = parameter_set_group_period["player_order"].split(",")
-            player_order = [v.strip() for v in player_order if v.strip().isdigit()]
+            # player_order = [v.strip() for v in player_order if v.strip().isdigit()]
 
             group["priority_scores"] = priority_scores
             group["player_order"] = player_order
