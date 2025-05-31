@@ -29,3 +29,12 @@ class ExperimentMode(models.TextChoices):
     '''
     SIMULTANEOUS = 'Simultaneous', _('Simultaneous')
     SEQUENTIAL = 'Sequential', _('Sequential')
+
+class SubjectStatus(models.TextChoices):
+    '''
+    subject status
+    '''
+    RANKING = 'Ranking', _('Ranking')
+    FINISHED_RANKING = 'Finished_Ranking', _('Finished_Ranking')
+    REVIEWING_RESULTS = 'Reviewing_Results', _('Reviewing_Results')
+    WAITING = 'Waiting', _('Waiting')

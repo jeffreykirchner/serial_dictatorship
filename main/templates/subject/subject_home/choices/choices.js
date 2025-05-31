@@ -48,7 +48,7 @@ submit_choices : function submit_choices() {
         }
     }
     app.choices_error_message = "";
-    app.waiting_for_others = true;
+    app.session.world_state.session_players[app.session_player.id].status = "Finished_Ranking";
 
     app.send_message("choices", 
                     {"choices": app.choices},

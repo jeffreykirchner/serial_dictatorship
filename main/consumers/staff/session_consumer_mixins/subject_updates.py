@@ -12,6 +12,7 @@ from main.models import Session
 from main.models import SessionEvent
 
 from main.globals import ExperimentPhase
+from main.globals import SubjectStatus
 
 import main
 
@@ -128,8 +129,7 @@ class SubjectUpdatesMixin():
         session_player = self.world_state_local["session_players"][str(player_id)]
 
         self.world_state_local["choices"][str(player_id)] = choices
-
-        await self.store_world_state(force_store=True)
+        session_player["status"] = SubjectStatus.FINISHED_RANKING
 
         self.session_events.append(SessionEvent(session_id=self.session_id, 
                                     session_player_id=player_id,
@@ -150,7 +150,7 @@ class SubjectUpdatesMixin():
 
             for i in self.world_state_local["session_players"]:
                 player = self.world_state_local["session_players"][i]
-                player["status"] = "ready to go on"
+                player["status"] = SubjectStatus.REVIEWING_RESULTS
 
             period_results = {}
             for g in groups:
@@ -198,6 +198,8 @@ class SubjectUpdatesMixin():
             # await self.send_message(message_to_self={"choices": self.world_state_local["choices"]},
             #                         message_to_group=None, message_type="choices", send_to_client=True, send_to_group=False)
             pass
+
+        await self.store_world_state(force_store=True)
     
     async def update_result(self, event):
         '''

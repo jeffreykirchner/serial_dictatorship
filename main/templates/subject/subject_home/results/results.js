@@ -4,6 +4,7 @@
 take_results : function take_results(message_data) {
 
     app.session_player.period_results[app.session.world_state.current_period] = message_data.period_results;
+    app.session.world_state.session_players[app.session_player.id].status = "Reviewing_Results";
 },
 
 

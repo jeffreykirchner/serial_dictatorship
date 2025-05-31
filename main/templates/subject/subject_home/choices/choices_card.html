@@ -77,7 +77,7 @@
         </div>
         
         <div class="row justify-content-center">
-            <div v-if="!waiting_for_others" 
+            <div v-if="session.world_state.session_players[session_player.id].status == 'Ranking'"
                 class="col-md text-center">
                 <button type="button" 
                         class="btn btn-primary btn-lg" 
@@ -85,7 +85,7 @@
                     Submit Choices
                 </button>
             </div>
-            <div v-else 
+            <div v-if="session.world_state.session_players[session_player.id].status == 'Finished_Ranking'" 
                 class="col-md text-center">
                 <button type="button" 
                         class="btn btn-secondary btn-lg" 

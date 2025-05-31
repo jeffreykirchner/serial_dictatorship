@@ -9,5 +9,6 @@ from .send_email import send_mass_email_service
 from .sessions import ChatTypes
 from .sessions import ExperimentPhase
 from .sessions import ExperimentMode
+from .sessions import SubjectStatus
 
 from .validate_input import is_positive_integer
