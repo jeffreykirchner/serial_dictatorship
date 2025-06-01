@@ -55,5 +55,23 @@ submit_choices : function submit_choices() {
                      "group"); 
 },
 
+/**
+ * send ready to go on to the server
+ */
+send_ready_to_go_on : function send_ready_to_go_on() {
+    app.session.world_state.session_players[app.session_player.id].status = "Waiting";
+    app.send_message("ready_to_go_on", 
+                    {},
+                     "group"); 
+},
+
+/**
+ * start the next period
+ */
+take_start_next_period : function take_start_next_period() {
+    app.session.world_state.session_players[app.session_player.id].status = "Ranking";
+   
+},
+
 
     

@@ -49,7 +49,11 @@ let app = Vue.createApp({
                     // modals
                     end_game_modal : null,
                     help_modal : null,
-                    test_mode : {%if session.parameter_set.test_mode%}true{%else%}false{%endif%},                   
+                    test_mode : {%if session.parameter_set.test_mode%}true{%else%}false{%endif%},        
+                    
+                    //tick tock
+                    tick_tock : "tick",
+                    tick_tock_interval : 300,
                 }},
     methods: {
 
@@ -76,6 +80,22 @@ let app = Vue.createApp({
             }
 
             return true;
+        },
+
+        /**
+         * run tick tock at a set interval
+         */
+        run_tick_tock: function run_tick_tock() {
+            if(app.tick_tock == "tick")
+            {
+                app.tick_tock = "tock";
+            }
+            else
+            {
+                app.tick_tock = "tick";
+            }
+
+            setTimeout(app.run_tick_tock, app.tick_tock_interval);
         },
 
         /** take websocket message from server
@@ -123,6 +143,9 @@ let app = Vue.createApp({
                     break;               
                 case "update_result":
                     app.take_results(message_data);
+                    break;
+                case "update_start_next_period":
+                    app.take_start_next_period(message_data);
                     break;
             }
 
@@ -180,6 +203,9 @@ let app = Vue.createApp({
 
                 app.scroll_update();
             }
+
+            //start tick tock
+            app.run_tick_tock();
         },
 
         /**

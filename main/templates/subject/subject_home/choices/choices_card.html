@@ -80,18 +80,25 @@
             <div v-if="session.world_state.session_players[session_player.id].status == 'Ranking'"
                 class="col-md text-center">
                 <button type="button" 
-                        class="btn btn-primary btn-lg" 
+                        title = "Submit your choices"
+                        v-bind:class="tick_tock=='tick' ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'" 
                         v-on:click="submit_choices()">
                     Submit Choices
                 </button>
             </div>
-            <div v-if="session.world_state.session_players[session_player.id].status == 'Finished_Ranking'" 
+            <div v-if="session.world_state.session_players[session_player.id].status == 'Finished_Ranking' ||
+                       session.world_state.session_players[session_player.id].status == 'Waiting'" 
+                class="col-md text-center fw-bold fs-4">
+                 Waiting for others
+            </div>
+            <div v-if="session.world_state.session_players[session_player.id].status == 'Reviewing_Results'"
                 class="col-md text-center">
                 <button type="button" 
-                        class="btn btn-secondary btn-lg" 
-                        disabled>
-                    Waiting for others
-                </button>
+                        title = "Ready to go to the next period"
+                        v-bind:class="tick_tock=='tick' ? 'btn btn-outline-success btn-lg' : 'btn btn-success btn-lg'"
+                        v-on:click="send_ready_to_go_on()">
+                    Ready to Go On
+                </button>   
             </div>
         </div>
 

@@ -209,6 +209,70 @@ class SubjectUpdatesMixin():
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
+    
+    async def ready_to_go_on(self, event):
+        '''
+        subject has finished reviewing results and is ready to go on
+        '''
+        if self.controlling_channel != self.channel_name:
+            return
+        
+        logger = logging.getLogger(__name__)
+
+        event_data = event["message_text"]
+        player_key = event_data["player_key"]
+        player_id = self.session_players_local[player_key]["id"]
+        session_player = self.world_state_local["session_players"][str(player_id)]
+        session_player["status"] = SubjectStatus.WAITING
+
+        # store event
+        self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                    session_player_id=player_id,
+                                    type=event['type'],
+                                    period_number=self.world_state_local["current_period"],
+                                    time_remaining=self.world_state_local["time_remaining"],
+                                    data=event_data,))
+        
+        await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+        self.session_events = []
+
+        # check if all subjects are ready
+        all_ready = True
+        for i in self.world_state_local["session_players"]:
+            if self.world_state_local["session_players"][i]["status"] != SubjectStatus.WAITING:
+                all_ready = False
+                break
+
+        if all_ready:
+            # all subjects are ready, go to next period
+            self.world_state_local["current_period"] += 1
+            self.world_state_local["time_remaining"] = self.world_state_local["period_length"]
+
+            # reset choices and set session players status to 'Ranking'
+            for i in self.world_state_local["session_players"]:
+                self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
+  
+            self.world_state_local["choices"] = {}
+            
+            result = {
+                "current_period": self.world_state_local["current_period"],                
+            }
+
+            # send message to subject screens to go to next period
+            await self.send_message(message_to_self=None, message_to_group=result,
+                                    message_type="start_next_period", send_to_client=False, send_to_group=True)
+
+        await self.store_world_state(force_store=True)
+    
+    async def update_start_next_period(self, event):
+        '''
+        send start next period to subject screens
+        '''
+        event_data = event["group_data"]
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+
 
    
                                       
