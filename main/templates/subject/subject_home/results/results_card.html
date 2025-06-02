@@ -38,10 +38,10 @@
                         </tr>
                     </thead>
                     <tbody id="choice_list">
-                        <tr v-for="(p, index) in session_player.period_results" 
+                        <tr v-for="(p, index) in session_player.period_results.slice().reverse()" 
                             v-bind:key="index">                            
                             <td class="text-nowrap fs-5">
-                               [[index]]
+                               [[p.period_number]]
                             </td>
                             <td class="text-nowrap fs-5">
                                <span v-for="(v, idx) in p.values" v-bind:key="idx">

@@ -177,6 +177,7 @@ class SubjectUpdatesMixin():
                     #store period results
                     period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
                     period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
+                    period_results[str(p)]["period_number"] = current_period
                     
                     period_results[str(p)]["values"] = []
                     for i in range(len(player_choices)):
@@ -186,7 +187,7 @@ class SubjectUpdatesMixin():
                         })
 
                     session_player = await SessionPlayer.objects.aget(id=p)
-                    session_player.period_results[str(current_period)] = period_results[str(p)]
+                    session_player.period_results.append(period_results[str(p)])
                     await session_player.asave()
 
             result = {"period_results": period_results,}
@@ -220,9 +221,10 @@ class SubjectUpdatesMixin():
         logger = logging.getLogger(__name__)
 
         event_data = event["message_text"]
-        player_key = event_data["player_key"]
-        player_id = self.session_players_local[player_key]["id"]
+
+        player_id = self.session_players_local[event["player_key"]]["id"]
         session_player = self.world_state_local["session_players"][str(player_id)]
+
         session_player["status"] = SubjectStatus.WAITING
 
         # store event
@@ -246,7 +248,7 @@ class SubjectUpdatesMixin():
         if all_ready:
             # all subjects are ready, go to next period
             self.world_state_local["current_period"] += 1
-            self.world_state_local["time_remaining"] = self.world_state_local["period_length"]
+            self.world_state_local["time_remaining"] = self.parameter_set_local["period_length"]
 
             # reset choices and set session players status to 'Ranking'
             for i in self.world_state_local["session_players"]:

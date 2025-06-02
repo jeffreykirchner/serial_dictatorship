@@ -77,7 +77,7 @@ class SessionPlayer(models.Model):
         self.current_instruction_complete = 0
         self.instructions_finished = False
 
-        self.period_results = {}
+        self.period_results = []
 
         self.save()
     
@@ -183,7 +183,7 @@ class SessionPlayer(models.Model):
             "survey_complete" : self.survey_complete,
             "survey_link" : self.get_survey_link(),
 
-            "period_results" : self.period_results if self.period_results else {},
+            "period_results" : self.period_results if self.period_results else [],
 
         }
     

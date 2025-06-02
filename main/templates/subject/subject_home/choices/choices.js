@@ -68,9 +68,9 @@ send_ready_to_go_on : function send_ready_to_go_on() {
 /**
  * start the next period
  */
-take_start_next_period : function take_start_next_period() {
+take_start_next_period : function take_start_next_period(message_data) {
+    app.session.world_state.current_period = message_data.current_period;
     app.session.world_state.session_players[app.session_player.id].status = "Ranking";
-   
 },
 
 
