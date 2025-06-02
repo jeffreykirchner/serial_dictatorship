@@ -44,7 +44,7 @@ let app = Vue.createApp({
 
                     choices : [],
                     choices_error_message : null,
-                    waiting_for_others : false, //true if waiting for other players to make choices
+                    // waiting_for_others : false, //true if waiting for other players to make choices
 
                     // modals
                     end_game_modal : null,
@@ -147,10 +147,13 @@ let app = Vue.createApp({
                 case "update_start_next_period":
                     app.take_start_next_period(message_data);
                     break;
+                case "update_choices":
+                    app.take_choices(message_data);
+                    break;
             }
 
             app.first_load_done = true;
-            app.working = false;
+            // app.working = false;
         },
 
         /** send websocket message to server
@@ -202,6 +205,15 @@ let app = Vue.createApp({
                 )
 
                 app.scroll_update();
+            }
+
+            //load current ranks
+            if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking')
+            {
+                if(app.session_player.id in app.session.world_state.choices)
+                {
+                    app.choices = app.session.world_state.choices[app.session_player.id];
+                }
             }
 
             //start tick tock

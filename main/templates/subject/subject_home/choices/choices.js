@@ -27,32 +27,25 @@ get_current_priority_score : function get_current_priority_score() {
 validate and submit subject choices to the server
  */
 submit_choices : function submit_choices() {
-    //all choices must be ranked
-    let current_choices = app.get_current_choices();
-    if (app.choices.length < current_choices.length) {
-        app.choices_error_message = "You must rank all choices.";
-        return;
-    }
-
-    //choices must be an integer greater than 0 and less than or equal to the number of get_current_choices().length
-    //each choice must be unique
-    let choice_set = new Set(app.choices);
-    if (choice_set.size !== app.choices.length) {
-        app.choices_error_message = "You must rank each choice uniquely.";
-        return;
-    }
-    for (let i = 0; i < app.choices.length; i++) {
-        if (app.choices[i] < 1 || app.choices[i] > current_choices.length) {
-            app.choices_error_message = "You must rank each choice between 1 and " + current_choices.length + ".";
-            return;
-        }
-    }
+    
     app.choices_error_message = "";
-    app.session.world_state.session_players[app.session_player.id].status = "Finished_Ranking";
+    app.working = true;
 
     app.send_message("choices", 
                     {"choices": app.choices},
                      "group"); 
+},
+
+/***
+ * handle the response from the server after submitting choices
+ */
+take_choices(message_data) {
+    if (message_data.status === "success") {
+        app.session.world_state.session_players[app.session_player.id].status = message_data.player_status;
+    } else {
+        app.working = false;
+        app.choices_error_message = message_data.error_message;
+    }
 },
 
 /**
@@ -71,6 +64,9 @@ send_ready_to_go_on : function send_ready_to_go_on() {
 take_start_next_period : function take_start_next_period(message_data) {
     app.session.world_state.current_period = message_data.current_period;
     app.session.world_state.session_players[app.session_player.id].status = "Ranking";
+
+    app.choices = [];
+    app.choices_error_message = "";
 },
 
 

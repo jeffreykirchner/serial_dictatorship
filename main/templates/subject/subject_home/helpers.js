@@ -18,3 +18,22 @@ get_parameter_set_player_from_player_id: function get_parameter_set_player_from_
         return {id_label:null};
     }
 },
+
+/**
+ * get earnings display
+ */
+get_earnings_display: function get_earnings_display(earnings)
+{
+    // $[[(Math.ceil(Number(session.world_state.session_players[p].earnings))/100).toFixed(2)]]
+
+    let v = parseFloat(earnings);
+    
+    if(earnings < 0)
+    {
+        return "-$" + v.toFixed(2);
+    }
+    else
+    {
+        return "$" + v.toFixed(2);
+    }
+},

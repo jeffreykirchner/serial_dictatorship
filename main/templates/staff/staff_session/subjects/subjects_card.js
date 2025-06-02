@@ -353,30 +353,11 @@ get_average_earnings: function get_average_earnings()
         count++;
     }
 
-    let v = Math.ceil(total_earnings/count)/100
+    let v = total_earnings/count
 
     if (isNaN(v)) {
         return "---";
     }
     
     return "$" + v.toFixed(2);
-},
-
-/**
- * get earnings display
- */
-get_earnings_display: function get_earnings_display(earnings)
-{
-    // $[[(Math.ceil(Number(session.world_state.session_players[p].earnings))/100).toFixed(2)]]
-
-    let v = (Math.ceil(Number( Math.abs(earnings)))/100).toFixed(2);
-    
-    if(earnings < 0)
-    {
-        return "-$" + v;
-    }
-    else
-    {
-        return "$" + v;
-    }
-},  
+}, 

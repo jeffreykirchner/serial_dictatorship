@@ -3,6 +3,8 @@ import logging
 import math
 import json
 
+from decimal import Decimal
+
 from datetime import datetime, timedelta
 
 from django.utils.html import strip_tags
@@ -118,6 +120,8 @@ class SubjectUpdatesMixin():
         logger = logging.getLogger(__name__)
         
         event_data = event["message_text"]
+        status = "success"
+        error_message = ""
 
         try:
             choices = event_data["choices"]    
@@ -127,81 +131,122 @@ class SubjectUpdatesMixin():
         
         player_id = self.session_players_local[event["player_key"]]["id"]
         session_player = self.world_state_local["session_players"][str(player_id)]
+        groups = self.world_state_local["groups"]
 
-        self.world_state_local["choices"][str(player_id)] = choices
-        session_player["status"] = SubjectStatus.FINISHED_RANKING
+        #check if there is one choice per rank
+        if len(choices) != self.parameter_set_local["group_size"]:
+            status = "fail"
+            error_message = "Rank all choices."
 
-        self.session_events.append(SessionEvent(session_id=self.session_id, 
-                                    session_player_id=player_id,
-                                    type=event['type'],
-                                    period_number=self.world_state_local["current_period"],
-                                    time_remaining=self.world_state_local["time_remaining"],
-                                    data=event_data,))
-        
-        await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
-        self.session_events = []
+        #choices must be an array of integers
+        elif not all(isinstance(c, int) for c in choices):
+            status = "fail"
+            error_message = "Choices must be whole numbers."
 
-        #check if all players have made choices
-        if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
-            #all players have made choices, send to server
-            outcome = {}
-            groups = self.world_state_local["groups"]
-            current_period = self.world_state_local["current_period"]
+        #the minium value for a choice is 1 and the maximum is group_size
+        elif any(c < 1 or c > self.parameter_set_local["group_size"] for c in choices):
+            status = "fail"
+            error_message = "Choices must be between 1 and " + str(self.parameter_set_local["group_size"]) + "."
 
-            for i in self.world_state_local["session_players"]:
-                player = self.world_state_local["session_players"][i]
-                player["status"] = SubjectStatus.REVIEWING_RESULTS
+        #check if there are duplicate choices
+        elif len(choices) != len(set(choices)):
+            status = "fail"
+            error_message = "Choices must be unique."
 
-            period_results = {}
-            for g in groups:
-                outcome[g] = {"payments": {}}
-                group = groups[g]
-                for p in group["session_players_order"]:
-                    # player_id = self.world_state_local["session_players"][str(p)]
-                    player_choices = self.world_state_local["choices"][str(p)]
+        if status == "success":    
+            self.world_state_local["choices"][str(player_id)] = choices
+            session_player["status"] = SubjectStatus.FINISHED_RANKING
 
-                    #loop through group[values][current_period] and find the next available value according to rank
-                    outer_break = False
-                    for i in range(len(player_choices)):
-                        for c in player_choices:
-                            if c == i+1 and not group["values"][str(current_period)][i]["owner"]:
-                                group["values"][str(current_period)][i]["owner"] = p
-                                period_results[str(p)] = {}
-                                period_results[str(p)]["prize"] = group["values"][str(current_period)][i]["value"]
-                                outer_break = True
+            self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                        session_player_id=player_id,
+                                        type=event['type'],
+                                        period_number=self.world_state_local["current_period"],
+                                        time_remaining=self.world_state_local["time_remaining"],
+                                        data=event_data,))
+            
+            await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+            self.session_events = []
+
+            #check if all players have made choices
+            if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
+                #all players have made choices, send to server
+                outcome = {}
+                
+                current_period = self.world_state_local["current_period"]
+
+                for i in self.world_state_local["session_players"]:
+                    player = self.world_state_local["session_players"][i]
+                    player["status"] = SubjectStatus.REVIEWING_RESULTS
+
+                period_results = {}
+                for g in groups:
+                    outcome[g] = {"payments": {}}
+                    group = groups[g]
+                    for p in group["session_players_order"]:
+                        # player_id = self.world_state_local["session_players"][str(p)]
+                        player_choices = self.world_state_local["choices"][str(p)]
+
+                        #loop through group[values][current_period] and find the next available value according to rank
+                        outer_break = False
+                        for i in range(len(player_choices)):
+                            for c in player_choices:
+                                if c == i+1 and not group["values"][str(current_period)][i]["owner"]:
+                                    group["values"][str(current_period)][i]["owner"] = p
+                                    period_results[str(p)] = {}
+                                    period_results[str(p)]["prize"] = group["values"][str(current_period)][i]["value"]
+                                    self.world_state_local["session_players"][str(p)]["earnings"] = Decimal(group["values"][str(current_period)][i]["value"]) + \
+                                                                                                    Decimal(self.world_state_local["session_players"][str(p)]["earnings"])    
+                                    outer_break = True
+                                    break
+                            
+                            if outer_break:
                                 break
                         
-                        if outer_break:
-                            break
-                    
-                    #store period results
-                    period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
-                    period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
-                    period_results[str(p)]["period_number"] = current_period
-                    
-                    period_results[str(p)]["values"] = []
-                    for i in range(len(player_choices)):
-                        period_results[str(p)]["values"].append({
-                            "value": group["values"][str(current_period)][i]["value"],
-                            "rank": player_choices[i],
-                        })
+                        #store period results
+                        period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
+                        period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
+                        period_results[str(p)]["period_number"] = current_period
+                        
+                        period_results[str(p)]["values"] = []
+                        for i in range(len(player_choices)):
+                            period_results[str(p)]["values"].append({
+                                "value": group["values"][str(current_period)][i]["value"],
+                                "rank": player_choices[i],
+                            })
 
-                    session_player = await SessionPlayer.objects.aget(id=p)
-                    session_player.period_results.append(period_results[str(p)])
-                    await session_player.asave()
+                        session_player = await SessionPlayer.objects.aget(id=p)
+                        session_player.period_results.append(period_results[str(p)])
+                        await session_player.asave()
 
-            result = {"period_results": period_results,}
+                result = {"period_results": period_results,
+                          "session_players": self.world_state_local["session_players"],}
 
-            await self.send_message(message_to_self=None, message_to_group=result,
-                                    message_type="result", send_to_client=False, send_to_group=True)
+                await self.send_message(message_to_self=None, message_to_group=result,
+                                        message_type="result", send_to_client=False, send_to_group=True)
+            else:
+                 # there was an error with the choices
+                result = {"status": status, 
+                          "error_message": error_message,
+                          "player_status":session_player["status"]}
+                await self.send_message(message_to_self=None, message_to_group=result,
+                                        message_type=event['type'], send_to_client=False, 
+                                        send_to_group=True, target_list=[player_id])
+            
+            await self.store_world_state(force_store=True)
         else:
-            #not all players have made choices, update subject screen
-            # await self.send_message(message_to_self={"choices": self.world_state_local["choices"]},
-            #                         message_to_group=None, message_type="choices", send_to_client=True, send_to_group=False)
-            pass
+            # there was an error with the choices
+            result = {"status": status, "error_message": error_message}
+            await self.send_message(message_to_self=None, message_to_group=result,
+                                    message_type=event['type'], send_to_client=False, 
+                                    send_to_group=True, target_list=[player_id])
+            
 
-        await self.store_world_state(force_store=True)
-    
+    async def update_choices(self, event):
+        '''
+        update choices from subject
+        '''
+        pass
+
     async def update_result(self, event):
         '''
         send the result of the period choices to the subject screens

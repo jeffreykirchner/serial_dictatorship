@@ -1,7 +1,7 @@
 <div class="card" v-show="first_load_done">                  
     <div class="card-header fw-bold">                
         <span class="align-middle">
-            Rank the Prizes
+            Rank the prizes for period [[ session.world_state.current_period ]]:
         </span>       
 
         <span class="float-end"> 
@@ -49,7 +49,7 @@
                                 <input type="number" 
                                        class="form-control form-control-lg text-center fw-bold" 
                                        v-model="choices[index]" 
-                                       v-bind:disabled="waiting_for_others"
+                                       v-bind:disabled="session.world_state.session_players[session_player.id].status != 'Ranking'"
                                        min="1" 
                                        v-bind:max="get_current_choices().length"
                                        :placeholder="'1 - ' + get_current_choices().length" />
@@ -82,8 +82,9 @@
                 <button type="button" 
                         title = "Submit your choices"
                         v-bind:class="tick_tock=='tick' ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'" 
+                        v-bind:disabled="reconnecting || working"
                         v-on:click="submit_choices()">
-                    Submit Choices
+                    Submit Your Choices
                 </button>
             </div>
             <div v-if="session.world_state.session_players[session_player.id].status == 'Finished_Ranking' ||

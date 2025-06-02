@@ -409,6 +409,7 @@ let app = Vue.createApp({
         {%include "staff/staff_session/summary/summary_card.js"%}
         {%include "staff/staff_session/data/data_card.js"%}
         {%include "staff/staff_session/interface/interface_card.js"%}
+        {%include "subject/subject_home/helpers.js"%}
 
         {%include "js/help_doc.js"%}
     
