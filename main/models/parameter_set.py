@@ -14,6 +14,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from main.models import InstructionSet
 
 from main.globals import ExperimentMode
+from main.globals import ChatGPTMode
 
 import main
 
@@ -27,6 +28,7 @@ class ParameterSet(models.Model):
     possible_values = models.CharField(max_length=1000, default='0.00,0.25,0.50,0.75,1.00,1.25', verbose_name='Possible Values', blank=True, null=True) #possible values for the game
     experiment_mode = models.CharField(max_length=20, choices=ExperimentMode.choices, default=ExperimentMode.SIMULTANEOUS, verbose_name='Experiment Mode') #experiment mode, simultaneous or sequential
     max_priority_score = models.IntegerField(verbose_name='Max Priority Score', default=10)
+    chat_gpt_mode = models.CharField(max_length=20, choices=ChatGPTMode.choices, default=ChatGPTMode.OFF, verbose_name='ChatGPT Mode')
 
     show_instructions = models.BooleanField(default=True, verbose_name='Show Instructions')                   #if true show instructions
 
@@ -68,6 +70,7 @@ class ParameterSet(models.Model):
             self.possible_values = new_ps.get("possible_values", "0.00,0.25,0.50,0.75,1.00,1.25")
             self.experiment_mode = new_ps.get("experiment_mode", ExperimentMode.SIMULTANEOUS)
             self.max_priority_score = new_ps.get("max_priority_score", 1)
+            self.chat_gpt_mode = new_ps.get("chat_gpt_mode", ChatGPTMode.OFF)
 
             self.show_instructions = True if new_ps.get("show_instructions") else False
 
@@ -202,6 +205,7 @@ class ParameterSet(models.Model):
         self.json_for_session["possible_values"] = self.possible_values
         self.json_for_session["experiment_mode"] = self.experiment_mode
         self.json_for_session["max_priority_score"] = self.max_priority_score
+        self.json_for_session["chat_gpt_mode"] = self.chat_gpt_mode
 
         self.json_for_session["show_instructions"] = 1 if self.show_instructions else 0
 

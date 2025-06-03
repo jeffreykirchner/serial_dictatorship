@@ -7,6 +7,7 @@ from django import forms
 from main.models import ParameterSet
 
 from main.globals import ExperimentMode
+from main.globals import ChatGPTMode
 
 import  main
 
@@ -47,6 +48,11 @@ class ParameterSetForm(forms.ModelForm):
                                       widget=forms.NumberInput(attrs={"v-model":"parameter_set.max_priority_score",
                                                                       "step":"1",
                                                                       "min":"1"}))
+    
+    chat_gpt_mode = forms.ChoiceField(label='ChatGPT Mode',
+                                      choices=ChatGPTMode.choices,
+                                      widget=forms.Select(attrs={"v-model":"parameter_set.chat_gpt_mode",}))
+
 
     show_instructions = forms.ChoiceField(label='Show Instructions',
                                           choices=((1, 'Yes'), (0,'No' )),
@@ -83,7 +89,7 @@ class ParameterSetForm(forms.ModelForm):
     class Meta:
         model=ParameterSet
         fields =['period_count', 'period_length', 'group_size', 'possible_values', 'experiment_mode','max_priority_score',
-                 'show_instructions', 
+                 'chat_gpt_mode', 'show_instructions', 
                  'survey_required', 'survey_link', 'prolific_mode', 'prolific_completion_link', 'reconnection_limit',
                  'test_mode', ]
 
