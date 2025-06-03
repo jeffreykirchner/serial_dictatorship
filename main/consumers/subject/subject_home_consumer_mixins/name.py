@@ -49,12 +49,15 @@ class NameMixin():
 
                 # await sync_to_async(session_player.save, thread_sensitive=self.thread_sensitive)()    
                 await session_player.asave()
+
+                survey_link = await sync_to_async(session_player.get_survey_link, thread_sensitive=self.thread_sensitive)()
                 
                 result = {"value" : "success",
                             "result" : {"id" : self.session_player_id,
                                         "name" : session_player.name, 
                                         "name_submitted" : session_player.name_submitted,
-                                        "student_id" : session_player.student_id}}                      
+                                        "student_id" : session_player.student_id,
+                                        "survey_link" : survey_link},}                      
             else:                            
                 logger.warning("Invalid name form")
 

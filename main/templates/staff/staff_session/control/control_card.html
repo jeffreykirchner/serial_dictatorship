@@ -38,7 +38,7 @@
         </div>
 
         <!-- start timer -->
-        <div class="row" v-if="session.started  && session.world_state.current_experiment_phase=='Run' && !session.world_state.finished">
+        <!-- <div class="row" v-if="session.started  && session.world_state.current_experiment_phase=='Run' && !session.world_state.finished">
             <div class="col-md text-center">
                 <button type="button"                        
                         v-on:click = "start_timer()"
@@ -49,7 +49,7 @@
                     <span v-else>Start Timer <i class="far fa-clock"></i></span>
                 </button>
             </div>
-        </div>
+        </div> -->
 
         <!-- next experiment phase -->
         <div class="row mt-2" v-show="(session.started && session.world_state.current_experiment_phase!='Run') || (session.world_state.finished)">

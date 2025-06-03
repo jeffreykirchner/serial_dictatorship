@@ -150,6 +150,9 @@ let app = Vue.createApp({
                 case "update_choices":
                     app.take_choices(message_data);
                     break;
+                case "update_show_name_input":
+                    app.take_show_name_input(message_data);
+                    break;
             }
 
             app.first_load_done = true;
@@ -208,11 +211,14 @@ let app = Vue.createApp({
             }
 
             //load current ranks
-            if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking')
+            if(app.session.started)
             {
-                if(app.session_player.id in app.session.world_state.choices)
+                if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking')
                 {
-                    app.choices = app.session.world_state.choices[app.session_player.id];
+                    if(app.session_player.id in app.session.world_state.choices)
+                    {
+                        app.choices = app.session.world_state.choices[app.session_player.id];
+                    }
                 }
             }
 
@@ -347,7 +353,6 @@ let app = Vue.createApp({
         show_end_game_modal: function show_end_game_modal(){
             if(app.end_game_modal_visible) return;
    
-            app.interaction_modal.hide();
             app.help_modal.hide();
 
             app.end_game_modal.toggle();

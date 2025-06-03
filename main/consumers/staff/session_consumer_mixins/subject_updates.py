@@ -291,23 +291,34 @@ class SubjectUpdatesMixin():
                 break
 
         if all_ready:
-            # all subjects are ready, go to next period
-            self.world_state_local["current_period"] += 1
-            self.world_state_local["time_remaining"] = self.parameter_set_local["period_length"]
+            if self.world_state_local["current_period"] >= self.parameter_set_local["period_count"]:
+                # all periods are complete
+                self.world_state_local["current_experiment_phase"] = ExperimentPhase.NAMES
 
-            # reset choices and set session players status to 'Ranking'
-            for i in self.world_state_local["session_players"]:
-                self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
-  
-            self.world_state_local["choices"] = {}
-            
-            result = {
-                "current_period": self.world_state_local["current_period"],                
-            }
+                result = {
+                    "current_experiment_phase": self.world_state_local["current_experiment_phase"],
+                    }
+                # send message to subject screens to go to next period
+                await self.send_message(message_to_self=None, message_to_group=result,
+                                        message_type="show_name_input", send_to_client=False, send_to_group=True)
+            else:
+                # all subjects are ready, go to next period
+                self.world_state_local["current_period"] += 1
+                self.world_state_local["time_remaining"] = self.parameter_set_local["period_length"]
 
-            # send message to subject screens to go to next period
-            await self.send_message(message_to_self=None, message_to_group=result,
-                                    message_type="start_next_period", send_to_client=False, send_to_group=True)
+                # reset choices and set session players status to 'Ranking'
+                for i in self.world_state_local["session_players"]:
+                    self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
+    
+                self.world_state_local["choices"] = {}
+                
+                result = {
+                    "current_period": self.world_state_local["current_period"],                
+                }
+
+                # send message to subject screens to go to next period
+                await self.send_message(message_to_self=None, message_to_group=result,
+                                        message_type="start_next_period", send_to_client=False, send_to_group=True)
 
         await self.store_world_state(force_store=True)
     
@@ -315,7 +326,16 @@ class SubjectUpdatesMixin():
         '''
         send start next period to subject screens
         '''
-        event_data = event["group_data"]
+        event_data = json.loads(event["group_data"])
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+    
+    async def update_show_name_input(self, event):
+        '''
+        send show name input to subject screens
+        '''
+        event_data = json.loads(event["group_data"])
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)

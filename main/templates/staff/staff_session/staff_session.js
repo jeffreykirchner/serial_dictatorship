@@ -129,14 +129,6 @@ let app = Vue.createApp({
                 case "update_chat":
                     app.take_update_chat(message_data);
                     break;
-                case "update_time":
-                    app.take_update_time(message_data);
-                    break;
-                case "start_timer":
-                    app.take_start_timer(message_data);
-                    break;   
-                case "stop_timer_pulse":
-                    app.take_stop_timer_pulse(message_data);
                 case "update_connection_status":
                     app.take_update_connection_status(message_data);
                     break;   
@@ -217,6 +209,9 @@ let app = Vue.createApp({
                     break;
                 case "lock_session":
                     app.take_lock_session(message_data);
+                    break;
+                case "update_show_name_input":
+                    app.take_show_name_input(message_data);
                     break;
             }
             app.working = false;
@@ -320,7 +315,6 @@ let app = Vue.createApp({
             app.update_phase_button_text();
             let v = {};
             v.timer_running = app.session.world_state.timer_running;
-            app.take_start_timer(v); 
         },
 
         /**update text of move on button based on current state

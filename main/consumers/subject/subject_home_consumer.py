@@ -18,7 +18,6 @@ class SubjectHomeConsumer(SocketConsumerMixin,
                           NameMixin,
                           InstructionsMixin,
                           PhaseMixin,
-                          TimeMixin,
                           GetHelpDocSubjectMixin,
                           InterfaceMixin):
     '''

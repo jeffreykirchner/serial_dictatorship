@@ -17,6 +17,7 @@ take_name: function take_name(message_data){
         app.session_player.name = message_data.result.name; 
         app.session_player.student_id = message_data.result.student_id;           
         app.session_player.name_submitted = message_data.result.name_submitted;       
+        app.session_player.survey_link = message_data.result.survey_link;
     } 
     else
     {
@@ -39,4 +40,12 @@ post_session_link: function post_session_link(){
         location.href = app.session.parameter_set.prolific_completion_link;
     }
 
+},
+
+/**
+ * the expermient is over, show name input
+ */
+take_show_name_input: function take_show_name_input(message_data){
+    app.session.world_state.current_experiment_phase = message_data.current_experiment_phase;
+    app.show_end_game_modal();
 },
