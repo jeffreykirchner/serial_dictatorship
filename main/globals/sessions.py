@@ -44,5 +44,5 @@ class ChatGPTMode(models.TextChoices):
     chat gpt modes
     '''
     OFF = 'Off', _('Off')
-    WITH_CONTEXT = 'With_Context', _('With_Context')
-    WITHOUT_CONTEXT = 'Without_Context', _('Without_Context')
+    WITH_CONTEXT = 'With Context', _('With Context')
+    WITHOUT_CONTEXT = 'Without Context', _('Without Context')

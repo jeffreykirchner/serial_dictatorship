@@ -1,11 +1,14 @@
 
 import os
 import base64
+
 from openai import AzureOpenAI
+
+from django.conf import settings
 
 endpoint = os.getenv("ENDPOINT_URL", "https://esi-open-ai.openai.azure.com/")
 deployment = os.getenv("DEPLOYMENT_NAME", "gpt-4.1")
-subscription_key = os.getenv("AZURE_OPENAI_API_KEY", "REPLACE_WITH_YOUR_KEY_VALUE_HERE")
+subscription_key = os.getenv("AZURE_OPENAI_API_KEY", settings.AZURE_OPENAI_API_KEY)
 
 # Initialize Azure OpenAI client with key-based authentication
 client = AzureOpenAI(
@@ -14,37 +17,26 @@ client = AzureOpenAI(
     api_version="2025-01-01-preview",
 )
 
-# IMAGE_PATH = "YOUR_IMAGE_PATH"
-# encoded_image = base64.b64encode(open(IMAGE_PATH, 'rb').read()).decode('ascii')
+async def chat_gpt_generate_completion(messages):
+    """
+    Asynchronously generate a completion using the Azure OpenAI client.
+    
+    :param messages: List of messages to send to the model.
+    :return: The generated completion response.
+    """
 
-#Prepare the chat prompt
-chat_prompt = [
-    {
-        "role": "system",
-        "content": [
-            {
-                "type": "text",
-                "text": "You are an AI assistant that helps people find information."
-            }
-        ]
-    }
-]
+    response = await client.chat.completions.create(
+        model=deployment,
+        messages=messages,
+        max_tokens=800,
+        temperature=1,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=None,
+        stream=False
+    )
 
-# Include speech result if speech is enabled
-messages = chat_prompt
+    return response.to_json()
 
-# Generate the completion
-completion = client.chat.completions.create(
-    model=deployment,
-    messages=messages,
-    max_tokens=800,
-    temperature=1,
-    top_p=1,
-    frequency_penalty=0,
-    presence_penalty=0,
-    stop=None,
-    stream=False
-)
-
-print(completion.to_json())
     

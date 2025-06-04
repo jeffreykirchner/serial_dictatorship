@@ -54,6 +54,10 @@ let app = Vue.createApp({
                     //tick tock
                     tick_tock : "tick",
                     tick_tock_interval : 300,
+
+                    //chat gpt
+                    chat_text : "",
+                    chat_history : {{session_player.get_chat_display_history|safe}},
                 }},
     methods: {
 
@@ -429,6 +433,7 @@ let app = Vue.createApp({
         {%include "subject/subject_home/choices/choices.js"%}
         {%include "subject/subject_home/helpers.js"%}
         {%include "subject/subject_home/results/results.js"%}
+        {%include "subject/subject_home/chat_gpt/chat_gpt.js"%}
 
 
         /** clear form error messages

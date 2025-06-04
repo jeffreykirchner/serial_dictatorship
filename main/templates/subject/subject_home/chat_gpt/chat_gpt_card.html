@@ -1,0 +1,70 @@
+<div class="card" v-show="first_load_done" id="chat_gpt_card">                  
+    <div class="card-header fw-bold" id="chat_gpt_card">                
+        <span class="align-middle">
+           Chat Bot
+        </span>       
+
+        <span class="float-end"> 
+        
+            <button type="button" 
+                    class="btn btn-link ms-2" 
+                    title="Show Help Doc" 
+                    v-on:click="send_load_help_doc_subject('subject_chat_gpt')">
+                <i class="far fa-question-circle"></i> 
+            </button>
+        </span>          
+    </div>
+    <div class="card-body" >        
+        <div class = "row justify-content-cente">
+            <div class="col-md">
+               
+                <div class="d-flex chat">    
+                    <div v-for="c in chat_history" 
+                        :key="c"
+                        :set="psp=get_parameter_set_player_from_player_id(c.session_player)">
+                        <div v-if="c.type=='cents'" class="text-center fst-italic">
+                        <span v-html="c.message"></span>
+                        </div>
+                        <div v-else-if="c.session_player==session_player.id" class="text-end">
+                            [[c.message]]
+                        </div>
+                        <div v-else>
+                            (<span :style="'color : ' + psp.hex_color">[[psp.id_label]]</span>) [[c.message]]
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                
+                <div class="input-group">
+                    <input type="text" 
+                        class="form-control form-control" 
+                        placeholder="Chat Text" 
+                        v-model="chat_text"
+                        id="id_chat_text"
+                        aria-label="Chat Text"                           
+                        v-on:keyup.enter="send_chat_gpt_prompt()"
+                        maxlength="100"
+                        aria-describedby="send_chat_id">
+                    <button class="btn btn-outline-primary"
+                            type="button" 
+                            id="send_chat_id" 
+                            title="Send your chat message."
+                            v-bind:disabled="reconnecting || working || session.started===false || session.world_state.finished"
+                            v-on:click="send_chat_gpt_prompt()">Chat <i class="far fa-comments"></i></button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-end pe-4 text-secondary">
+                [[chat_text.length]]/100
+            </div>
+        </div>
+        
+    </div>                    
+</div> 

@@ -1,6 +1,10 @@
 
 import json
+
 from main.decorators import check_message_for_me
+from main.globals import chat_gpt_generate_completion
+
+from main.models import SessionPlayer
 
 class InterfaceMixin():
     '''
@@ -59,5 +63,35 @@ class InterfaceMixin():
         await self.send_message(message_to_self=event_data, message_to_subjects=None, message_to_staff=None, 
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
 
+    async def process_chat_gpt_prompt(self, event):
+        '''
+        process the chat gpt prompt
+        '''
+        logger = self.logger.getChild("process_chat_gpt_prompt")
+
+        event_data = event["message_text"]
+        status = "success"
+        error_message = ""
+
+        session_player = await SessionPlayer.objects.aget(id=self.session_player_id)
+
+        messages = session_player.chatgpt_prompt.copy()
+        messages.append({
+            "role": "user",
+            "content": [
+                {
+                    "type": "text",
+                    "text": event_data["prompt"]
+                }
+            ]
+        })
+        
+        response = await chat_gpt_generate_completion(messages)
+
+        logger.info(f"ChatGPT response: {response}")
+
+        # Send the response back to the client
+        await self.send_message(message_to_self=response, message_to_subjects=None, message_to_staff=None, 
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
 
         

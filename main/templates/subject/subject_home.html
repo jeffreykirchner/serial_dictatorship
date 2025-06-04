@@ -21,6 +21,15 @@
         height: 500px;
         overflow-y:scroll;
     }
+
+    .chat{
+        height: 360px;
+        overflow-y:scroll;
+        flex-direction:column-reverse;
+        word-breaK:break-word;
+        margin: 10px;
+        font-size: large;
+    }
        
 </style>
 
@@ -52,6 +61,16 @@
         </div>
         <div class="col-md-6">
             {%include "subject/subject_home/results/results_card.html"%}
+        </div>
+    </div>
+
+    <!-- chat gpt card -->
+    <div class="row justify-content-lg-center mt-4" v-cloak 
+         v-if="session.started && 
+               session.world_state.current_experiment_phase != 'Done' && 
+               session.parameter_set.chat_gpt_mode != 'Off'">
+        <div class="col-md-10">
+            {%include "subject/subject_home/chat_gpt/chat_gpt_card.html"%}
         </div>
     </div>
 

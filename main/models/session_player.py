@@ -45,6 +45,7 @@ class SessionPlayer(models.Model):
     survey_complete = models.BooleanField(default=False, verbose_name="Survey Complete")                 #subject has completed the survey  
 
     period_results = models.JSONField(encoder=DjangoJSONEncoder, null=True, blank=True, verbose_name="Period Results")  #results of the periods for this subject
+    chat_gpt_prompt = models.JSONField(encoder=DjangoJSONEncoder, null=True, blank=True, verbose_name="Chat GPT Prompt")  #chat prompt for this subject, used for AI chat
 
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -78,6 +79,17 @@ class SessionPlayer(models.Model):
         self.instructions_finished = False
 
         self.period_results = []
+        self.chat_gpt_prompt = [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "You are an AI assistant that helps people find information."
+                    }
+                ]
+            }
+        ]
 
         self.save()
     
@@ -136,6 +148,29 @@ class SessionPlayer(models.Model):
         text = text.replace("#player_count-1#", str(len(parameter_set["parameter_set_players"])-1))
 
         return text
+    
+    def get_chat_display_history(self):
+        '''
+        return chat gpt history for display
+        '''
+
+        chat_history = []
+
+        for i in self.chat_gpt_prompt:
+            if i["role"] == "system":
+                continue
+            
+            message = {
+                "role": i["role"],
+                "content": ""
+            }
+
+            for j in i["content"]:
+                message["content"] += j["text"]
+
+            chat_history.append(message)
+
+        return chat_history
     
     def get_survey_link(self):
         '''

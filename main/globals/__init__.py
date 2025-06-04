@@ -13,3 +13,5 @@ from .sessions import SubjectStatus
 from .sessions import ChatGPTMode
 
 from .validate_input import is_positive_integer
+
+from .open_ai import chat_gpt_generate_completion

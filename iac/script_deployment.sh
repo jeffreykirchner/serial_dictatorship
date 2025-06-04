@@ -26,6 +26,11 @@ az webapp config set \
     --name $webapp_name \
     --startup-file startup.sh
 
+az webapp config set \
+    --resource-group $resource_group \
+    --name $webapp_name \
+    --http20-enabled true 
+
 az webapp config storage-account add \
   --resource-group $resource_group \
   --name $webapp_name \
