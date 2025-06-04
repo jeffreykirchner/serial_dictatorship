@@ -17,15 +17,15 @@ client = AzureOpenAI(
     api_version="2025-01-01-preview",
 )
 
-async def chat_gpt_generate_completion(messages):
+def chat_gpt_generate_completion(messages):
     """
-    Asynchronously generate a completion using the Azure OpenAI client.
+    generate a completion using the Azure OpenAI client.
     
     :param messages: List of messages to send to the model.
     :return: The generated completion response.
     """
 
-    response = await client.chat.completions.create(
+    response = client.chat.completions.create(
         model=deployment,
         messages=messages,
         max_tokens=800,

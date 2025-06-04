@@ -58,6 +58,7 @@ let app = Vue.createApp({
                     //chat gpt
                     chat_text : "",
                     chat_history : {{session_player.get_chat_display_history|safe}},
+                    chat_button_text : 'Chat <i class="far fa-comments"></i>',
                 }},
     methods: {
 
@@ -156,6 +157,9 @@ let app = Vue.createApp({
                     break;
                 case "update_show_name_input":
                     app.take_show_name_input(message_data);
+                    break;
+                case "process_chat_gpt_prompt":
+                    app.take_process_chat_gpt_prompt(message_data);
                     break;
             }
 

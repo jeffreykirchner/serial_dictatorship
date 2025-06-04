@@ -1,6 +1,8 @@
 
 import json
+import logging
 
+from asgiref.sync import sync_to_async
 from main.decorators import check_message_for_me
 from main.globals import chat_gpt_generate_completion
 
@@ -67,7 +69,7 @@ class InterfaceMixin():
         '''
         process the chat gpt prompt
         '''
-        logger = self.logger.getChild("process_chat_gpt_prompt")
+        logger = logging.getLogger(__name__) 
 
         event_data = event["message_text"]
         status = "success"
@@ -75,23 +77,30 @@ class InterfaceMixin():
 
         session_player = await SessionPlayer.objects.aget(id=self.session_player_id)
 
-        messages = session_player.chatgpt_prompt.copy()
-        messages.append({
+        session_player.chat_gpt_prompt.append({
             "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": event_data["prompt"]
-                }
-            ]
+            "content":event_data["prompt"],
         })
-        
-        response = await chat_gpt_generate_completion(messages)
 
+        response = await sync_to_async(chat_gpt_generate_completion, thread_sensitive=self.thread_sensitive)(session_player.chat_gpt_prompt)
+        response = json.loads(response)
         logger.info(f"ChatGPT response: {response}")
+        
+        session_player.chat_gpt_prompt.append({
+            "role": "assistant",
+            "content": response['choices'][0]['message']['content']
+        })
+
+        # Save the updated chat_gpt_prompt to the session_player
+        await session_player.asave()
+
+        result = {
+            "status": "success",            
+            "response": {"role":"assistant", "content": response['choices'][0]['message']['content']},
+        }
 
         # Send the response back to the client
-        await self.send_message(message_to_self=response, message_to_subjects=None, message_to_staff=None, 
+        await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=None, 
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
 
         

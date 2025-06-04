@@ -85,7 +85,11 @@ class SessionPlayer(models.Model):
                 "content": [
                     {
                         "type": "text",
-                        "text": "You are an AI assistant that helps people find information."
+                        "text": "You are a helpful AI assistant that answers questions concisely."
+                    },
+                    {
+                        "type": "text",
+                        "text": "Reply with html formating."
                     }
                 ]
             }
@@ -157,18 +161,13 @@ class SessionPlayer(models.Model):
         chat_history = []
 
         for i in self.chat_gpt_prompt:
+            
             if i["role"] == "system":
                 continue
-            
-            message = {
-                "role": i["role"],
-                "content": ""
-            }
 
-            for j in i["content"]:
-                message["content"] += j["text"]
+            #add i to front of list 
+            chat_history.insert(0, i)
 
-            chat_history.append(message)
 
         return chat_history
     
