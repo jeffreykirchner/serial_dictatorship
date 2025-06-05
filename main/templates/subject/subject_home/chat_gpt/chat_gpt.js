@@ -33,5 +33,33 @@ take_process_chat_gpt_prompt : function take_chat_gpt_response(message_data) {
     }
 },
 
+/**
+ * clear chat gpt history
+ */
+send_clear_chat_gpt_history: function send_clear_chat_gpt_history() {
+    if(app.working) {
+        return;
+    }
+
+    app.clear_chat_gpt_history_modal.hide();
+    app.working = true;
+    app.send_message("clear_chat_gpt_history", 
+                     {},
+                      "self");
+},
+
+/**
+ * take clear chat gpt history
+ */
+take_clear_chat_gpt_history: function take_clear_chat_gpt_history(message_data) {
+    app.working = false;
+    
+    if (message_data.status == "success") {
+        app.chat_history = message_data.chat_history;
+    } else {
+       
+    }
+},
+
 
     

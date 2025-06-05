@@ -49,6 +49,8 @@ let app = Vue.createApp({
                     // modals
                     end_game_modal : null,
                     help_modal : null,
+                    clear_chat_gpt_history_modal : null,
+
                     test_mode : {%if session.parameter_set.test_mode%}true{%else%}false{%endif%},        
                     
                     //tick tock
@@ -161,6 +163,9 @@ let app = Vue.createApp({
                 case "process_chat_gpt_prompt":
                     app.take_process_chat_gpt_prompt(message_data);
                     break;
+                case "clear_chat_gpt_history":
+                    app.take_clear_chat_gpt_history(message_data);
+                    break;
             }
 
             app.first_load_done = true;
@@ -186,8 +191,8 @@ let app = Vue.createApp({
         do_first_load: function do_first_load()
         {           
             app.end_game_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('end_game_modal'), {keyboard: false})   
-           
             app.help_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('help_modal'), {keyboard: false})
+            app.clear_chat_gpt_history_modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('clear_chat_gpt_history_modal'), {keyboard: false})
             
             document.getElementById('end_game_modal').addEventListener('hidden.bs.modal', app.hide_end_game_modal);
 

@@ -78,7 +78,16 @@ class SessionPlayer(models.Model):
         self.current_instruction_complete = 0
         self.instructions_finished = False
 
-        self.period_results = []
+        self.period_results = []        
+
+        self.save()
+        self.setup_chat_gpt_prompt()
+    
+    def setup_chat_gpt_prompt(self):
+        '''
+        setup the chat gpt prompt for the subject
+        '''
+
         self.chat_gpt_prompt = [
             {
                 "role": "system",

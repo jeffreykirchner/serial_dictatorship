@@ -1,0 +1,27 @@
+{% load crispy_forms_tags %}
+<!--Edit notice Modal -->
+<div class="modal fade"
+     id="clear_chat_gpt_history_modal"
+     data-bs-backdrop="static"
+     data-bs-keyboard="false"
+     tabindex="-1"
+     aria-labelledby="clear_chat_gpt_history_modal"
+     aria-hidden="true">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <!-- yes button-->
+                <div class="row justify-content-center">
+                    <div class="text-center fs-5">
+                        Are you sure you want to clear the chat history?<br>This action cannot be undone.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-danger" v-on:click="send_clear_chat_gpt_history()">Yes, clear history</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

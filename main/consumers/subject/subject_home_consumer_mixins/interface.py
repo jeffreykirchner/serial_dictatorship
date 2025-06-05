@@ -102,5 +102,21 @@ class InterfaceMixin():
         # Send the response back to the client
         await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=None, 
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
+    
+    async def clear_chat_gpt_history(self, event):
+        '''
+        clear the chat gpt history
+        '''
+        session_player = await SessionPlayer.objects.aget(id=self.session_player_id)
+        await sync_to_async(session_player.setup_chat_gpt_prompt, thread_sensitive=self.thread_sensitive)()
+       
+        result = {
+            "status": "success",
+            "chat_history" : await sync_to_async(session_player.get_chat_display_history)(),
+        }
+
+        # Send the response back to the client
+        await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=None, 
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
 
         
