@@ -182,7 +182,7 @@ class SubjectUpdatesMixin():
                 for g in groups:
                     outcome[g] = {"payments": {}}
                     group = groups[g]
-                    for p in group["session_players_order"]:
+                    for p in group["player_order"][str(current_period)]:
                         # player_id = self.world_state_local["session_players"][str(p)]
                         player_choices = self.world_state_local["choices"][str(p)]
 
