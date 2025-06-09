@@ -183,15 +183,15 @@ class Session(models.Model):
                             }
         
         inventory = {str(i):0 for i in list(self.session_periods.all().values_list('id', flat=True))}
-        groups = {i:{"session_players":{}, "session_players_order":[], "values":{}, "priority_scores":{}, "player_order":{},"index_map":{}} for i in parameter_set["parameter_set_groups"]}
+        groups = {i:{"session_players":{}, "session_players_order":[], "values":{}, "priority_scores":{}, "player_order":{},"index_map":{},"active_player_group_index":0} for i in parameter_set["parameter_set_groups"]}
 
         #session periods
         for i in self.world_state["session_periods"]:
             self.world_state["session_periods"][i]["consumption_completed"] = False
         
         #session players
-        for i in self.session_players.prefetch_related('parameter_set_player').all().values('id',                                                                 
-                                                                                            'parameter_set_player__id' ):
+        for i in self.session_players.prefetch_related('parameter_set_player').all().values('id',
+                                                                                            'parameter_set_player__id'):
             v = {}
             v['earnings'] = 0
             v['status'] = SubjectStatus.RANKING
@@ -220,20 +220,16 @@ class Session(models.Model):
             #trim values
             group["values"][str(period_number)] = [{"value":v.strip(),"owner":None } for v in group["values"][str(period_number)]]
             
-            # #priority scores
+            #priority scores
             group["priority_scores"][str(period_number)] = parameter_set_group_period["priority_scores"].split(",")
-            # priority_scores = [v.strip() for v in priority_scores if v.strip().isdigit()]
 
-            # #player order
+            #player order
             group["player_order"][str(period_number)] = parameter_set_group_period["player_order"].split(",")
             
             #map player order to session player id
             for j in range(len(group["player_order"][str(period_number)])):
                 group["player_order"][str(period_number)][j] = groups[str(parameter_set_group_id)]["index_map"][str(group["player_order"][str(period_number)][j])]
-
-            # group["priority_scores"] = priority_scores
-            # group["player_order"] = player_order
-            
+  
             for j in range(len(group["player_order"][str(period_number)])): 
                 session_player_id = group["player_order"][str(period_number)][j]   
                 parameter_set_player_id = self.world_state["session_players"][str(session_player_id)]["parameter_set_player_id"]

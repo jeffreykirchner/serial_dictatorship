@@ -42,7 +42,8 @@ let app = Vue.createApp({
 
                     notices_seen: [],
 
-                    choices : [],
+                    choices : [], //choices for simultaneous choices
+                    choice: null, //choice for sequential choices
                     choices_error_message : null,
                     // waiting_for_others : false, //true if waiting for other players to make choices
 
@@ -154,8 +155,11 @@ let app = Vue.createApp({
                 case "update_start_next_period":
                     app.take_start_next_period(message_data);
                     break;
-                case "update_choices":
-                    app.take_choices(message_data);
+                case "update_choices_simultaneous":
+                    app.take_choices_simultaneous(message_data);
+                    break;
+                case "update_choices_sequential":
+                    app.take_choices_sequential(message_data);
                     break;
                 case "update_show_name_input":
                     app.take_show_name_input(message_data);

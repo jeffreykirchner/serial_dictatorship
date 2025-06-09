@@ -1,7 +1,9 @@
 get_current_parameter_set_group_period : function get_current_parameter_set_group_period() {
     let parameter_set = app.session.world_state.parameter_set;
     let current_period = app.session.world_state.current_period;
-    
+    let parameter_set_group_id = parameter_set.parameter_set_group_periods_order[current_period-1];
+
+    return app.session.world_state.parameter_set_groups[parameter_set_group_id];  
 },
 
 /**

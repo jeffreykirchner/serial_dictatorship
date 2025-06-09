@@ -109,8 +109,8 @@ class SubjectUpdatesMixin():
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
-    
-    async def choices(self, event):
+
+    async def choices_simultaneous(self, event):
         '''
         take choices from subject
         '''
@@ -241,9 +241,107 @@ class SubjectUpdatesMixin():
                                     send_to_group=True, target_list=[player_id])
             
 
-    async def update_choices(self, event):
+    async def update_choices_simultaneous(self, event):
         '''
         update choices from subject
+        '''
+        pass
+
+    async def choices_sequential(self, event):
+        '''
+        take choice from subject
+        '''
+        if self.controlling_channel != self.channel_name:
+            return
+        
+        logger = logging.getLogger(__name__)
+        
+        event_data = event["message_text"]
+        status = "success"
+        error_message = ""
+
+        try:
+            choice = event_data["choice"]
+        except KeyError:
+            logger.warning(f"choice: invalid choice, {event['message_text']}")
+            return
+        
+        player_id = self.session_players_local[event["player_key"]]["id"]
+        session_player = self.world_state_local["session_players"][str(player_id)]
+        parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
+        group = self.world_state_local["groups"][str(parameter_set_player["parameter_set_group"])]
+        current_period = self.world_state_local["current_period"]
+
+        #check if choice is an integer
+        if not isinstance(choice, int):
+            status = "fail"
+            error_message = "Choice must be a whole number."
+        #the minium value for a choice is 0 and the maximum is group_size-1
+        elif choice < 0 or choice >= self.parameter_set_local["group_size"]:
+            status = "fail"
+            error_message = f"Choice must be between 0 and {self.parameter_set_local['group_size'] - 1}."
+        #check if is this player's turn
+        elif group["player_order"][str(current_period)][group["active_player_group_index"]] != str(player_id):
+            status = "fail"
+            error_message = "It is not your turn to choose."
+        #check if player has already made a choice
+        elif str(player_id) in self.world_state_local["choices"]:
+            status = "fail"
+            error_message = "You have already made a choice."
+
+        if status == "success":
+            self.world_state_local["choices"][str(player_id)] = choice
+            session_player["status"] = SubjectStatus.FINISHED_RANKING
+            group["values"][str(current_period)][choice]["owner"] = player_id
+            
+            self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                        session_player_id=player_id,
+                                        type=event['type'],
+                                        period_number=self.world_state_local["current_period"],
+                                        time_remaining=self.world_state_local["time_remaining"],
+                                        data=event_data,))
+            
+            await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+            self.session_events = []
+
+            #check if all players have made choices
+            if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
+                #all players have made choices, send to server
+                outcome = {}
+                
+                for i in self.world_state_local["session_players"]:
+                    player = self.world_state_local["session_players"][i]
+                    player["status"] = SubjectStatus.REVIEWING_RESULTS
+
+                period_results = {}
+                
+            else:
+                #send choice to the group
+                group["active_player_group_index"] += 1
+
+                await self.store_world_state(force_store=True)
+
+                result = {"status": status,
+                          "error_message": error_message,
+                          "active_player_group_index": group["active_player_group_index"],
+                          "values": group["values"][str(current_period)],
+                          "player_id": player_id,
+                          "player_status": session_player["status"],
+                          }
+                await self.send_message(message_to_self=None, message_to_group=result,
+                                        message_type=event['type'], send_to_client=False, 
+                                        send_to_group=True, target_list=group["session_players_order"])
+        else:
+            # there was an error with the choices
+            result = {"status": status, "error_message": error_message}
+            await self.send_message(message_to_self=None, message_to_group=result,
+                                    message_type=event['type'], send_to_client=False, 
+                                    send_to_group=True, target_list=[player_id])
+
+
+    async def update_choices_simultaneous(self, event):
+        '''
+        update choice from subject
         '''
         pass
 

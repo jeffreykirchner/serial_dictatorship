@@ -1,8 +1,12 @@
 <div class="card" v-show="first_load_done">                  
     <div class="card-header fw-bold">                
-        <span class="align-middle">
+        <span class="align-middle" v-if="session.parameter_set.experiment_mode == 'Simultaneous'">            
             Rank the prizes for period [[ session.world_state.current_period ]]:
         </span>       
+
+        <span class="align-middle" v-if="session.parameter_set.experiment_mode == 'Sequential'">            
+            Pick your prize for period [[ session.world_state.current_period ]]:
+        </span>
 
         <span class="float-end"> 
         
@@ -30,8 +34,13 @@
                                 Value ($)
                             </th>                            
                             <th scope="col" class = "text-center">
-                                Rank the prizes from 1 to [[get_current_choices().length]]<br>
-                                (1 = most preferred)
+                                <span v-if="session.parameter_set.experiment_mode == 'Simultaneous'">
+                                    Rank the prizes from 1 to [[get_current_choices().length]]<br>
+                                    (1 = most preferred)
+                                </span>
+                                <span v-if="session.parameter_set.experiment_mode == 'Sequential'">
+                                    Pick one of the prizes below
+                                </span>
                             </th>                                                 
                         </tr>
                     </thead>
@@ -46,13 +55,38 @@
                                 $[[p.value]]
                             </td>                            
                             <td class="text-nowrap">
+                                <!-- input boxes for simultaneous ranking -->
                                 <input type="number" 
+                                       v-if="session.parameter_set.experiment_mode == 'Simultaneous'"
                                        class="form-control form-control-lg text-center fw-bold" 
                                        v-model="choices[index]" 
                                        v-bind:disabled="session.world_state.session_players[session_player.id].status != 'Ranking'"
                                        min="1" 
                                        v-bind:max="get_current_choices().length"
                                        :placeholder="'1 - ' + get_current_choices().length" />
+
+                                <!-- radio buttons for sequential ranking -->  
+                                <div v-if="session.parameter_set.experiment_mode == 'Sequential' && show_submit_choices_button() && !p.owner">
+                                    <input type="radio" 
+                                            class="form-check-input" 
+                                            v-model="choice" 
+                                            v-bind:value="index"
+                                            v-bind:disabled="session.world_state.session_players[session_player.id].status != 'Ranking'">
+                                    <label class="form-check-label ms-2">
+                                        [[ String.fromCharCode(65 + index) ]]
+                                    </label>
+                                </div>
+                                <div v-if="session.parameter_set.experiment_mode == 'Sequential' && p.owner == session_player.id"
+                                    class="text-center"
+                                    title="This is your prize">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div v-if="session.parameter_set.experiment_mode == 'Sequential' && p.owner && p.owner != session_player.id"
+                                    class="text-center"
+                                    title="This prize has been picked by another player">
+                                    <i class="fas fa-times"></i>
+                                </div>
+   
                             </td>                                            
                         </tr>
                     </tbody>
@@ -69,30 +103,31 @@
                     Priority Score: [[ get_current_priority_score() ]]
                 </span>
                 <br>
-                <span class="text-muted">
-                    (Highest priority score gets their first choice)
+                <span class="text-muted" v-if="session.parameter_set.experiment_mode == 'Simultaneous'">
+                    (Highest gets their first choice)
+                </span>
+                <span class="text-muted" v-if="session.parameter_set.experiment_mode == 'Sequential'">
+                    (Highest picks first)
                 </span>
 
             </div>
         </div>
         
         <div class="row justify-content-center">
-            <div v-if="session.world_state.session_players[session_player.id].status == 'Ranking'"
+            <div v-if="show_submit_choices_button()"
                 class="col-md text-center">
                 <button type="button" 
                         title = "Submit your choices"
                         v-bind:class="tick_tock=='tick' ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'" 
                         v-bind:disabled="reconnecting || working"
-                        v-on:click="submit_choices()">
-                    Submit Your Choices
+                        v-on:click="session.parameter_set.experiment_mode == 'Simultaneous' ? submit_choices_simultaneous() : submit_choices_sequential()">
+
+                    <span v-if="session.parameter_set.experiment_mode == 'Simultaneous'">Submit Your Choices</span>
+                    <span v-if="session.parameter_set.experiment_mode == 'Sequential'">Confirm Choice</span>
+                    
                 </button>
-            </div>
-            <div v-if="session.world_state.session_players[session_player.id].status == 'Finished_Ranking' ||
-                       session.world_state.session_players[session_player.id].status == 'Waiting'" 
-                class="col-md text-center fw-bold fs-4">
-                 Waiting for others
-            </div>
-            <div v-if="session.world_state.session_players[session_player.id].status == 'Reviewing_Results'"
+            </div>           
+            <div v-else-if="session.world_state.session_players[session_player.id].status == 'Reviewing_Results'"
                 class="col-md text-center">
                 <button type="button" 
                         title = "Ready to go to the next period"
@@ -100,6 +135,10 @@
                         v-on:click="send_ready_to_go_on()">
                     Ready to Go On
                 </button>   
+            </div>
+             <div v-else
+                class="col-md text-center fw-bold fs-4">
+                 Waiting for others
             </div>
         </div>
 
