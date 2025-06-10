@@ -95,7 +95,7 @@ class InterfaceMixin():
 
         response = await sync_to_async(chat_gpt_generate_completion, thread_sensitive=self.thread_sensitive)(session_player.chat_gpt_prompt)
         response = json.loads(response)
-        logger.info(f"ChatGPT response: {response}")
+        # logger.info(f"ChatGPT response: {response}")
         
         session_player.chat_gpt_prompt.append({
             "role": "assistant",

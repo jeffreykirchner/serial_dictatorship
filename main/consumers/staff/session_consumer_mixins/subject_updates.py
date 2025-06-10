@@ -169,9 +169,7 @@ class SubjectUpdatesMixin():
 
             #check if all players have made choices
             if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
-                #all players have made choices, send to server
-                outcome = {}
-                
+                #all players have made choices, send to server                
                 current_period = self.world_state_local["current_period"]
 
                 for i in self.world_state_local["session_players"]:
@@ -180,7 +178,7 @@ class SubjectUpdatesMixin():
 
                 period_results = {}
                 for g in groups:
-                    outcome[g] = {"payments": {}}
+      
                     group = groups[g]
                     for p in group["player_order"][str(current_period)]:
                         # player_id = self.world_state_local["session_players"][str(p)]
@@ -211,6 +209,7 @@ class SubjectUpdatesMixin():
                         for i in range(len(player_choices)):
                             period_results[str(p)]["values"].append({
                                 "value": group["values"][str(current_period)][i]["value"],
+                                "owner": group["values"][str(current_period)][i]["owner"],
                                 "rank": player_choices[i],
                             })
 
@@ -269,13 +268,14 @@ class SubjectUpdatesMixin():
         player_id = self.session_players_local[event["player_key"]]["id"]
         session_player = self.world_state_local["session_players"][str(player_id)]
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
-        group = self.world_state_local["groups"][str(parameter_set_player["parameter_set_group"])]
+        groups = self.world_state_local["groups"]
+        group = groups[str(parameter_set_player["parameter_set_group"])]
         current_period = self.world_state_local["current_period"]
 
         #check if choice is an integer
         if not isinstance(choice, int):
             status = "fail"
-            error_message = "Choice must be a whole number."
+            error_message = "Select a prize."
         #the minium value for a choice is 0 and the maximum is group_size-1
         elif choice < 0 or choice >= self.parameter_set_local["group_size"]:
             status = "fail"
@@ -307,19 +307,54 @@ class SubjectUpdatesMixin():
             #check if all players have made choices
             if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
                 #all players have made choices, send to server
-                outcome = {}
-                
+
                 for i in self.world_state_local["session_players"]:
                     player = self.world_state_local["session_players"][i]
                     player["status"] = SubjectStatus.REVIEWING_RESULTS
 
                 period_results = {}
+
+                for g in groups: 
+                    group = groups[g]
+                    for p in group["player_order"][str(current_period)]:
+                        # player_id = self.world_state_local["session_players"][str(p)]
+                        player_choices = self.world_state_local["choices"][str(p)]
+
+                        #loop through group[values][current_period] and find the next available value according to rank
+
+                        period_results[str(p)] = {}
+                        prize_index = self.world_state_local["choices"][str(player_id)]
+                        period_results[str(p)]["prize"] = group["values"][str(current_period)][prize_index]["value"]
+                        self.world_state_local["session_players"][str(p)]["earnings"] = Decimal(group["values"][str(current_period)][prize_index]["value"]) + \
+                                                                                        Decimal(self.world_state_local["session_players"][str(p)]["earnings"])    
+
+                        #store period results
+                        period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
+                        period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
+                        period_results[str(p)]["period_number"] = current_period
+                        
+                        period_results[str(p)]["values"] = []
+                        for i in range(len(group["values"][str(current_period)])):
+                            period_results[str(p)]["values"].append({
+                                "value": group["values"][str(current_period)][i]["value"],
+                                "owner": group["values"][str(current_period)][i]["owner"],
+                                "rank": 1 if i == prize_index else 0,
+                            })
+
+                        session_player = await SessionPlayer.objects.aget(id=p)
+                        session_player.period_results.append(period_results[str(p)])
+                        await session_player.asave()
+
+                result = {"period_results": period_results,
+                          "values": group["values"][str(current_period)],
+                          "session_players": self.world_state_local["session_players"],}
+
+                await self.send_message(message_to_self=None, message_to_group=result,
+                                        message_type="result", send_to_client=False, send_to_group=True)
                 
             else:
                 #send choice to the group
                 group["active_player_group_index"] += 1
-
-                await self.store_world_state(force_store=True)
 
                 result = {"status": status,
                           "error_message": error_message,
@@ -331,6 +366,8 @@ class SubjectUpdatesMixin():
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type=event['type'], send_to_client=False, 
                                         send_to_group=True, target_list=group["session_players_order"])
+            
+            await self.store_world_state(force_store=True)
         else:
             # there was an error with the choices
             result = {"status": status, "error_message": error_message}
@@ -408,10 +445,17 @@ class SubjectUpdatesMixin():
                 for i in self.world_state_local["session_players"]:
                     self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
     
+                # reset choices
                 self.world_state_local["choices"] = {}
-                
+
+                #set active player group index to 0
+                for g in self.world_state_local["groups"]:
+                    group = self.world_state_local["groups"][g]
+                    group["active_player_group_index"] = 0
+
                 result = {
-                    "current_period": self.world_state_local["current_period"],                
+                    "current_period": self.world_state_local["current_period"],  
+                    "active_player_group_index": 0,             
                 }
 
                 # send message to subject screens to go to next period

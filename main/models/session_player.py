@@ -99,6 +99,10 @@ class SessionPlayer(models.Model):
                     {
                         "type": "text",
                         "text": "Reply with html formating."
+                    },
+                    {
+                        "type": "text",
+                        "text": "Do not use the html tag."
                     }
                 ]
             }

@@ -71,7 +71,7 @@ take_choices_sequential(message_data) {
         let player_id = message_data.player_id;
 
         app.session.world_state.groups[parameter_set_player.parameter_set_group].active_player_group_index = message_data.active_player_group_index;
-        app.session.world_state.session_players[app.session_player.id].values[current_period] = message_data.values;
+        app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period] = message_data.values;
         app.session.world_state.session_players[player_id].status = message_data.player_status;
 
     } else {
@@ -99,6 +99,13 @@ take_start_next_period : function take_start_next_period(message_data) {
 
     app.choices = [];
     app.choices_error_message = "";
+    app.choice = null;
+
+    // reset the active player group index for all groups
+    for(let g in app.session.world_state.groups) {
+        let group = app.session.world_state.groups[g];
+        group.active_player_group_index = 0;
+    }
 },
 
 /**
