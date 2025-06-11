@@ -376,7 +376,7 @@ class SubjectUpdatesMixin():
                                     send_to_group=True, target_list=[player_id])
 
 
-    async def update_choices_simultaneous(self, event):
+    async def update_choices_sequential(self, event):
         '''
         update choice from subject
         '''

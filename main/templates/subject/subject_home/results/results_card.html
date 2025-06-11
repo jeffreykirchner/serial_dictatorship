@@ -27,7 +27,8 @@
                                 Period
                             </th>
                             <th scope="col" class = "">
-                                Values (Your Ranking)
+                                [[session.parameter_set.experiment_mode == 'Simultaneous' ? 'Values (Your Ranking)' : 'Values (Your Prize)']]
+                                
                             </th>                            
                             <th scope="col" class = "text-center">
                                Your Priority Score
@@ -45,8 +46,15 @@
                             </td>
                             <td class="text-nowrap fs-5">
                                <span v-for="(v, idx) in p.values" v-bind:key="idx">
-                                   $[[v.value]] ([[v.rank]]) [[ idx < p.values.length - 1 ? ', ' : '' ]]
-                               </span>
+                                   $[[v.value]] 
+                                   <span v-if="session.parameter_set.experiment_mode == 'Simultaneous'">
+                                        ([[v.rank]])
+                                   </span>
+                                   <span v-if="session.parameter_set.experiment_mode == 'Sequential' && v.owner == session_player.id" 
+                                         v-html="'(<i class=\'fas fa-check\'></i>)'">
+                                   </span>
+
+                                   [[ idx < p.values.length - 1 ? ', ' : '' ]]
                             </td>                            
                             <td class="text-nowrap fs-5">
                                  [[ p.priority_score ]]
