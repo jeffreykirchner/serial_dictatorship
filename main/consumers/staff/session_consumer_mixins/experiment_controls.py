@@ -185,13 +185,47 @@ def take_start_experiment(session_id, data):
 
     #session_id = data["session_id"]   
     session = Session.objects.get(id=session_id)
-
-    if not session.started:
-        session.start_experiment()
-
     value = "success"
-    
+    error_message = None
+    #check that session has a parameter set
+
+    #check that each player has a group
+    if session.parameter_set.parameter_set_players.filter(group_index__isnull=True).exists():
+        value = "fail"
+        error_message = f"Start Experiment: session {session_id}, not all players have a group assigned"
+
+    #check that number of player in each group equals group size in the parmater set model
+    if value == "success":
+        for group in session.parameter_set.parameter_set_groups.all():
+            player_count = session.parameter_set.parameter_set_players.filter(parameter_set_group=group).count()
+            if player_count != session.parameter_set.group_size:
+                value = "fail"
+                error_message = f"Start Experiment: session {session_id}, group {group.id} has {player_count} players, expected {session.parameter_set.group_size}"
+
+   
+    if value == "success":
+        for group in session.parameter_set.parameter_set_groups.all():
+            group_indexes = session.parameter_set.parameter_set_players.filter(parameter_set_group=group).values_list('group_index', flat=True)
+        
+            #check that group_index is unique for each player in a group
+            if len(group_indexes) != len(set(group_indexes)):
+                value = "fail"
+                error_message = f"Start Experiment: session {session_id}, group {group.id} has non-unique player indices"
+
+            #check that group_index does not exceed group size
+            if any(index > session.parameter_set.group_size for index in group_indexes):
+                value = "fail"
+                error_message = f"Start Experiment: session {session_id}, group {group.id} has player indices that exceed group size {session.parameter_set.group_size}"
+
+    if value == "success":
+        if not session.started:
+            session.start_experiment()
+
+    if error_message:
+        logger.error(error_message)
+
     return {"value" : value, 
+            "error_message" : error_message,
             "session" : session.json()}
 
 def take_reset_experiment(session_id, data):
