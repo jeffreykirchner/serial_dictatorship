@@ -42,12 +42,12 @@
                                 <th scope="col" 
                                     class = "m-1 p-1"
                                     v-for="(p, index) in parameter_set.group_size">
-                                    Priority Score [[index + 1]]
+                                    Priority Score #[[index + 1]]
                                 </th>
                                 <th scope="col" 
                                     class = "m-1 p-1"
                                     v-for="(p, index) in parameter_set.group_size">
-                                    Player Order [[index + 1]]
+                                    Player Order [[getNumberWithOrdinal(index + 1)]]
                                 </th>
                             </tr>
                         </thead>
@@ -76,7 +76,7 @@
                                    
                                     v-for="(po, index4) in (temp_p.player_order ? temp_p.player_order.split(',') : [])"
                                     v-bind:key="'po'+index4">
-                                    [[po]]
+                                    #[[po]]
                                 </td>
                                 
                                 

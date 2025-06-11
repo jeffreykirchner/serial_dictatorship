@@ -23,7 +23,18 @@ class InterfaceMixin():
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
 
     @check_message_for_me  
-    async def update_choices(self, event):
+    async def update_choices_simultaneous(self, event):
+        '''
+        update the choices made by the subject
+        '''
+
+        event_data = json.loads(event["group_data"])
+
+        await self.send_message(message_to_self=event_data, message_to_subjects=None, message_to_staff=None, 
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        
+    @check_message_for_me
+    async def update_choices_sequential(self, event):
         '''
         update the choices made by the subject
         '''
@@ -84,7 +95,7 @@ class InterfaceMixin():
 
         response = await sync_to_async(chat_gpt_generate_completion, thread_sensitive=self.thread_sensitive)(session_player.chat_gpt_prompt)
         response = json.loads(response)
-        logger.info(f"ChatGPT response: {response}")
+        # logger.info(f"ChatGPT response: {response}")
         
         session_player.chat_gpt_prompt.append({
             "role": "assistant",

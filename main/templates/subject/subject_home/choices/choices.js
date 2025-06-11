@@ -26,12 +26,12 @@ get_current_priority_score : function get_current_priority_score() {
 /**
 validate and submit subject choices to the server
  */
-submit_choices : function submit_choices() {
-    
+submit_choices_simultaneous : function submit_choices() {
+
     app.choices_error_message = "";
     app.working = true;
 
-    app.send_message("choices", 
+    app.send_message("choices_simultaneous", 
                     {"choices": app.choices},
                      "group"); 
 },
@@ -39,9 +39,41 @@ submit_choices : function submit_choices() {
 /***
  * handle the response from the server after submitting choices
  */
-take_choices(message_data) {
+take_choices_simultaneous(message_data) {
     if (message_data.status === "success") {
         app.session.world_state.session_players[app.session_player.id].status = message_data.player_status;
+    } else {
+        app.working = false;
+        app.choices_error_message = message_data.error_message;
+    }
+},
+
+/**
+ * submit choices sequentially
+ */
+submit_choices_sequential : function submit_choices_sequential() {
+
+    app.choices_error_message = "";
+    app.working = true;
+
+    app.send_message("choices_sequential", 
+                    {"choice": app.choice},
+                     "group");
+},
+
+/**
+ * handle the response from the server after submitting choices sequentially
+ */
+take_choices_sequential(message_data) {
+    if (message_data.status === "success") {
+        let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
+        let current_period = app.session.world_state.current_period;
+        let player_id = message_data.player_id;
+
+        app.session.world_state.groups[parameter_set_player.parameter_set_group].active_player_group_index = message_data.active_player_group_index;
+        app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period] = message_data.values;
+        app.session.world_state.session_players[player_id].status = message_data.player_status;
+
     } else {
         app.working = false;
         app.choices_error_message = message_data.error_message;
@@ -67,7 +99,40 @@ take_start_next_period : function take_start_next_period(message_data) {
 
     app.choices = [];
     app.choices_error_message = "";
+    app.choice = null;
+
+    // reset the active player group index for all groups
+    for(let g in app.session.world_state.groups) {
+        let group = app.session.world_state.groups[g];
+        group.active_player_group_index = 0;
+    }
 },
 
+/**
+ * get active player id
+ */
+get_active_player_id : function get_active_player_id() {
+    let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
+    let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
+    let current_period = app.session.world_state.current_period;
+
+    return group.player_order[current_period][group.active_player_group_index];
+},
+
+/**
+ * show submit choices button
+ */
+show_submit_choices_button : function show_submit_choices_button() {
+
+    if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking') return false;
+
+    if(app.session.parameter_set.experiment_mode == 'Sequential') {
+        if(app.get_active_player_id() != app.session_player.id) {
+            return false; // not the active player
+        }
+    }
+
+    return true
+},
 
     
