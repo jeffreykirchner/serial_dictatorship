@@ -228,7 +228,7 @@ class Session(models.Model):
             
             #map player order to session player id
             for j in range(len(group["player_order"][str(period_number)])):
-                group["player_order"][str(period_number)][j] = groups[str(parameter_set_group_id)]["index_map"][str(group["player_order"][str(period_number)][j])]
+                group["player_order"][str(period_number)][j] = group["index_map"][str(group["player_order"][str(period_number)][j])]
   
             for j in range(len(group["player_order"][str(period_number)])): 
                 session_player_id = group["player_order"][str(period_number)][j]   
