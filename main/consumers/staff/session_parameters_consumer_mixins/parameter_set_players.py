@@ -126,10 +126,21 @@ def take_add_parameterset_player(data):
     except ObjectDoesNotExist:
         logger.warning(f"take_update_take_update_parameter_set player, not found ID: {session_id}")
         return {"value" : "fail"}
+    
+    #last parameters set player
+    last_parameter_set_player = parameter_set.parameter_set_players.last()
 
     parameter_set_player = main.models.ParameterSetPlayer()
     parameter_set_player.parameter_set = parameter_set
     parameter_set_player.player_number = parameter_set.parameter_set_players.count() + 1
+
+    if last_parameter_set_player:
+        if last_parameter_set_player.group_index < parameter_set.group_size:
+            parameter_set_player.group_index = last_parameter_set_player.group_index + 1
+            parameter_set_player.parameter_set_group = last_parameter_set_player.parameter_set_group
+        
+        parameter_set_player.instruction_set = last_parameter_set_player.instruction_set
+
     parameter_set_player.save()
 
     parameter_set.update_json_fk(update_players=True)
