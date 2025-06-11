@@ -105,8 +105,12 @@ def take_remove_parameterset_group(data):
         logger.warning(f"take_remove_parameterset_group, not found ID: {parameterset_group_id}")
         return
     
+    session.parameter_set.parameter_set_players.filter(parameter_set_group=parameter_set_group).delete()
+    
     parameter_set_group.delete()
-    session.parameter_set.update_json_fk(update_groups=True, update_group_periods=True)
+    session.parameter_set.update_json_fk(update_groups=True, 
+                                         update_group_periods=True,
+                                         update_players=True)
     
     return {"value" : "success"}
 

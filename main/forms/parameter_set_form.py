@@ -120,3 +120,21 @@ class ParameterSetForm(forms.ModelForm):
             raise forms.ValidationError('Invalid Entry')
 
         return prolific_completion_link
+
+    def clean_possible_values(self):
+        #number of possible values must be greater than or equal to the group size
+        try:
+            possible_values = self.data.get('possible_values')
+            group_size = int(self.data.get('group_size', 1))
+            if possible_values:
+                values = [float(v.strip()) for v in possible_values.split(',')]
+                if len(values) < group_size:
+                    raise forms.ValidationError('The number of possible values must be greater than or equal to the group size')
+                
+                #return csv string of values
+                values = [str(v) for v in values]
+                return ','.join(values)
+            else:
+                raise forms.ValidationError('Invalid Entry, use comma separated numbers')
+        except ValueError:
+            raise forms.ValidationError('Invalid Entry, use comma separated numbers')
