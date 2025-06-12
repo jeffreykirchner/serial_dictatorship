@@ -362,10 +362,10 @@ class Session(models.Model):
             for p in self.session_events.all():
                 writer.writerow([self.id,
                                 p.period_number, 
-                                p.group_number, 
+                                parameter_set["parameter_set_groups"][str(p.group_number)]["name"], 
                                 parameter_set_players[str(p.session_player_id)]["player_number"], 
                                 p.type, 
-                                self.action_data_parse(p.type, p.data, session_players),
+                                self.action_data_parse(p.type, p.data, parameter_set, p.group_number, p.period_number, world_state),
                                 p.data, 
                                 p.timestamp])
             
@@ -375,10 +375,23 @@ class Session(models.Model):
 
         return v
 
-    def action_data_parse(self, type, data, session_players):
+    def action_data_parse(self, type, data, parameter_set, group_number, period_number, world_state):
         '''
         return plain text version of action
         '''
+
+        parameter_set_group = parameter_set["parameter_set_groups"][str(group_number)]
+       
+        parameter_set_group_period = None
+
+        # for p in parameter_set["parameter_set_group_periods"]:
+        #     if parameter_set["parameter_set_group_periods"][p]["parameter_set_group"] == group_number and \
+        #         parameter_set["parameter_set_group_periods"][p]["period_number"] == period_number:
+        #         parameter_set_group_period = parameter_set["parameter_set_group_periods"][p]
+        #         break
+
+        if type == "choices_sequential":
+            return world_state["groups"][str(group_number)]["values"][str(period_number)][data["choice"]-1]["value"]
 
         return ""
     
