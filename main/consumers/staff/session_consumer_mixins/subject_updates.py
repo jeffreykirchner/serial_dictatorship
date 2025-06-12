@@ -131,6 +131,7 @@ class SubjectUpdatesMixin():
         
         player_id = self.session_players_local[event["player_key"]]["id"]
         session_player = self.world_state_local["session_players"][str(player_id)]
+        parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
         groups = self.world_state_local["groups"]
 
         #check if there is one choice per rank
@@ -161,9 +162,9 @@ class SubjectUpdatesMixin():
                                         session_player_id=player_id,
                                         type=event['type'],
                                         period_number=self.world_state_local["current_period"],
-                                        time_remaining=self.world_state_local["time_remaining"],
-                                        data=event_data,))
-            
+                                        group_number=parameter_set_player["parameter_set_group"],
+                                        data=event_data))
+
             await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
             self.session_events = []
 
@@ -298,7 +299,7 @@ class SubjectUpdatesMixin():
                                         session_player_id=player_id,
                                         type=event['type'],
                                         period_number=self.world_state_local["current_period"],
-                                        time_remaining=self.world_state_local["time_remaining"],
+                                        group_number=parameter_set_player["parameter_set_group"],
                                         data=event_data,))
             
             await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
@@ -323,7 +324,7 @@ class SubjectUpdatesMixin():
                         #loop through group[values][current_period] and find the next available value according to rank
 
                         period_results[str(p)] = {}
-                        prize_index = self.world_state_local["choices"][str(player_id)]
+                        prize_index = self.world_state_local["choices"][str(p)]
                         period_results[str(p)]["prize"] = group["values"][str(current_period)][prize_index]["value"]
                         self.world_state_local["session_players"][str(p)]["earnings"] = Decimal(group["values"][str(current_period)][prize_index]["value"]) + \
                                                                                         Decimal(self.world_state_local["session_players"][str(p)]["earnings"])    
@@ -402,8 +403,9 @@ class SubjectUpdatesMixin():
 
         event_data = event["message_text"]
 
-        player_id = self.session_players_local[event["player_key"]]["id"]
+        player_id = self.session_players_local[event["player_key"]]["id"]        
         session_player = self.world_state_local["session_players"][str(player_id)]
+        parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
 
         session_player["status"] = SubjectStatus.WAITING
 
@@ -412,7 +414,7 @@ class SubjectUpdatesMixin():
                                     session_player_id=player_id,
                                     type=event['type'],
                                     period_number=self.world_state_local["current_period"],
-                                    time_remaining=self.world_state_local["time_remaining"],
+                                    group_number=parameter_set_player["parameter_set_group"],
                                     data=event_data,))
         
         await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
