@@ -46,7 +46,7 @@
                             </td>
                             <td class="text-nowrap fs-5">
                                <span v-for="(v, idx) in p.values" v-bind:key="idx">
-                                   $[[v.value]] 
+                                   $[[parseFloat(v.value).toFixed(2)]]
                                    <span v-if="session.parameter_set.experiment_mode == 'Simultaneous'">
                                         ([[v.rank]])
                                    </span>
@@ -60,7 +60,7 @@
                                  [[ p.priority_score ]]
                             </td>                      
                             <td class="text-nowrap fs-5">
-                                $[[p.prize]]    
+                                $[[parseFloat(p.prize).toFixed(2)]]    
                             </td>              
                         </tr>
                     </tbody>

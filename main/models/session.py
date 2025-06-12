@@ -346,7 +346,30 @@ class Session(models.Model):
 
             writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
 
+            writer.writerow(["Session ID", "Period", "Group", "Client #", "Action","Info (Plain)", "Info (JSON)", "Timestamp"])
+
+            world_state = self.world_state
+            parameter_set_players = {}
+            for i in self.session_players.all().values('id','player_number'):
+                parameter_set_players[str(i['id'])] = i
+
+            session_players = {}
+            for i in self.session_players.all().values('id','player_number'):
+                session_players[str(i['id'])] = i
+
+            parameter_set = self.parameter_set.json()
+
+            for p in self.session_events.all():
+                writer.writerow([self.id,
+                                p.period_number, 
+                                p.group_number, 
+                                parameter_set_players[str(p.session_player_id)]["player_number"], 
+                                p.type, 
+                                self.action_data_parse(p.type, p.data, session_players),
+                                p.data, 
+                                p.timestamp])
             
+
             v = output.getvalue()
             output.close()
 
