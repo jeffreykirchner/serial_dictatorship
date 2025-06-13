@@ -392,6 +392,15 @@ class Session(models.Model):
 
         if type == "choices_sequential":
             return world_state["groups"][str(group_number)]["values"][str(period_number)][data["choice"]-1]["value"]
+        elif type == "choices_simultaneous":
+            s = ""
+            for c in data["choices"]:
+                if s != "":
+                    s += ", "
+                s += world_state["groups"][str(group_number)]["values"][str(period_number)][c-1]["value"] 
+            return s
+
+
 
         return ""
     
