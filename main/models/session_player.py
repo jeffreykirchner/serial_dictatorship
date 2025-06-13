@@ -102,7 +102,7 @@ class SessionPlayer(models.Model):
                     },
                     {
                         "type": "text",
-                        "text": "Do not use the html tag."
+                        "text": "Do not use the html and body tags."
                     }
                 ]
             }

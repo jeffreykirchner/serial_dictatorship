@@ -26,6 +26,7 @@ from django.db.models.signals import post_save
 from django.utils.timezone import now
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.html import strip_tags
 
 import main
 
@@ -359,7 +360,7 @@ class Session(models.Model):
 
             parameter_set = self.parameter_set.json()
 
-            for p in self.session_events.all():
+            for p in self.session_events.exclude(type="world_state").all():
                 writer.writerow([self.id,
                                 p.period_number, 
                                 parameter_set["parameter_set_groups"][str(p.group_number)]["name"], 
@@ -399,7 +400,8 @@ class Session(models.Model):
                     s += ", "
                 s += world_state["groups"][str(group_number)]["values"][str(period_number)][c-1]["value"] 
             return s
-
+        elif type == "chat_gpt_prompt":
+            return f'{data["prompt"]} | {strip_tags(data["response"])}'
 
 
         return ""

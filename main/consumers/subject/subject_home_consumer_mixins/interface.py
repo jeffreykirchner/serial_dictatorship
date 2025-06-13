@@ -110,10 +110,20 @@ class InterfaceMixin():
             "response": {"role":"assistant", "content": response['choices'][0]['message']['content']},
         }
 
+        result_staff = {"prompt": event_data["prompt"],
+                        "response": response['choices'][0]['message']['content'],
+                        "session_player_id": self.session_player_id}
+
         # Send the response back to the client
-        await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=None, 
-                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=result_staff, 
+                                message_type=event['type'], send_to_client=True, send_to_group=True)
     
+    async def update_process_chat_gpt_prompt(self, event):
+        '''
+        ignore chat gpt prompt
+        '''
+        pass
+
     async def clear_chat_gpt_history(self, event):
         '''
         clear the chat gpt history
@@ -126,8 +136,16 @@ class InterfaceMixin():
             "chat_history" : await sync_to_async(session_player.get_chat_display_history)(),
         }
 
+        result_staff = {"session_player_id": self.session_player_id}
+
         # Send the response back to the client
-        await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=None, 
-                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=result_staff, 
+                                message_type=event['type'], send_to_client=True, send_to_group=True)
+    
+    async def update_clear_chat_gpt_history(self, event):
+        '''
+        ignore clear chat gpt history
+        '''
+        pass
 
         
