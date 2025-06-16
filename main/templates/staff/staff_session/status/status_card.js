@@ -12,6 +12,31 @@ get_status_table_values : function get_status_table_values() {
             v.period = i;
             v.group = parameter_set.parameter_set_groups[parameter_set_player.parameter_set_group].name;
             v.client_number = parameter_set_player.player_number;
+            v.values = "";
+
+            if(app.session.session_players[session_player_id].period_results.length>i-1)
+            {
+                for(let k in app.session.session_players[session_player_id].period_results[i-1].values) {
+                    let period_result = app.session.session_players[session_player_id].period_results[i-1].values[k];
+
+                    v.values += period_result.value
+
+                    if(parameter_set.experiment_mode == "Sequential")
+                    {
+                        if(period_result.owner == session_player_id)
+                        {
+                            v.values += ' (<i class=\'fas fa-check\'></i>)';
+                        }
+                    }
+                    else if(parameter_set.experiment_mode == "Simultaneous")
+                    {
+                       
+                    }
+
+                    v.values += ", ";
+                }
+                v.values = v.values.slice(0, -2);  // remove trailing comma and space
+            }
 
             output.push(v);
         }

@@ -33,10 +33,13 @@
                                 Client #
                             </th>                                                        
                             <th scope="col" class = "">
-                                 [[session.parameter_set.experiment_mode == 'Simultaneous' ? 'Values (Your Ranking)' : 'Values (Your Prize)']]
+                                 [[session.parameter_set.experiment_mode == 'Simultaneous' ? 'Values (Ranking)' : 'Values (Prize)']]
                             </th>        
                             <th scope="col" class = "text-center">
                                 Priority Score
+                            </th>
+                            <th scope="col" class = "text-center">
+                                Order
                             </th>
                             <th scope="col" class = "text-center">
                                 Prize
@@ -56,7 +59,7 @@
                                 [[p.client_number]]
                             </td>
                             <td class="text-nowrap">
-
+                                <span v-html="p.values"></span>
                             </td>
                             <td class="text-nowrap">
 
@@ -64,7 +67,9 @@
                             <td class="text-nowrap">
                                
                             </td>
-                                                  
+                            <td class="text-nowrap">
+                               
+                            </td>                      
                         </tr>
                     </tbody>
                    
