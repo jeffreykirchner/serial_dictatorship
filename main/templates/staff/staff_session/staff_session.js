@@ -213,6 +213,9 @@ let app = Vue.createApp({
                 case "update_show_name_input":
                     app.take_show_name_input(message_data);
                     break;
+                case "update_result":
+                    app.take_result(message_data);
+                    break;
             }
             app.working = false;
         },

@@ -1,3 +1,6 @@
+/**
+ * return data for status table
+ */
 get_status_table_values : function get_status_table_values() {
     let world_state = app.session.world_state;
     let parameter_set = app.session.parameter_set;
@@ -48,4 +51,17 @@ get_status_table_values : function get_status_table_values() {
     }
 
     return output;
+},
+
+/**
+ * take the result of the period
+ */
+take_result : function take_result(message_data){
+
+    let period_results = message_data.period_results;
+    for(let i in period_results) {
+        let period_result = period_results[i];
+        // process each period_result as needed
+        app.session.session_players[i].period_results.push(period_result);
+    }
 },
