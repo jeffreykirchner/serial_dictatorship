@@ -76,6 +76,9 @@ let app = Vue.createApp({
                     replay_timeout : null,
                     replay_time_remaining : 0,
                     replay_current_period : 0,
+
+                    //chat gpt
+                    chat_text : "",
                 }},
     methods: {
 
@@ -215,6 +218,18 @@ let app = Vue.createApp({
                     break;
                 case "update_result":
                     app.take_result(message_data);
+                    break;
+                case "update_status":
+                    app.take_update_status(message_data);
+                    break;
+                case "update_choices_simultaneous":
+                    app.take_update_status(message_data);
+                    break;
+                case "update_start_next_period":
+                    app.take_start_next_period(message_data);
+                    break;
+                case "update_choices_sequential":
+                    app.take_update_choices_sequential(message_data);
                     break;
             }
             app.working = false;

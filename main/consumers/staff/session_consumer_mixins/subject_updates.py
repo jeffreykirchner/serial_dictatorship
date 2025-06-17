@@ -239,9 +239,10 @@ class SubjectUpdatesMixin():
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type="result", send_to_client=False, send_to_group=True)
             else:
-                 # there was an error with the choices
+               #send status player and staff screens
                 result = {"status": status, 
                           "error_message": error_message,
+                          "player_id": player_id,
                           "player_status":session_player["status"]}
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type=event['type'], send_to_client=False, 
@@ -260,7 +261,10 @@ class SubjectUpdatesMixin():
         '''
         update choices from subject
         '''
-        pass
+        event_data = json.loads(event["group_data"])
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
 
     async def choices_sequential(self, event):
         '''
@@ -406,8 +410,11 @@ class SubjectUpdatesMixin():
         '''
         update choice from subject
         '''
-        pass
+        event_data = json.loads(event["group_data"])
 
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        
     async def update_result(self, event):
         '''
         send the result of the period choices to the subject screens
@@ -488,15 +495,28 @@ class SubjectUpdatesMixin():
                 # send message to subject screens to go to next period
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type="start_next_period", send_to_client=False, send_to_group=True)
-
+        else:
+            result = {
+                "status": "success",
+                "player_id": player_id,
+                "player_status": session_player["status"],            
+            }
+            await self.send_message(message_to_self=result, message_to_group=None,
+                                    message_type="update_status", send_to_client=True, send_to_group=False)
+        
         await self.store_world_state(force_store=True)
-    
+
+        # send message to subject screens to go to next period
+
     async def update_start_next_period(self, event):
         '''
         send start next period to subject screens
         '''
         event_data = json.loads(event["group_data"])
 
+        session_players = {i: {"status" : self.world_state_local["session_players"][i]["status"]} for i in self.world_state_local["session_players"]}
+
+        event_data["session_players"] = session_players
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
     
