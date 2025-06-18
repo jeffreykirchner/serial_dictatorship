@@ -102,7 +102,15 @@ class SessionPlayer(models.Model):
                     },
                     {
                         "type": "text",
-                        "text": "Do not use the html and body tags."
+                        "text": "Do not use the html or body tags."
+                    },
+                    {
+                        "type": "text",
+                        "text": "Do not return javascript or css code."
+                    },
+                    {
+                        "type": "text",
+                        "text": "Do not return html form elements or buttons."
                     }
                 ]
             }

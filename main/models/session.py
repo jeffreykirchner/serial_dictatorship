@@ -299,6 +299,22 @@ class Session(models.Model):
         
         return False
 
+    def get_chat_display_history(self):
+        '''
+        return chat gpt history for display
+        '''
+
+        chat_history = []
+
+        #return last 10 session events
+        for i in self.session_events.filter(type="chat_gpt_prompt").order_by('-timestamp').all()[:10]:
+
+            #add i to front of list 
+            chat_history.append(i.data)
+
+
+        return chat_history
+
     def get_download_summary_csv(self):
         '''
         return data summary in csv format
@@ -364,26 +380,6 @@ class Session(models.Model):
                     
                     row.append(summary_data[i]["prize"])
                     row.append(summary_data[i]["expected_order"])
-
-                    # for j in range(parameter_set["group_size"]):
-                    #     if str(j+1) in summary_data[i]:
-                    #         row.append(summary_data[i][str(j+1)]["value"])
-                    #     else:
-                    #         row.append("")
-
-                    # row.append(summary_data[i][str(j+1)]["priority_score"])
-                    # row.append(summary_data[i][str(j+1)]["order"])
-
-                    # if parameter_set["experiment_mode"] == "Simultaneous":
-                    #     for j in range(parameter_set["group_size"]):
-                    #         if str(j+1) in summary_data[i]:
-                    #             row.append(summary_data[i][str(j+1)]["choice"])
-                    #         else:
-                    #             row.append("")
-
-                    # row.append(summary_data[i]["prize"])
-                    # row.append(summary_data[i]["received_expected_prize"])
-
 
                     writer.writerow(row)
 

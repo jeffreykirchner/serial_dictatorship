@@ -1,12 +1,15 @@
 
 import json
 import logging
+import re
 
 from asgiref.sync import sync_to_async
 from main.decorators import check_message_for_me
 from main.globals import chat_gpt_generate_completion
+from django.utils.html import strip_tags
 
 from main.models import SessionPlayer
+from main.models import SessionEvent
 
 class InterfaceMixin():
     '''
@@ -86,34 +89,83 @@ class InterfaceMixin():
         status = "success"
         error_message = ""
 
-        session_player = await SessionPlayer.objects.aget(id=self.session_player_id)
+        session_player = await SessionPlayer.objects.select_related('parameter_set_player__parameter_set_group').aget(id=self.session_player_id)
+
+        prompt = strip_tags(event_data["prompt"]).strip()
 
         session_player.chat_gpt_prompt.append({
             "role": "user",
-            "content":event_data["prompt"],
+            "content":prompt,
         })
 
         response = await sync_to_async(chat_gpt_generate_completion, thread_sensitive=self.thread_sensitive)(session_player.chat_gpt_prompt)
         response = json.loads(response)
         # logger.info(f"ChatGPT response: {response}")
         
-        session_player.chat_gpt_prompt.append({
-            "role": "assistant",
-            "content": response['choices'][0]['message']['content']
-        })
+        content = ""
+        try:
+            content = response['choices'][0]['message']['content']
+            code_found = 0
 
+            if "<button" in content.lower():
+                code_found = 1
+            
+            if "script" in content.lower():
+                code_found = 1
+            
+            # # if "fetch" in content.lower():
+            # #     content = "Error: Invalid prompt"
+            
+            # if "form" in content.lower():
+            #     content = "Error: Invalid prompt"
+            
+            # if "xmlhttprequest " in content.lower():
+            #     content = "Error: Invalid prompt"
+
+            # if "img" in content.lower():
+            #     content = "Error: Invalid prompt"
+            
+            if "a href" in content.lower():
+                code_found = 1
+
+            # #remove any html events but leave tags
+            # content = re.sub(r'\s+on\w+\s*=\s*(".*?"|\'.*?\'|[^\s>]+)', '', content, flags=re.IGNORECASE)
+
+            
+            # if strip_tags(content) != content:
+            #    code_found = True
+
+            session_player.chat_gpt_prompt.append({
+                "role": "assistant",
+                "content": content,
+                "code_found": code_found
+            })
+
+        except Exception as e:
+            content = "Error: Invalid prompt"
+            session_player.chat_gpt_prompt.pop()  # remove last user prompt
+        
         # Save the updated chat_gpt_prompt to the session_player
         await session_player.asave()
 
         result = {
             "status": "success",            
-            "response": {"role":"assistant", "content": response['choices'][0]['message']['content']},
+            "response": {"role":"assistant", "content": content, "code_found": code_found},
         }
 
-        result_staff = {"prompt": event_data["prompt"],
-                        "response": response['choices'][0]['message']['content'],
+        result_staff = {"prompt": prompt,
+                        "response": content,
+                        "code_found": code_found,
                         "session_player_id": self.session_player_id}
 
+        # store event
+        await SessionEvent.objects.acreate(session_id=self.session_id, 
+                            session_player_id=session_player.id,
+                            type="chat_gpt_prompt",
+                            period_number=event_data["current_period"],
+                            group_number=session_player.parameter_set_player.parameter_set_group_id,
+                            data=result_staff)
+        
         # Send the response back to the client
         await self.send_message(message_to_self=result, message_to_subjects=None, message_to_staff=result_staff, 
                                 message_type=event['type'], send_to_client=True, send_to_group=True)

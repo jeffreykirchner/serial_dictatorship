@@ -13,7 +13,9 @@ send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_dat
     app.chat_button_text = '<i class="fas fa-spinner fa-spin"></i>';   
 
     app.send_message("process_chat_gpt_prompt", 
-                     {"prompt": app.chat_text},
+                     {"prompt": app.chat_text,
+                      "current_period": app.session.world_state.current_period, 
+                     },
                       "self");
 
     app.chat_text = "";

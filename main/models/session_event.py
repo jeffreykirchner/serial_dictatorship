@@ -27,7 +27,7 @@ class SessionEvent(models.Model):
     updated= models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.period_number} - {self.time_remaining} - {self.type}"
+        return f"{self.period_number} - {self.type}"
 
     class Meta:
 
