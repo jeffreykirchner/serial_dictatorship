@@ -26,6 +26,7 @@ from django.db.models.signals import post_save
 from django.utils.timezone import now
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.html import strip_tags
 
 import main
 
@@ -136,30 +137,7 @@ class Session(models.Model):
         '''
         setup summary data
         '''
-
-        session_players = self.session_players.values('id','parameter_set_player__id').all()
-
-        summary_data = {}
-        
-        for i in session_players:
-            i_s = str(i["id"])
-            summary_data[i_s] = {}
-
-            summary_data_player = summary_data[i_s]
-            summary_data_player["earnings"] = 0
-            summary_data_player["cherries_harvested"] = 0
-
-            summary_data_interactions = {}
-            for j in session_players:
-                j_s = str(j["id"])
-                summary_data_interactions[j_s] = {"cherries_i_took":0, 
-                                                  "cherries_i_sent":0,
-                                                  "cherries_they_took":0, 
-                                                  "cherries_they_sent":0,}
-            
-            summary_data_player["interactions"] = summary_data_interactions
-                
-        self.session_periods.all().update(summary_data=summary_data)
+        self.session_periods.all().update(summary_data=None)
 
     def setup_world_state(self):
         '''
@@ -186,8 +164,8 @@ class Session(models.Model):
         groups = {i:{"session_players":{}, "session_players_order":[], "values":{}, "priority_scores":{}, "player_order":{},"index_map":{},"active_player_group_index":0} for i in parameter_set["parameter_set_groups"]}
 
         #session periods
-        for i in self.world_state["session_periods"]:
-            self.world_state["session_periods"][i]["consumption_completed"] = False
+        # for i in self.world_state["session_periods"]:
+        #     self.world_state["session_periods"][i]["consumption_completed"] = False
         
         #session players
         for i in self.session_players.prefetch_related('parameter_set_player').all().values('id',
@@ -321,17 +299,89 @@ class Session(models.Model):
         
         return False
 
+    def get_chat_display_history(self):
+        '''
+        return chat gpt history for display
+        '''
+
+        chat_history = []
+
+        #return last 10 session events
+        for i in self.session_events.filter(type="chat_gpt_prompt").order_by('-timestamp').all()[:10]:
+
+            #add i to front of list 
+            chat_history.append(i.data)
+
+
+        return chat_history
+
     def get_download_summary_csv(self):
         '''
         return data summary in csv format
         '''
         logger = logging.getLogger(__name__)
         
+        world_state = self.world_state
+        parameter_set_players = {}
+        for i in self.session_players.all().values('id','player_number'):
+            parameter_set_players[str(i['id'])] = i
+
+        session_players = {}
+        for i in self.session_players.all().values('id','player_number'):
+            session_players[str(i['id'])] = i
+
+        parameter_set = self.parameter_set.json()
         
         with io.StringIO() as output:
 
             writer = csv.writer(output, quoting=csv.QUOTE_NONNUMERIC)
+            
+            top_row = ["Session ID", "Period", "Group", "Client #"]
 
+            for i in range(parameter_set["group_size"]):
+                top_row.append(f"Value {i+1}")
+
+            top_row.append("Priority Score")
+            top_row.append("Player Order")
+
+            if parameter_set["experiment_mode"] == "Simultaneous":
+                for i in range(parameter_set["group_size"]):
+                    top_row.append(f"Choice {i+1}")
+
+            top_row.append("Prize")
+            top_row.append("Optimal Prize")
+
+            writer.writerow(top_row)
+
+            for p in self.session_periods.all():
+                summary_data = p.summary_data
+                if not summary_data:
+                    continue
+
+                for i in summary_data:
+                    session_player = world_state["session_players"][i]
+                    parameter_set_player = parameter_set["parameter_set_players"][str(session_player["parameter_set_player_id"])]
+
+                    row = []
+                    row.append(self.id)
+                    row.append(p.period_number)
+                    row.append(parameter_set["parameter_set_groups"][str(parameter_set_player["parameter_set_group"])]["name"])
+                    row.append(parameter_set_player["player_number"])
+
+                    for j in summary_data[i]["values"]:
+                        row.append(j["value"])
+                    
+                    row.append(summary_data[i]["priority_score"])
+                    row.append(summary_data[i]["order"])
+
+                    if parameter_set["experiment_mode"] == "Simultaneous":
+                        for j in summary_data[i]["values"]:
+                            row.append(j["rank"])
+                    
+                    row.append(summary_data[i]["prize"])
+                    row.append(summary_data[i]["expected_order"])
+
+                    writer.writerow(row)
 
             v = output.getvalue()
             output.close()
@@ -359,13 +409,13 @@ class Session(models.Model):
 
             parameter_set = self.parameter_set.json()
 
-            for p in self.session_events.all():
+            for p in self.session_events.exclude(type="world_state").all():
                 writer.writerow([self.id,
                                 p.period_number, 
-                                p.group_number, 
+                                parameter_set["parameter_set_groups"][str(p.group_number)]["name"], 
                                 parameter_set_players[str(p.session_player_id)]["player_number"], 
                                 p.type, 
-                                self.action_data_parse(p.type, p.data, session_players),
+                                self.action_data_parse(p.type, p.data, parameter_set, p.group_number, p.period_number, world_state),
                                 p.data, 
                                 p.timestamp])
             
@@ -375,10 +425,23 @@ class Session(models.Model):
 
         return v
 
-    def action_data_parse(self, type, data, session_players):
+    def action_data_parse(self, type, data, parameter_set, group_number, period_number, world_state):
         '''
         return plain text version of action
         '''
+
+        if type == "choices_sequential":
+            return world_state["groups"][str(group_number)]["values"][str(period_number)][data["choice"]-1]["value"]
+        elif type == "choices_simultaneous":
+            s = ""
+            for c in data["choices"]:
+                if s != "":
+                    s += ", "
+                s += world_state["groups"][str(group_number)]["values"][str(period_number)][c-1]["value"] 
+            return s
+        elif type == "chat_gpt_prompt":
+            return f'{data["prompt"]} | {strip_tags(data["response"])}'
+
 
         return ""
     

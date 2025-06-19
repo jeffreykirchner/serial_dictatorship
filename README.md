@@ -1,5 +1,5 @@
-# Multi-User Django Websocket Template
-Template for a multi-user Django Channels experiment.
+# Serial Dictatorship Setup
+Serial Dictatorship Django Channels experiment.
 
 ## Local setup on Windows:
 

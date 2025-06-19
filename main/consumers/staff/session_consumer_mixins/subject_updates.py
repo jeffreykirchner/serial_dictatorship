@@ -12,11 +12,13 @@ from django.utils.html import strip_tags
 from main.models import SessionPlayer
 from main.models import Session
 from main.models import SessionEvent
+from main.models import SessionPeriod
 
 from main.globals import ExperimentPhase
 from main.globals import SubjectStatus
 
 import main
+
 
 class SubjectUpdatesMixin():
     '''
@@ -188,12 +190,13 @@ class SubjectUpdatesMixin():
                         #loop through group[values][current_period] and find the next available value according to rank
                         outer_break = False
                         for i in range(len(player_choices)):
-                            for c in player_choices:
-                                if c == i+1 and not group["values"][str(current_period)][i]["owner"]:
-                                    group["values"][str(current_period)][i]["owner"] = p
+                            for j in range(len(player_choices)):
+
+                                if player_choices[j] == i+1 and not group["values"][str(current_period)][j]["owner"]:
+                                    group["values"][str(current_period)][j]["owner"] = p
                                     period_results[str(p)] = {}
-                                    period_results[str(p)]["prize"] = group["values"][str(current_period)][i]["value"]
-                                    self.world_state_local["session_players"][str(p)]["earnings"] = Decimal(group["values"][str(current_period)][i]["value"]) + \
+                                    period_results[str(p)]["prize"] = group["values"][str(current_period)][j]["value"]
+                                    self.world_state_local["session_players"][str(p)]["earnings"] = Decimal(group["values"][str(current_period)][j]["value"]) + \
                                                                                                     Decimal(self.world_state_local["session_players"][str(p)]["earnings"])    
                                     outer_break = True
                                     break
@@ -201,6 +204,15 @@ class SubjectUpdatesMixin():
                             if outer_break:
                                 break
                         
+                        period_results[str(p)]["expected_order"] = True
+                        #check if player value of choices are in order from highest to lowest
+                        for i in range(len(player_choices)-1):
+                            v1 = player_choices[i]-1
+                            v2 = player_choices[i+1]-1
+                            if group["values"][str(current_period)][v1]["value"] < group["values"][str(current_period)][v2]["value"]:
+                                period_results[str(p)]["expected_order"] = False
+                                break
+
                         #store period results
                         period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
                         period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
@@ -218,15 +230,19 @@ class SubjectUpdatesMixin():
                         session_player.period_results.append(period_results[str(p)])
                         await session_player.asave()
 
+                await SessionPeriod.objects.filter(session_id=self.session_id,period_number=current_period) \
+                                           .aupdate(summary_data=period_results)
+
                 result = {"period_results": period_results,
                           "session_players": self.world_state_local["session_players"],}
 
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type="result", send_to_client=False, send_to_group=True)
             else:
-                 # there was an error with the choices
+               #send status player and staff screens
                 result = {"status": status, 
                           "error_message": error_message,
+                          "player_id": player_id,
                           "player_status":session_player["status"]}
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type=event['type'], send_to_client=False, 
@@ -245,7 +261,10 @@ class SubjectUpdatesMixin():
         '''
         update choices from subject
         '''
-        pass
+        event_data = json.loads(event["group_data"])
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
 
     async def choices_sequential(self, event):
         '''
@@ -294,6 +313,12 @@ class SubjectUpdatesMixin():
             self.world_state_local["choices"][str(player_id)] = choice
             session_player["status"] = SubjectStatus.FINISHED_RANKING
             group["values"][str(current_period)][choice]["owner"] = player_id
+            group["values"][str(current_period)][choice]["expected_order"] = True
+
+            #check if there is a remaining higher unclaimed value
+            for i in group["values"][str(current_period)]:
+                if not i["owner"] and i["value"] > group["values"][str(current_period)][choice]["value"]:
+                    group["values"][str(current_period)][choice]["expected_order"] = False
             
             self.session_events.append(SessionEvent(session_id=self.session_id, 
                                         session_player_id=player_id,
@@ -333,6 +358,7 @@ class SubjectUpdatesMixin():
                         period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
                         period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
                         period_results[str(p)]["period_number"] = current_period
+                        period_results[str(p)]["expected_order"] = group["values"][str(current_period)][prize_index]["expected_order"]
                         
                         period_results[str(p)]["values"] = []
                         for i in range(len(group["values"][str(current_period)])):
@@ -345,6 +371,9 @@ class SubjectUpdatesMixin():
                         session_player = await SessionPlayer.objects.aget(id=p)
                         session_player.period_results.append(period_results[str(p)])
                         await session_player.asave()
+
+                await SessionPeriod.objects.filter(session_id=self.session_id,period_number=current_period) \
+                                           .aupdate(summary_data=period_results)
 
                 result = {"period_results": period_results,
                           "values": group["values"][str(current_period)],
@@ -381,8 +410,11 @@ class SubjectUpdatesMixin():
         '''
         update choice from subject
         '''
-        pass
+        event_data = json.loads(event["group_data"])
 
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        
     async def update_result(self, event):
         '''
         send the result of the period choices to the subject screens
@@ -463,15 +495,28 @@ class SubjectUpdatesMixin():
                 # send message to subject screens to go to next period
                 await self.send_message(message_to_self=None, message_to_group=result,
                                         message_type="start_next_period", send_to_client=False, send_to_group=True)
-
+        else:
+            result = {
+                "status": "success",
+                "player_id": player_id,
+                "player_status": session_player["status"],            
+            }
+            await self.send_message(message_to_self=result, message_to_group=None,
+                                    message_type="update_status", send_to_client=True, send_to_group=False)
+        
         await self.store_world_state(force_store=True)
-    
+
+        # send message to subject screens to go to next period
+
     async def update_start_next_period(self, event):
         '''
         send start next period to subject screens
         '''
         event_data = json.loads(event["group_data"])
 
+        session_players = {i: {"status" : self.world_state_local["session_players"][i]["status"]} for i in self.world_state_local["session_players"]}
+
+        event_data["session_players"] = session_players
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
     
@@ -483,6 +528,37 @@ class SubjectUpdatesMixin():
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
+    
+    async def update_process_chat_gpt_prompt(self, event):
+        '''
+        process chat gpt prompt from subject consumer
+        '''
+        event_data = event["staff_data"]
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+
+    async def update_clear_chat_gpt_history(self, event):
+        '''
+        clear chat gpt history from subject consumer
+        '''
+        event_data = event["staff_data"]
+
+        player_id = event_data["session_player_id"]     
+        session_player = self.world_state_local["session_players"][str(player_id)]
+        parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
+
+        # store event
+        self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                    session_player_id=player_id,
+                                    type="clear_chat_gpt_history",
+                                    period_number=self.world_state_local["current_period"],
+                                    group_number=parameter_set_player["parameter_set_group"],
+                                    data=event_data,))
+        
+        await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+        self.session_events = []
+        
 
 
    

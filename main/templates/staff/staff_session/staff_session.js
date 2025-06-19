@@ -76,6 +76,9 @@ let app = Vue.createApp({
                     replay_timeout : null,
                     replay_time_remaining : 0,
                     replay_current_period : 0,
+
+                    //chat gpt
+                    chat_history : {{session.get_chat_display_history|safe}},
                 }},
     methods: {
 
@@ -212,6 +215,24 @@ let app = Vue.createApp({
                     break;
                 case "update_show_name_input":
                     app.take_show_name_input(message_data);
+                    break;
+                case "update_result":
+                    app.take_result(message_data);
+                    break;
+                case "update_status":
+                    app.take_update_status(message_data);
+                    break;
+                case "update_choices_simultaneous":
+                    app.take_update_status(message_data);
+                    break;
+                case "update_start_next_period":
+                    app.take_start_next_period(message_data);
+                    break;
+                case "update_choices_sequential":
+                    app.take_update_choices_sequential(message_data);
+                    break;
+                case "update_process_chat_gpt_prompt":
+                    app.take_process_chat_gpt_prompt(message_data);
                     break;
             }
             app.working = false;
@@ -404,6 +425,8 @@ let app = Vue.createApp({
         {%include "staff/staff_session/data/data_card.js"%}
         {%include "staff/staff_session/interface/interface_card.js"%}
         {%include "subject/subject_home/helpers.js"%}
+        {%include "staff/staff_session/status/status_card.js"%}
+        {%include "staff/staff_session/chat_gpt/chat_gpt.js"%}
 
         {%include "js/help_doc.js"%}
     

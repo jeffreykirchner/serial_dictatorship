@@ -361,3 +361,4 @@ get_average_earnings: function get_average_earnings()
     
     return "$" + v.toFixed(2);
 }, 
+

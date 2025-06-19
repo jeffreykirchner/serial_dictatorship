@@ -1,0 +1,35 @@
+<div class="card" v-show="first_load_done" id="chat_gpt_card">                  
+    <div class="card-header fw-bold" id="chat_gpt_card">                
+        <span class="align-middle">
+           Chat Bot
+        </span>       
+
+        <span class="float-end"> 
+        <button type="button" 
+                class="btn btn-link ms-2" 
+                title="Show Help Doc" 
+                v-on:click="send_load_help_doc_subject('subject_chat_gpt')">
+            <i class="far fa-question-circle"></i> 
+        </button>
+        </span>          
+    </div>
+    <div class="card-body" >        
+        <div class = "row justify-content-cente">
+            <div class="col-md">
+               
+                <div class="d-flex chat pe-4">    
+                    <div v-for="c in chat_history" 
+                        :key="c">
+                        <div class="user_chat">
+                            P[[get_parameter_set_player_from_player_id(c.session_player_id).player_number]]: [[c.prompt]]
+                        </div>                        
+                        <div class="assistant_chat">
+                            <span v-if="c.code_found"><code>[[c.response]]</code></span>
+                            <span v-else v-html="c.response"></span>
+                        </div>                       
+                    </div>                       
+                </div>
+            </div>
+        </div>        
+    </div>                    
+</div> 

@@ -1,0 +1,82 @@
+<div class="card" v-show="first_load_done">                  
+    <div class="card-header fw-bold">                
+        <span class="align-middle">
+             Period [[session.world_state.current_period]] Status
+        </span>       
+
+        <span class="float-end"> 
+            
+            <button type="button" 
+                    class="btn btn-link ms-2" 
+                    title="Show Help Doc" 
+                    v-on:click="send_load_help_doc('Staff Status')">
+                <i class="far fa-question-circle"></i> 
+            </button>
+        </span>          
+    </div>
+    <div class="card-body" >        
+
+        <!-- player status -->
+        <div class="row justify-content-center">           
+            <div class="col-md-auto text-center">                
+                <div class="table-responsive">
+                <table class="table table-condensed"> 
+                    <thead>
+                        <tr>
+                            <th scope="col" class = "">
+                                Period
+                            </th>
+                            <th scope="col" class = "">
+                                Group
+                            </th>
+                            <th scope="col" class = "">
+                                Client #
+                            </th>                                                        
+                            <th scope="col" class = "">
+                                 [[session.parameter_set.experiment_mode == 'Simultaneous' ? 'Values (Ranking)' : 'Values (Prize)']]
+                            </th>        
+                            <th scope="col" class = "text-center">
+                                Priority Score
+                            </th>
+                            <th scope="col" class = "text-center">
+                                Order
+                            </th>
+                            <th scope="col" class = "text-center">
+                                Prize
+                            </th>                
+                        </tr>
+                    </thead>
+                    <tbody id="player_list">
+                        <tr v-for="(p, index) in get_status_table_values()" 
+                            v-bind:key="p">
+                            <td class="text-nowrap">
+                               [[p.period]]
+                            </td>
+                            <td class="text-nowrap">
+                                [[p.group]]
+                            </td>
+                            <td class="text-nowrap">
+                                [[p.client_number]]
+                            </td>
+                            <td class="text-nowrap">
+                                <span v-html="p.values"></span>
+                            </td>
+                            <td class="text-nowrap">
+                                [[p.priority_score]]
+                            </td>
+                            <td class="text-nowrap">
+                               [[p.order]]
+                            </td>
+                            <td class="text-nowrap">
+                               [[p.prize]]
+                            </td>                      
+                        </tr>
+                    </tbody>
+                   
+                </table>
+                </div>
+            </div>
+        </div>  
+        
+    </div>                    
+</div> 
