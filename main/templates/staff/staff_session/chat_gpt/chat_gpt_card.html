@@ -21,10 +21,11 @@
                     <div v-for="c in chat_history" 
                         :key="c">
                         <div class="user_chat">
-                            [[c.session_player_id]]: [[c.prompt]]
+                            P[[get_parameter_set_player_from_player_id(c.session_player_id).player_number]]: [[c.prompt]]
                         </div>                        
                         <div class="assistant_chat">
-                            <code><span v-html="c.response"></span></code>
+                            <span v-if="c.code_found"><code>[[c.response]]</code></span>
+                            <span v-else v-html="c.response"></span>
                         </div>                       
                     </div>                       
                 </div>
