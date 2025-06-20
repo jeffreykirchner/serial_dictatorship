@@ -3,6 +3,10 @@
  *  */ 
 send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_data) {
 
+    if(app.working) {
+        return;
+    }
+
     app.working = true;
 
     let prompt = {"role":"user", "content": app.chat_text};
@@ -68,9 +72,9 @@ take_clear_chat_gpt_history: function take_clear_chat_gpt_history(message_data) 
  */
 scroll_chat_gpt_history_to_bottom: function scroll_chat_gpt_history_to_bottom(id) {
     Vue.nextTick(() => {
-        // if (app.last_scroll_chat_gpt_history_to_bottom == id) {
-        //     return;
-        // }
+        if (app.last_scroll_chat_gpt_history_to_bottom == id) {
+            return;
+        }
         app.last_scroll_chat_gpt_history_to_bottom = id;        
         document.getElementById(id).scrollIntoView();
     });
