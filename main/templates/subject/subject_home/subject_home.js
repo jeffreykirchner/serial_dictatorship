@@ -63,6 +63,12 @@ let app = Vue.createApp({
                     chat_history : {{session_player.get_chat_display_history|safe}},
                     chat_button_text : 'Chat <i class="far fa-comments"></i>',
                     last_scroll_chat_gpt_history_to_bottom : null,
+
+                    //time remaining
+                    time_remaining : 0,
+                    timer_running : false,
+                    timer_last_pulse : null,
+
                 }},
     methods: {
 
@@ -102,6 +108,25 @@ let app = Vue.createApp({
             else
             {
                 app.tick_tock = "tick";
+            }
+
+            //if one second has passed, decrease time remaining by one second
+            if(app.timer_running)
+            {
+                let now = Date.now();
+                if(app.timer_last_pulse && (now - app.timer_last_pulse) >= 1000)
+                {
+                    app.timer_last_pulse = now;
+                    if(app.time_remaining > 0)
+                    {
+                        app.time_remaining -= 1;
+                    }
+                    else
+                    {
+                        app.timer_running = false;
+                        app.timer_expired();
+                    }
+                }
             }
 
             setTimeout(app.run_tick_tock, app.tick_tock_interval);
@@ -320,6 +345,7 @@ let app = Vue.createApp({
             app.help_modal.hide();
 
             app.notices_seen = [];
+            app.chat_history = [];
         },
 
         /**
