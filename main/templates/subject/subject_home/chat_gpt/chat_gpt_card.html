@@ -15,13 +15,14 @@
         </span>          
     </div>
     <div class="card-body" >        
-        <div class = "row justify-content-cente">
+        <div class = "row justify-content-center">
             <div class="col-md">
                
                 <div class="d-flex chat pe-4">    
-                    <div v-for="c in chat_history" 
+                    <div v-for="(c, index) in chat_history" 
                         :key="c"
-                        v-bind:class="c.role=='user' ? 'user_chat' : 'assistant_chat' ">
+                        v-bind:class="c.role=='user' ? 'user_chat' : 'assistant_chat' "
+                        v-bind:id="'chat_message_' + index">
                         <div v-if="c.role=='user'">
                             [[c.content]]
                         </div>
@@ -29,6 +30,7 @@
                             <span v-if="c.code_found"><code>[[c.content]]</code></span>
                             <span v-else v-html="c.content"></span>
                         </div>
+                        <span v-if="index == 0">[[scroll_chat_gpt_history_to_bottom('chat_message_' + index)]]</span>
                     </div>                       
                 </div>
             </div>

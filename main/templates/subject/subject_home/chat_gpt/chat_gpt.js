@@ -63,5 +63,18 @@ take_clear_chat_gpt_history: function take_clear_chat_gpt_history(message_data) 
     }
 },
 
+/**
+ * scroll to this element in chat gpt history
+ */
+scroll_chat_gpt_history_to_bottom: function scroll_chat_gpt_history_to_bottom(id) {
+    Vue.nextTick(() => {
+        // if (app.last_scroll_chat_gpt_history_to_bottom == id) {
+        //     return;
+        // }
+        app.last_scroll_chat_gpt_history_to_bottom = id;        
+        document.getElementById(id).scrollIntoView();
+    });
+},
+
 
     
