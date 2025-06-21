@@ -30,6 +30,7 @@ reset_experiment: function reset_experiment(){
 
     app.session.world_state.timer_running = false;
     app.working = true;
+    app.chat_history = [];
     app.send_message("reset_experiment", {});
 },
 

@@ -61,7 +61,6 @@ submit_choices_sequential : function submit_choices_sequential() {
 
     app.choices_error_message = "";
     app.working = true;
-
     app.send_message("choices_sequential", 
                     {"choice": app.choice},
                      "group");
@@ -80,6 +79,8 @@ take_choices_sequential(message_data) {
         app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period] = message_data.values;
         app.session.world_state.session_players[player_id].status = message_data.player_status;
 
+        app.working = false;
+        
         app.setup_timer();
     } else {
         app.working = false;
@@ -92,6 +93,7 @@ take_choices_sequential(message_data) {
  */
 send_ready_to_go_on : function send_ready_to_go_on() {
     if(app.working) return; // don't send if already working
+    app.timer_running = false; // stop the timer
 
     app.session.world_state.session_players[app.session_player.id].status = "Waiting";
     app.send_message("ready_to_go_on", 
@@ -110,13 +112,13 @@ take_start_next_period : function take_start_next_period(message_data) {
     app.choices_error_message = "";
     app.choice = null;
 
-    app.setup_timer();
-
     // reset the active player group index for all groups
     for(let g in app.session.world_state.groups) {
         let group = app.session.world_state.groups[g];
         group.active_player_group_index = 0;
     }
+
+    app.setup_timer();
 },
 
 /**
@@ -150,16 +152,28 @@ show_submit_choices_button : function show_submit_choices_button() {
  * timer setup
  */
 setup_timer : function setup_timer() {
-    if(app.session.parameter_set.experiment_mode == 'Sequential') {
+
+    if(app.session.world_state.session_players[app.session_player.id].status == 'Reviewing_Results') {
+        // if the player is reviewing results, do not start the timer
+        app.time_remaining = app.session.parameter_set.ready_to_go_on_length;        
+        app.timer_last_pulse = Date.now();
+        app.timer_running = true;
+    }
+    else if(app.session.parameter_set.experiment_mode == 'Sequential') {
         // start submission timer for the active player
         if(app.show_submit_choices_button()) {
-            app.time_remaining = app.session.parameter_set.period_length;
-            app.timer_running = true;
+            app.time_remaining = app.session.parameter_set.period_length;            
             app.timer_last_pulse = Date.now();
+            app.timer_running = true;
         }
     }
     else if(app.session.parameter_set.experiment_mode == 'Simultaneous') {
         // start submission timer for all players
+        if(app.show_submit_choices_button()) {
+            app.time_remaining = app.session.parameter_set.period_length;           
+            app.timer_last_pulse = Date.now();
+            app.timer_running = true;
+        }
     }
 },
 
@@ -167,26 +181,32 @@ setup_timer : function setup_timer() {
  * timer expired, do action
  */
 timer_expired : function timer_expired() {
-   
-    if(app.session.parameter_set.experiment_mode == 'Sequential') {
-        // if the active player did not submit choices, submit choices with empty array
-        if(app.show_submit_choices_button()) {
-            
-            let choices = app.get_current_choices();
 
-            for(let i=0; i < choices.length; i++) {
-                let choice = choices[i];
-                if(!choice.owner) {
-                    app.choice = i;
-                }
-            }
-
-            app.submit_choices_sequential();
-        }
+    if(app.session.world_state.session_players[app.session_player.id].status == 'Reviewing_Results') {
+        app.send_ready_to_go_on();
     }
-    else if(app.session.parameter_set.experiment_mode == 'Simultaneous') {
-        // if the active player did not submit choices, submit choices with empty array
-        app.submit_choices_simultaneous();
+    else
+    {
+        if(app.session.parameter_set.experiment_mode == 'Sequential') {
+            // if the active player did not submit choices, submit choices with empty array
+            if(app.show_submit_choices_button()) {
+                
+                let choices = app.get_current_choices();
+
+                for(let i=0; i < choices.length; i++) {
+                    let choice = choices[i];
+                    if(!choice.owner) {
+                        app.choice = i;
+                    }
+                }
+
+                app.submit_choices_sequential();
+            }
+        }
+        else if(app.session.parameter_set.experiment_mode == 'Simultaneous') {
+            // if the active player did not submit choices, submit choices with empty array
+            app.submit_choices_simultaneous();
+        }
     }
 },
 

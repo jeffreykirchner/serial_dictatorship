@@ -345,8 +345,8 @@ let app = Vue.createApp({
             app.help_modal.hide();
 
             app.notices_seen = [];
-            app.chat_history = [];
         },
+            
 
         /**
         * update time and start status
