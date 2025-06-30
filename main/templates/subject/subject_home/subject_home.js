@@ -63,6 +63,7 @@ let app = Vue.createApp({
                     chat_history : {{session_player.get_chat_display_history|safe}},
                     chat_button_text : 'Chat <i class="far fa-comments"></i>',
                     last_scroll_chat_gpt_history_to_bottom : null,
+                    chat_working : false,
 
                     //time remaining
                     time_remaining : 0,

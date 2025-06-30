@@ -7,7 +7,7 @@ send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_dat
         return;
     }
 
-    app.working = true;
+    app.chat_working = true;
 
     let prompt = {"role":"user", "content": app.chat_text};
 
@@ -29,7 +29,7 @@ send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_dat
  * take chat gpt response
  */
 take_process_chat_gpt_prompt : function take_chat_gpt_response(message_data) {
-    app.working = false;
+    app.chat_working = false;
     app.chat_button_text = 'Chat <i class="far fa-comments"></i>';
 
     if (message_data.status == "success") {       
@@ -43,12 +43,12 @@ take_process_chat_gpt_prompt : function take_chat_gpt_response(message_data) {
  * clear chat gpt history
  */
 send_clear_chat_gpt_history: function send_clear_chat_gpt_history() {
-    if(app.working) {
+    if(app.chat_working) {
         return;
     }
 
     app.clear_chat_gpt_history_modal.hide();
-    app.working = true;
+    app.chat_working = true;
     app.send_message("clear_chat_gpt_history", 
                      {},
                       "self");
@@ -58,7 +58,7 @@ send_clear_chat_gpt_history: function send_clear_chat_gpt_history() {
  * take clear chat gpt history
  */
 take_clear_chat_gpt_history: function take_clear_chat_gpt_history(message_data) {
-    app.working = false;
+    app.chat_working = false;
     
     if (message_data.status == "success") {
         app.chat_history = message_data.chat_history;

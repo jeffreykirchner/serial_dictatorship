@@ -36,7 +36,6 @@ class GetHelpDocSubjectMixin():
                                            session_player_id=session_player.id,
                                            type="help_doc",
                                            period_number=session_player.session.world_state["current_period"],
-                                           time_remaining=session_player.session.world_state["time_remaining"],
                                            data=title)
 
 
