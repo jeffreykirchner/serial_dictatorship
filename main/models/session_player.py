@@ -159,13 +159,31 @@ class SessionPlayer(models.Model):
         parameter_set = self.parameter_set_player.parameter_set.json()
         parameter_set_player = parameter_set["parameter_set_players"][str(self.parameter_set_player.id)]
 
+        value_list = parameter_set["possible_values"].split(",")
+
         for i in parameter_set:
             text = text.replace(f'#{i}#', str(parameter_set[i]))
 
         text = text.replace("#player_count-1#", str(len(parameter_set["parameter_set_players"])-1))
 
-        return text
-    
+        #min and max value formatted to two decimal places
+        text = text.replace("#min_value#", f'{float(value_list[0]):.2f}')
+        text = text.replace("#max_value#", f'{float(value_list[-1]):.2f}')
+
+        #create a comma separated list of prizes starting with the letter A based on the group size
+        prizes = ""
+        for i in range(parameter_set["group_size"]):
+            prize = chr(65 + i)  #65 is ASCII for 'A'
+
+            if prizes == "":
+                prizes += prize
+            elif i == parameter_set["group_size"] - 1:
+                prizes += " and " + prize
+            elif i < parameter_set["group_size"] - 1:
+                prizes += ", " + prize
+
+        return text.replace("#prizes#", prizes)
+
     def get_chat_display_history(self):
         '''
         return chat gpt history for display
