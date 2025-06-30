@@ -124,8 +124,11 @@
 
                     <span v-if="session.parameter_set.experiment_mode == 'Simultaneous'">Submit Your Choices</span>
                     <span v-if="session.parameter_set.experiment_mode == 'Sequential'">Confirm Choice</span>
-                    
                 </button>
+                <span class="text-muted fs-4 ms-2"
+                            v-if="timer_running">
+                    ([[time_remaining]])
+                </span>
             </div>           
             <div v-else-if="session.world_state.session_players[session_player.id].status == 'Reviewing_Results'"
                 class="col-md text-center">
@@ -135,6 +138,10 @@
                         v-on:click="send_ready_to_go_on()">
                     Ready to Go On
                 </button>   
+                <span class="text-muted fs-4 ms-2"
+                            v-if="timer_running">
+                    ([[time_remaining]])
+                </span>
             </div>
              <div v-else
                 class="col-md text-center fw-bold fs-4">

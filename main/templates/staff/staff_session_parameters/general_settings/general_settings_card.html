@@ -31,6 +31,14 @@
         </div>
         <div class="row">
             <div class="col-7 text-end">
+                {{parameter_set_form.ready_to_go_on_length.label}}:
+            </div>
+            <div class="col text-start">
+                [[parameter_set.ready_to_go_on_length]]
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-7 text-end">
                 {{parameter_set_form.group_size.label}}:
             </div>
             <div class="col text-start">
@@ -100,7 +108,7 @@
             <div class="col text-start">
                 <span v-if="parameter_set.test_mode">Yes</span><span v-else>No</span>                
             </div>  
-        </div> 
+        </div>         
         <div class="row justify-content-center">
             <div class="col-md text-center mb-2 mt-2">
                 <button class="btn btn-outline-primary"
@@ -114,4 +122,4 @@
         </div>
         
     </div>                    
-</div> 
+</div>

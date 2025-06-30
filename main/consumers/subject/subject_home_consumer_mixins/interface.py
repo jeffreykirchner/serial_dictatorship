@@ -2,6 +2,7 @@
 import json
 import logging
 import re
+import markdown
 
 from asgiref.sync import sync_to_async
 from main.decorators import check_message_for_me
@@ -107,37 +108,42 @@ class InterfaceMixin():
             content = response['choices'][0]['message']['content']
             code_found = 0
 
-            if "<button" in content.lower() or "&lt;button" in content.lower():
-                code_found = 1
+            content = strip_tags(content)
+            content = markdown.markdown(content)
 
-            if "<script" in content.lower() or "&lt;script" in content.lower():
-                code_found = 1
+            # if "<button" in content.lower() or "&lt;button" in content.lower():
+            #     code_found = 1
+
+            # if "<script" in content.lower() or "&lt;script" in content.lower():
+            #     code_found = 1
             
-            if "fetch(" in content.lower():
-                content = "Error: Invalid prompt"
+            # if "fetch(" in content.lower():
+            #     content = "Error: Invalid prompt"
 
-            if "<form" in content.lower() or "&lt;form" in content.lower():
-                content = "Error: Invalid prompt"
+            # if "<form" in content.lower() or "&lt;form" in content.lower():
+            #     content = "Error: Invalid prompt"
             
-            if "xmlhttprequest " in content.lower():
-                content = "Error: Invalid prompt"
+            # if "xmlhttprequest " in content.lower():
+            #     content = "Error: Invalid prompt"
 
-            if "img" in content.lower():
-                content = "Error: Invalid prompt"
+            # if "img" in content.lower():
+            #     content = "Error: Invalid prompt"
             
-            if "a href" in content.lower():
-                code_found = 1
+            # if "a href" in content.lower():
+            #     code_found = 1
             
-            if "html" in content.lower() or "&lt;html" in content.lower():
-                code_found = 1
+            # if "html" in content.lower() or "&lt;html" in content.lower():
+            #     code_found = 1
 
-            if "body" in content.lower() or "&lt;body" in content.lower():
-                code_found = 1
+            # if "body" in content.lower() or "&lt;body" in content.lower():
+            #     code_found = 1
 
-            #remove any html events but leave tags
-            event_free_content = re.sub(r'\s+on\w+\s*=\s*(".*?"|\'.*?\'|[^\s>]+)', '', content, flags=re.IGNORECASE)
-            if event_free_content != content:
-                code_found = 1
+            # #remove any html events but leave tags
+            # event_free_content = re.sub(r'\s+on\w+\s*=\s*(".*?"|\'.*?\'|[^\s>]+)', '', content, flags=re.IGNORECASE)
+            # if event_free_content != content:
+            #     code_found = 1
+
+            # code_found = 0
 
             # if strip_tags(content) != content:
             #    code_found = True

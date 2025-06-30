@@ -11,6 +11,8 @@ take_results : function take_results(message_data) {
     app.session.world_state.session_players[app.session_player.id].earnings = message_data.earnings;
 
     app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period] = message_data.period_results.values;
+
+    app.setup_timer();
 },
 
 

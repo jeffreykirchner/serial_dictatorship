@@ -80,18 +80,20 @@ class ParameterSetForm(forms.ModelForm):
                                                                             "step":"1",
                                                                             "min":"1"}))
                                                                 
-
     test_mode = forms.ChoiceField(label='Test Mode',
                                   choices=((1, 'Yes'), (0, 'No')),
                                   widget=forms.Select(attrs={"v-model":"parameter_set.test_mode",}))
 
+    ready_to_go_on_length = forms.IntegerField(label='Ready To Go On Length',
+                                               min_value=1,
+                                               widget=forms.NumberInput(attrs={"v-model":"parameter_set.ready_to_go_on_length","step":"1","min":"1"}))
    
     class Meta:
         model=ParameterSet
-        fields =['period_count', 'period_length', 'group_size', 'possible_values', 'experiment_mode','max_priority_score',
+        fields =['period_count', 'period_length', 'ready_to_go_on_length', 'group_size', 'possible_values', 'experiment_mode','max_priority_score',
                  'chat_gpt_mode', 'show_instructions', 
                  'survey_required', 'survey_link', 'prolific_mode', 'prolific_completion_link', 'reconnection_limit',
-                 'test_mode', ]
+                 'test_mode',  ]
 
     def clean_survey_link(self):
         
