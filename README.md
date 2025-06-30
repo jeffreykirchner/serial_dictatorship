@@ -27,11 +27,11 @@ local_settings.py is used for local development and is excluded from the repo<br
 Update the database section of this file with the info from your locally run instance of PostgreSQL.
 
 ### Python and Virtual Environment Setup:
-Install Python 3.12:
+Install Python 3.13:
 ```
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt update 
-sudo apt install python3.12
+sudo apt install python3.13
 sudo apt-get install python3.12-distutils
 ```
 
@@ -39,7 +39,7 @@ Install Virtual Environment:
 ```
 sudo apt install pipx
 pipx install virtualenv
-virtualenv --python=python3.12 _project_env
+virtualenv --python=python3.13 _project_env
 source _project_env/bin/activate
 pip install -r requirements.txt
 
