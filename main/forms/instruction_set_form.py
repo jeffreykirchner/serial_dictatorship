@@ -19,12 +19,12 @@ class InstructionSetForm(forms.ModelForm):
                                                                        "v-model":"instruction_set.action_page_1",
                                                                        "placeholder" : "Page Number"}))
     
-    action_page_2 = forms.IntegerField(label='Required Action: Chat Bot', 
+    action_page_2 = forms.IntegerField(label='Required Action: Results', 
                                        widget=forms.NumberInput(attrs={"min":"1", 
                                                                         "v-model":"instruction_set.action_page_2",
                                                                        "placeholder" : "Page Number"}))
     
-    action_page_3 = forms.IntegerField(label='Required Action: 3', 
+    action_page_3 = forms.IntegerField(label='Required Action: Chat Bot', 
                                        widget=forms.NumberInput(attrs={"min":"1", 
                                                                        "v-model":"instruction_set.action_page_3",
                                                                        "placeholder" : "Page Number"}))
