@@ -62,7 +62,6 @@ class InstructionSetForm(forms.ModelForm):
         model=InstructionSet
         fields = ('label', 'action_page_1', 'action_page_2', 'action_page_3', 'action_page_4', 'action_page_5', 'action_page_6', 'example_values', 'example_prize')
 
-    
     def clean_example_values(self):
         #number of possible values must be greater than or equal to the group size
         try:
