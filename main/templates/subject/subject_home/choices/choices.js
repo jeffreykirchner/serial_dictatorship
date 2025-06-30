@@ -2,15 +2,31 @@
  * return a json object of choices for the subject's current group and period
  *  */ 
 get_current_choices : function get_current_choices() {
-    let choice_list = [];
+    // let choice_list = [];
 
     // let choices = app.session.world_state.parameter_set.
 
-    let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
+    if(app.session.world_state.current_experiment_phase == 'Instructions') 
+    {
+        let choices = app.instructions.example_values.split(",");
+        let result = [];
+        //conver to float
+        for(let i=0; i < choices.length; i++) {
+            result.push({value: choices[i], owner: null});
+        }
 
-    let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
+        result[1].owner = -1;
 
-    return group.values[app.session.world_state.current_period.toString()];
+        return result;
+    }
+    else
+    {
+        let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
+
+        let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
+
+        return group.values[app.session.world_state.current_period.toString()];
+    }
 },
 
 /**
@@ -28,15 +44,22 @@ validate and submit subject choices to the server
  */
 submit_choices_simultaneous : function submit_choices() {
 
-    if(app.working) return; // don't submit if already working
-    app.timer_running = false; // stop the timer
+    if(app.session.world_state.current_experiment_phase == 'Instructions') 
+    {
 
-    app.choices_error_message = "";
-    app.working = true;
+    }
+    else
+    {
+        if(app.working) return; // don't submit if already working
+        app.timer_running = false; // stop the timer
 
-    app.send_message("choices_simultaneous", 
-                    {"choices": app.choices},
-                     "group"); 
+        app.choices_error_message = "";
+        app.working = true;
+
+        app.send_message("choices_simultaneous", 
+                        {"choices": app.choices},
+                        "group"); 
+    }
 },
 
 /***
@@ -56,14 +79,21 @@ take_choices_simultaneous(message_data) {
  */
 submit_choices_sequential : function submit_choices_sequential() {
 
-    if(app.working) return; // don't submit if already working
-    app.timer_running = false; // stop the timer
+    if(app.session.world_state.current_experiment_phase == 'Instructions') 
+    {
 
-    app.choices_error_message = "";
-    app.working = true;
-    app.send_message("choices_sequential", 
-                    {"choice": app.choice},
-                     "group");
+    }
+    else
+    {
+        if(app.working) return; // don't submit if already working
+        app.timer_running = false; // stop the timer
+
+        app.choices_error_message = "";
+        app.working = true;
+        app.send_message("choices_sequential", 
+                        {"choice": app.choice},
+                        "group");
+    }
 },
 
 /**
