@@ -17,8 +17,11 @@
     <div class="card-body" >        
         <div class = "row justify-content-center">
             <div class="col-md">
-               
-                <div class="d-flex chat pe-4">    
+               <div class="text-center text-secondary mb-4">
+                      Hi, I am a chat bot and here to help you. Ask me anything, however keep in mind that I cannot see your screen. This means you will have to explain what you see before asking me a question about it.   
+                </div> 
+                <div class="d-flex chat pe-4">
+                       
                     <div v-for="(c, index) in chat_history" 
                         :key="c"
                         v-bind:class="c.role=='user' ? 'user_chat' : 'assistant_chat' "
