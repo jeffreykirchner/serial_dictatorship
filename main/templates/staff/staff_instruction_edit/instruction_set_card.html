@@ -98,6 +98,24 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col text-end">
+                {{instruction_set_form.example_values.label}}:
+            </div>
+            <div class="col">
+                [[instruction_set.example_values]]
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-end">
+                {{instruction_set_form.example_prize.label}}:
+            </div>
+            <div class="col">
+                $[[parseFloat(instruction_set.example_prize).toFixed(2)]]
+            </div>
+        </div>
+
         <div class="row justify-content-center">
             <div class="col-md text-center mb-2 mt-2">
                 <button class="btn btn-outline-primary"

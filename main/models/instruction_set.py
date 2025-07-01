@@ -21,7 +21,10 @@ class InstructionSet(models.Model):
     action_page_4 = models.IntegerField(verbose_name='Required Action: 4', default=4)
     action_page_5 = models.IntegerField(verbose_name='Required Action: 5', default=5)
     action_page_6 = models.IntegerField(verbose_name='Required Action: 6', default=6)
-        
+
+    example_values = models.CharField(verbose_name="Example Values", max_length=100, default="0.00,0.25,0.50,0.75")
+    example_prize = models.DecimalField(verbose_name="Example Prize", max_digits=4, decimal_places=2, default=0.50)
+
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -49,6 +52,9 @@ class InstructionSet(models.Model):
         self.action_page_4 = new_ps.get("action_page_4")
         self.action_page_5 = new_ps.get("action_page_5")
         self.action_page_6 = new_ps.get("action_page_6")
+
+        self.example_values = new_ps.get("example_values", "0.00,0.25,0.50,0.75")
+        self.example_prize = new_ps.get("example_prize", 0.50)
 
         self.save()
         
@@ -94,6 +100,18 @@ class InstructionSet(models.Model):
             help_docs_subject.append(main.models.HelpDocsSubject(instruction_set=self, title=i.title, text=i.text))
 
         main.models.HelpDocsSubject.objects.bulk_create(help_docs_subject)
+    
+    def copy_help_docs_subject_from_dict(self, help_docs_subject):
+        self.help_docs_subject.all().delete()
+        
+        help_docs_subjects = []
+
+        for help_doc in help_docs_subject:
+            help_docs_subjects.append(main.models.HelpDocsSubject(instruction_set=self, 
+                                                        title=help_doc['title'], 
+                                                        text=help_doc['text']))
+
+        main.models.HelpDocsSubject.objects.bulk_create(help_docs_subjects)
         
     #return json object of class
     def json(self):
@@ -112,6 +130,9 @@ class InstructionSet(models.Model):
             "action_page_4" : self.action_page_4,
             "action_page_5" : self.action_page_5,
             "action_page_6" : self.action_page_6,
+
+            "example_values" : self.example_values,
+            "example_prize" : str(self.example_prize),
 
             "instruction_pages" : [i.json() for i in self.instructions.all()],
             "help_docs_subject" : [i.json() for i in self.help_docs_subject.all()],
@@ -133,6 +154,9 @@ class InstructionSet(models.Model):
             "action_page_4" : self.action_page_4,
             "action_page_5" : self.action_page_5,
             "action_page_6" : self.action_page_6,
+
+            "example_values" : self.example_values,
+            "example_prize" : str(self.example_prize),
 
             "instruction_pages" : [await i.ajson() async for i in self.instructions.all()],
             "help_docs_subject" : [await i.ajson() async for i in self.help_docs_subject.all()],
