@@ -135,8 +135,14 @@ send_ready_to_go_on : function send_ready_to_go_on() {
  * start the next period
  */
 take_start_next_period : function take_start_next_period(message_data) {
+
     app.session.world_state.current_period = message_data.current_period;
-    app.session.world_state.session_players[app.session_player.id].status = "Ranking";
+   
+    let subject_status = message_data.subject_status;
+
+    for (let i in subject_status) {
+        app.session.world_state.session_players[i].status = subject_status[i];
+    }
 
     app.choices = [];
     app.choices_error_message = "";
@@ -189,6 +195,12 @@ setup_timer : function setup_timer() {
         app.timer_last_pulse = Date.now();
         app.timer_running = true;
     }
+    if(app.session.world_state.session_players[app.session_player.id].status == 'Chatting') {
+        // if the player is finished ranking, do not start the timer
+        app.time_remaining = app.session.parameter_set.chat_gpt_length;
+        app.timer_last_pulse = Date.now();
+        app.timer_running = true;
+    }
     else if(app.session.parameter_set.experiment_mode == 'Sequential') {
         // start submission timer for the active player
         if(app.show_submit_choices_button()) {
@@ -212,31 +224,47 @@ setup_timer : function setup_timer() {
  */
 timer_expired : function timer_expired() {
 
-    if(app.session.world_state.session_players[app.session_player.id].status == 'Reviewing_Results') {
-        app.send_ready_to_go_on();
-    }
-    else
-    {
-        if(app.session.parameter_set.experiment_mode == 'Sequential') {
-            // if the active player did not submit choices, submit choices with empty array
-            if(app.show_submit_choices_button()) {
-                
-                let choices = app.get_current_choices();
+    try {
 
-                for(let i=0; i < choices.length; i++) {
-                    let choice = choices[i];
-                    if(!choice.owner) {
-                        app.choice = i;
+        if(app.session.world_state.session_players[app.session_player.id].status == 'Reviewing_Results') {
+            app.send_ready_to_go_on();
+        }
+        else if(app.session.world_state.session_players[app.session_player.id].status == 'Chatting') {
+            app.send_done_chatting();
+        }
+        else
+        {
+            if(app.session.parameter_set.experiment_mode == 'Sequential') {
+                // if the active player did not submit choices, submit choices with empty array
+                if(app.show_submit_choices_button()) {
+                    
+                    let choices = app.get_current_choices();
+
+                    for(let i=0; i < choices.length; i++) {
+                        let choice = choices[i];
+                        if(!choice.owner) {
+                            app.choice = i;
+                        }
                     }
+
+                    app.submit_choices_sequential();
+                }
+            }
+            else if(app.session.parameter_set.experiment_mode == 'Simultaneous') {
+                //if player does not submit, sumbit choices from 1 to n
+
+                app.choices = [];
+
+                for(let i=0; i < app.session.parameter_set.group_size; i++) {
+                    app.choices.push(i+1);
                 }
 
-                app.submit_choices_sequential();
+                app.submit_choices_simultaneous();
             }
         }
-        else if(app.session.parameter_set.experiment_mode == 'Simultaneous') {
-            // if the active player did not submit choices, submit choices with empty array
-            app.submit_choices_simultaneous();
-        }
+    }
+    catch (error) {
+        console.error("Error in timer_expired: ", error);        
     }
 },
 

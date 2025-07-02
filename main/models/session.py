@@ -35,6 +35,7 @@ from main.models import ParameterSet
 from main.globals import ExperimentPhase
 from main.globals import SubjectStatus
 from main.globals import round_up
+from main.globals import ChatGPTMode
 
 #experiment sessoin
 class Session(models.Model):
@@ -172,7 +173,7 @@ class Session(models.Model):
                                                                                             'parameter_set_player__id'):
             v = {}
             v['earnings'] = 0
-            v['status'] = SubjectStatus.RANKING
+            v['status'] = SubjectStatus.RANKING if self.parameter_set.chat_gpt_mode == ChatGPTMode.OFF else SubjectStatus.CHATTING
             # v['history'] = {}
             v['parameter_set_player_id'] = i['parameter_set_player__id']
             self.world_state["session_players"][str(i['id'])] = v

@@ -49,6 +49,10 @@ convert_player_status: function convert_player_status(status_text) {
             return "Finished Ranking";       
         case "Waiting":
             return "Waiting";
+        case "Chatting":
+            return "Chatting";
+        case "Finished_Chatting":
+            return "Finished Chatting";
         default:
             return "---";
     }
@@ -74,5 +78,18 @@ take_update_choices_sequential: function take_update_choices_sequential(message_
 
     if(session_player) {
         session_player.status = message_data.player_status;
+    }
+},
+
+/**
+ * take done chatting
+ */
+take_done_chatting: function take_done_chatting(message_data) {
+    app.chat_working = false;
+    
+    let subject_status = message_data.subject_status;
+
+    for (let i in subject_status) {
+        app.session.world_state.session_players[i].status = subject_status[i];
     }
 },

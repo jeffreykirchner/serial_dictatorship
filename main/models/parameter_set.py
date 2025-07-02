@@ -30,6 +30,7 @@ class ParameterSet(models.Model):
     experiment_mode = models.CharField(max_length=20, choices=ExperimentMode.choices, default=ExperimentMode.SIMULTANEOUS, verbose_name='Experiment Mode') #experiment mode, simultaneous or sequential
     max_priority_score = models.IntegerField(verbose_name='Max Priority Score', default=10)
     chat_gpt_mode = models.CharField(max_length=20, choices=ChatGPTMode.choices, default=ChatGPTMode.OFF, verbose_name='ChatGPT Mode')
+    chat_gpt_length = models.IntegerField(verbose_name='ChatGPT Length', default=60)                       #length of time a user can interact with chat gpt each period.
 
     show_instructions = models.BooleanField(default=True, verbose_name='Show Instructions')                   #if true show instructions
 
@@ -75,6 +76,7 @@ class ParameterSet(models.Model):
             self.experiment_mode = new_ps.get("experiment_mode", ExperimentMode.SIMULTANEOUS)
             self.max_priority_score = new_ps.get("max_priority_score", 1)
             self.chat_gpt_mode = new_ps.get("chat_gpt_mode", ChatGPTMode.OFF)
+            self.chat_gpt_length = new_ps.get("chat_gpt_length", 60)
 
             self.show_instructions = True if new_ps.get("show_instructions") else False
 
@@ -211,6 +213,7 @@ class ParameterSet(models.Model):
         self.json_for_session["experiment_mode"] = self.experiment_mode
         self.json_for_session["max_priority_score"] = self.max_priority_score
         self.json_for_session["chat_gpt_mode"] = self.chat_gpt_mode
+        self.json_for_session["chat_gpt_length"] = self.chat_gpt_length
 
         self.json_for_session["show_instructions"] = 1 if self.show_instructions else 0
 

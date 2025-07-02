@@ -52,6 +52,12 @@ class ParameterSetForm(forms.ModelForm):
     chat_gpt_mode = forms.ChoiceField(label='ChatGPT Mode',
                                       choices=ChatGPTMode.choices,
                                       widget=forms.Select(attrs={"v-model":"parameter_set.chat_gpt_mode",}))
+    
+    chat_gpt_length = forms.IntegerField(label='ChatGPT Length (seconds)',
+                                         min_value=1,
+                                         widget=forms.NumberInput(attrs={"v-model":"parameter_set.chat_gpt_length",
+                                                                         "step":"1",
+                                                                         "min":"1"}))
 
 
     show_instructions = forms.ChoiceField(label='Show Instructions',
@@ -91,7 +97,7 @@ class ParameterSetForm(forms.ModelForm):
     class Meta:
         model=ParameterSet
         fields =['period_count', 'period_length', 'ready_to_go_on_length', 'group_size', 'possible_values', 'experiment_mode','max_priority_score',
-                 'chat_gpt_mode', 'show_instructions', 
+                 'chat_gpt_mode', 'chat_gpt_length', 'show_instructions', 
                  'survey_required', 'survey_link', 'prolific_mode', 'prolific_completion_link', 'reconnection_limit',
                  'test_mode',  ]
 

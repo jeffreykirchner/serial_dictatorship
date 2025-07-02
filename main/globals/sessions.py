@@ -32,8 +32,10 @@ class ExperimentMode(models.TextChoices):
 
 class SubjectStatus(models.TextChoices):
     '''
-    subject status
+    subject statuses
     '''
+    CHATTING = 'Chatting', _('Chatting')
+    FINISHED_CHATTING = 'Finished_Chatting', _('Finished_Chatting')
     RANKING = 'Ranking', _('Ranking')
     FINISHED_RANKING = 'Finished_Ranking', _('Finished_Ranking')
     REVIEWING_RESULTS = 'Reviewing_Results', _('Reviewing_Results')
