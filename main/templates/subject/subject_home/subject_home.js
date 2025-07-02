@@ -197,6 +197,9 @@ let app = Vue.createApp({
                 case "clear_chat_gpt_history":
                     app.take_clear_chat_gpt_history(message_data);
                     break;
+                case "update_done_chatting":
+                    app.take_done_chatting(message_data);
+                    break;
             }
 
             app.first_load_done = true;
@@ -239,6 +242,10 @@ let app = Vue.createApp({
                     !app.session_player.survey_complete)
             {
                 window.location.replace(app.session_player.survey_link);
+            }
+            else if(app.session.world_state.current_experiment_phase == 'Run')
+            {
+                app.setup_timer();
             }
 
             if(document.getElementById('instructions_frame_a'))

@@ -16,6 +16,7 @@ from main.models import SessionPeriod
 
 from main.globals import ExperimentPhase
 from main.globals import SubjectStatus
+from main.globals import ChatGPTMode
 
 import main
 
@@ -111,7 +112,79 @@ class SubjectUpdatesMixin():
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
+        
+    async def done_chatting(self, event):
+        '''
+        subject has finished chatting with bot
+        '''
 
+        if self.controlling_channel != self.channel_name:
+            return
+        
+        logger = logging.getLogger(__name__)
+        
+        event_data = event["message_text"]
+        status = "success"
+        error_message = ""
+
+        event_data = event["message_text"]
+
+        player_id = self.session_players_local[event["player_key"]]["id"]        
+        session_player = self.world_state_local["session_players"][str(player_id)]
+        parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
+
+        session_player["status"] = SubjectStatus.FINISHED_CHATTING
+
+        # store event
+        self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                   session_player_id=player_id,
+                                   type=event['type'],
+                                   period_number=self.world_state_local["current_period"],
+                                   group_number=parameter_set_player["parameter_set_group"],
+                                   data=event_data,))
+        
+        # await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+        # self.session_events = []
+
+        # check if all subjects are ready
+        all_ready = True
+        for i in self.world_state_local["session_players"]:
+            if self.world_state_local["session_players"][i]["status"] != SubjectStatus.FINISHED_CHATTING:
+                all_ready = False
+                break
+
+        if all_ready:
+
+            result = {"subject_status":{}}
+
+            for i in self.world_state_local["session_players"]:
+                self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
+                result["subject_status"][i] = self.world_state_local["session_players"][i]["status"]
+
+            # send message to subject screens to go to next period
+            await self.send_message(message_to_self=None, message_to_group=result,
+                                    message_type=event['type'], send_to_client=False, send_to_group=True)
+            
+        else:
+            result = {
+                "status": "success",
+                "player_id": player_id,
+                "player_status": session_player["status"],            
+            }
+            await self.send_message(message_to_self=result, message_to_group=None,
+                                    message_type="update_status", send_to_client=True, send_to_group=False)
+        
+        await self.store_world_state()
+    
+    async def update_done_chatting(self, event):
+        '''
+        send done chatting to subject screens
+        '''
+        event_data = json.loads(event["group_data"])
+
+        await self.send_message(message_to_self=event_data, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        
     async def choices_simultaneous(self, event):
         '''
         take choices from subject
@@ -477,7 +550,10 @@ class SubjectUpdatesMixin():
 
                 # reset choices and set session players status to 'Ranking'
                 for i in self.world_state_local["session_players"]:
-                    self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
+                    if self.parameter_set_local["chat_gpt_mode"] == ChatGPTMode.OFF:
+                        self.world_state_local["session_players"][i]["status"] = SubjectStatus.RANKING
+                    else:
+                        self.world_state_local["session_players"][i]["status"] = SubjectStatus.CHATTING
     
                 # reset choices
                 self.world_state_local["choices"] = {}
@@ -489,8 +565,12 @@ class SubjectUpdatesMixin():
 
                 result = {
                     "current_period": self.world_state_local["current_period"],  
-                    "active_player_group_index": 0,             
+                    "active_player_group_index": 0, 
+                    "subject_status": {},           
                 }
+
+                for i in self.world_state_local["session_players"]:                    
+                    result["subject_status"][i] = self.world_state_local["session_players"][i]["status"]
 
                 # send message to subject screens to go to next period
                 await self.send_message(message_to_self=None, message_to_group=result,

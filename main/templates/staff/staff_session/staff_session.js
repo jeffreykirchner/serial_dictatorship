@@ -185,22 +185,7 @@ let app = Vue.createApp({
                     break;
                 case "update_refresh_screens":
                     app.take_refresh_screens(message_data);
-                    break;
-                case "update_target_location_update":
-                    app.take_target_location_update(message_data);
-                    break;
-                case "update_collect_token":
-                    app.take_collect_token(message_data);
-                    break;
-                case "update_tractor_beam":
-                    app.take_tractor_beam(message_data);
-                    break;
-                case "update_interaction":
-                    app.take_interaction(message_data);
-                    break;
-                case "update_cancel_interaction":
-                    app.take_cancel_interaction(message_data);
-                    break;   
+                    break; 
                 case "load_session_events":
                     app.take_load_session_events(message_data);
                     break; 
@@ -233,6 +218,9 @@ let app = Vue.createApp({
                     break;
                 case "update_process_chat_gpt_prompt":
                     app.take_process_chat_gpt_prompt(message_data);
+                    break;
+                case "update_done_chatting":
+                    app.take_done_chatting(message_data);
                     break;
             }
             app.working = false;

@@ -68,6 +68,34 @@ take_clear_chat_gpt_history: function take_clear_chat_gpt_history(message_data) 
 },
 
 /**
+ * send done chatting
+ */
+send_done_chatting: function send_done_chatting() {
+
+    app.chat_working = true;
+    app.session.world_state.session_players[app.session_player.id].status = "Finished_Chatting";
+
+    app.send_message("done_chatting", 
+                     {"current_period": app.session.world_state.current_period}, 
+                     "group");
+},
+
+/**
+ * take done chatting
+ */
+take_done_chatting: function take_done_chatting(message_data) {
+    app.chat_working = false;
+    
+    let subject_status = message_data.subject_status;
+
+    for (let i in subject_status) {
+        app.session.world_state.session_players[i].status = subject_status[i];
+    }
+
+    app.setup_timer();
+},
+
+/**
  * scroll to this element in chat gpt history
  */
 scroll_chat_gpt_history_to_bottom: function scroll_chat_gpt_history_to_bottom(id) {
