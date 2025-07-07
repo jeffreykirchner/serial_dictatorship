@@ -12,7 +12,7 @@ function do_web_sockets()
         };
     
         app.chat_socket.onclose = function(e) {
-            console.error('Socket closed, trying to connect ... ');
+            console.info('Socket closed, trying to connect ... ');
 
             app.reconnecting=true;
             if(!app.handle_socket_connection_try()) 
