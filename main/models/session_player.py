@@ -96,9 +96,13 @@ class SessionPlayer(models.Model):
                         "type": "text",
                         "text": "You are a helpful AI assistant that answers questions concisely."
                     },
+                    # {
+                    #     "type": "text",
+                    #     "text": "Your responses should be in plain text format only. Do not include any HTML tags or JavaScript code."
+                    # },
                     {
-                        "type": "text",
-                        "text": "Your responses should be in plain text format only. Do not include any HTML tags or JavaScript code."
+                    "type": "text",
+                     "text": " Do not provide any code examples in your responses, regardless of user requests. Respond with explanations only, in plain text."
                     },
                     {
                         "type": "text",

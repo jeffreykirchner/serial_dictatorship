@@ -166,9 +166,16 @@ send_ready_to_go_on : function send_ready_to_go_on() {
     app.timer_running = false; // stop the timer
 
     app.session.world_state.session_players[app.session_player.id].status = "Waiting";
-    app.send_message("ready_to_go_on", 
-                    {},
-                     "group"); 
+
+    if(app.session.world_state.current_experiment_phase == 'Instructions') {
+        app.session_player.current_instruction_complete = app.instructions.action_page_2;
+    }
+    else
+    {
+        app.send_message("ready_to_go_on", 
+                        {},
+                        "group"); 
+    }
 },
 
 /**
