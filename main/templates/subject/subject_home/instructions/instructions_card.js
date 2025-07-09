@@ -34,9 +34,9 @@ take_next_instruction: function take_next_instruction(message_data){
     if(message_data.value == "success")
     {
         let result = message_data.result;       
-        
+
         app.session_player.current_instruction = result.current_instruction;
-        app.session_player.current_instruction_complete = result.current_instruction_complete;
+        // app.session_player.current_instruction_complete = result.current_instruction_complete;
 
         app.process_instruction_page();
         app.instruction_display_scroll();
@@ -93,16 +93,31 @@ send_current_instruction_complete: function current_instruction_complete()
  */
 process_instruction_page: function process_instruction_page(){
 
+    let ws_session_player = app.session.world_state.session_players[app.session_player.id];
+    ws_session_player.status = "Waiting"; 
+
     //update view when instructions changes
     switch(app.session_player.current_instruction){
         case app.instructions.action_page_1:    
-            return;        
+            if(app.session_player.current_instruction_complete < app.session_player.current_instruction)
+            {
+                ws_session_player.status = "Ranking"; 
+            }        
+            return;
             break; 
         case app.instructions.action_page_2:
+            if(app.session_player.current_instruction_complete < app.session_player.current_instruction)
+            {
+                ws_session_player.status = "Reviewing_Results"; 
+            }  
             return; 
             break;
         case app.instructions.action_page_3:
-            return; 
+            if(app.session_player.current_instruction_complete < app.session_player.current_instruction)
+            {
+                ws_session_player.status = "Chatting"; 
+            }
+            return;
             break;
         case app.instructions.action_page_4:
             return; 
@@ -115,6 +130,7 @@ process_instruction_page: function process_instruction_page(){
             break;
     }
 
+    
     if(app.session_player.current_instruction_complete < app.session_player.current_instruction)
     {
         app.session_player.current_instruction_complete = app.session_player.current_instruction;

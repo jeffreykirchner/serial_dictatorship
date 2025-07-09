@@ -48,19 +48,27 @@ class InstructionSetForm(forms.ModelForm):
                                      help_text='Comma separated list of example values, e.g. 0.00,0.25,0.50,0.75',
                                      widget=forms.TextInput(attrs={"v-model":"instruction_set.example_values",
                                                                    "placeholder":"1,2,3,4"}))
+
+    example_prize_index = forms.IntegerField(label='Example Prize Index',
+                                        help_text='The index of the example prize in the example values list, e.g. 0 for the first value, 1 for the second value, etc.',
+                                        widget=forms.NumberInput(attrs={"step":"1",
+                                                                       "min":"0",
+                                                                       "v-model":"instruction_set.example_prize_index",
+                                                                       "placeholder" : "0"}))
     
-    example_prize = forms.DecimalField(label='Example Prize',
-                                        max_digits=4,
-                                        decimal_places=2,
-                                        initial=0.50,
-                                        widget=forms.NumberInput(attrs={"step":"0.01",
-                                                                       "min":"0.00",
-                                                                       "v-model":"instruction_set.example_prize",
-                                                                       "placeholder" : "0.50"}))
+    example_priority_score = forms.IntegerField(label='Example Priority Score',                                               
+                                                min_value=1,
+                                                max_value=10,
+                                                widget=forms.NumberInput(attrs={"step":"1",
+                                                                                "min":"1",
+                                                                                "max":"10",
+                                                                                "v-model":"instruction_set.example_priority_score",
+                                                                                "placeholder" : "5"}))
 
     class Meta:
         model=InstructionSet
-        fields = ('label', 'action_page_1', 'action_page_2', 'action_page_3', 'action_page_4', 'action_page_5', 'action_page_6', 'example_values', 'example_prize')
+        fields = ('label', 'action_page_1', 'action_page_2', 'action_page_3', 'action_page_4', 'action_page_5', 'action_page_6', 
+                  'example_values', 'example_prize_index', 'example_priority_score')
 
     def clean_example_values(self):
         #number of possible values must be greater than or equal to the group size

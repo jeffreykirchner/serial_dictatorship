@@ -7,8 +7,9 @@
         <span class="float-end"> 
             <button type="button" 
                     v-bind:class="tick_tock=='tick' ? 'btn btn-outline-success' : 'btn btn-success'"
-                    title="Clear Chat History" 
-                    v-if="session.world_state.session_players[session_player.id].status == 'Chatting'"
+                    title="Done Chatting" 
+                    v-if="session.world_state.current_experiment_phase == 'Run' && 
+                          session.world_state.session_players[session_player.id].status == 'Chatting'"
                     v-bind:disabled="reconnecting || chat_working || session.started===false || session.world_state.finished"
                     v-on:click="send_done_chatting()">
                 Done Chatting <i class="fas fa-check"></i> ([[time_remaining]])

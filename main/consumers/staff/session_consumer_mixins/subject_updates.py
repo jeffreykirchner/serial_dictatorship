@@ -230,21 +230,24 @@ class SubjectUpdatesMixin():
             error_message = "Choices must be unique."
 
         if status == "success":    
-            self.world_state_local["choices"][str(player_id)] = choices
-            session_player["status"] = SubjectStatus.FINISHED_RANKING
 
-            self.session_events.append(SessionEvent(session_id=self.session_id, 
-                                        session_player_id=player_id,
-                                        type=event['type'],
-                                        period_number=self.world_state_local["current_period"],
-                                        group_number=parameter_set_player["parameter_set_group"],
-                                        data=event_data))
+            if self.world_state_local["current_experiment_phase"] == "Run":
+                self.world_state_local["choices"][str(player_id)] = choices
+                session_player["status"] = SubjectStatus.FINISHED_RANKING
 
-            await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
-            self.session_events = []
+                self.session_events.append(SessionEvent(session_id=self.session_id, 
+                                            session_player_id=player_id,
+                                            type=event['type'],
+                                            period_number=self.world_state_local["current_period"],
+                                            group_number=parameter_set_player["parameter_set_group"],
+                                            data=event_data))
+
+                await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+                self.session_events = []
 
             #check if all players have made choices
-            if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]):
+            if len(self.world_state_local["choices"]) == len(self.world_state_local["session_players"]) and \
+                self.world_state_local["current_experiment_phase"] == "Run":
                 #all players have made choices, send to server                
                 current_period = self.world_state_local["current_period"]
 

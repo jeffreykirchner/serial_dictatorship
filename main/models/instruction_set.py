@@ -23,7 +23,8 @@ class InstructionSet(models.Model):
     action_page_6 = models.IntegerField(verbose_name='Required Action: 6', default=6)
 
     example_values = models.CharField(verbose_name="Example Values", max_length=100, default="0.00,0.25,0.50,0.75")
-    example_prize = models.DecimalField(verbose_name="Example Prize", max_digits=4, decimal_places=2, default=0.50)
+    example_prize_index = models.IntegerField(verbose_name="Example Prize Index", default=0)
+    example_priority_score = models.IntegerField(verbose_name="Example Priority Score", default=5)
 
     timestamp = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -54,7 +55,8 @@ class InstructionSet(models.Model):
         self.action_page_6 = new_ps.get("action_page_6")
 
         self.example_values = new_ps.get("example_values", "0.00,0.25,0.50,0.75")
-        self.example_prize = new_ps.get("example_prize", 0.50)
+        self.example_prize_index = new_ps.get("example_prize_index", 0)
+        self.example_priority_score = new_ps.get("example_priority_score", 5)
 
         self.save()
         
@@ -132,7 +134,8 @@ class InstructionSet(models.Model):
             "action_page_6" : self.action_page_6,
 
             "example_values" : self.example_values,
-            "example_prize" : str(self.example_prize),
+            "example_prize_index" : str(self.example_prize_index),
+            "example_priority_score" : self.example_priority_score,
 
             "instruction_pages" : [i.json() for i in self.instructions.all()],
             "help_docs_subject" : [i.json() for i in self.help_docs_subject.all()],
@@ -156,7 +159,8 @@ class InstructionSet(models.Model):
             "action_page_6" : self.action_page_6,
 
             "example_values" : self.example_values,
-            "example_prize" : str(self.example_prize),
+            "example_prize_index" : str(self.example_prize_index),
+            "example_priority_score" : self.example_priority_score,
 
             "instruction_pages" : [await i.ajson() async for i in self.instructions.all()],
             "help_docs_subject" : [await i.ajson() async for i in self.help_docs_subject.all()],

@@ -10,12 +10,18 @@ get_current_choices : function get_current_choices() {
     {
         let choices = app.instructions.example_values.split(",");
         let result = [];
-        //conver to float
+        //convert to float
         for(let i=0; i < choices.length; i++) {
             result.push({value: choices[i], owner: null});
         }
 
         result[1].owner = -1;
+
+        if(app.session_player.current_instruction_complete >= app.instructions.action_page_1 && 
+           app.choice) 
+        {
+            result[app.choice].owner = app.session_player.id;
+        }
 
         return result;
     }
@@ -33,6 +39,12 @@ get_current_choices : function get_current_choices() {
  * return the current priority score
  */
 get_current_priority_score : function get_current_priority_score() {
+
+    if(app.session.world_state.current_experiment_phase == 'Instructions') 
+    {
+        return app.instructions.example_priority_score;
+    }
+
     let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
     let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
 
@@ -42,14 +54,14 @@ get_current_priority_score : function get_current_priority_score() {
 /**
 validate and submit subject choices to the server
  */
-submit_choices_simultaneous : function submit_choices() {
+submit_choices_simultaneous : function submit_choices_simultaneous() {
 
-    if(app.session.world_state.current_experiment_phase == 'Instructions') 
-    {
+    // if(app.session.world_state.current_experiment_phase == 'Instructions') 
+    // {
 
-    }
-    else
-    {
+    // }
+    // else
+    // {
         if(app.working) return; // don't submit if already working
         app.timer_running = false; // stop the timer
 
@@ -59,17 +71,51 @@ submit_choices_simultaneous : function submit_choices() {
         app.send_message("choices_simultaneous", 
                         {"choices": app.choices},
                         "group"); 
-    }
+    // }
 },
 
 /***
  * handle the response from the server after submitting choices
  */
-take_choices_simultaneous(message_data) {
+take_choices_simultaneous: function take_choices_simultaneous(message_data) {
+    app.working = false;
+    
     if (message_data.status === "success") {
-        app.session.world_state.session_players[app.session_player.id].status = message_data.player_status;
-    } else {
-        app.working = false;
+        if(app.session.world_state.current_experiment_phase == 'Instructions') 
+        {
+            app.session_player.current_instruction_complete = app.instructions.action_page_1;
+
+            let period_results = {}
+
+            period_results["priority_score"] = app.get_current_priority_score();
+            period_results["order"] = app.instructions.example_prize_index+1;
+            period_results["period_number"] = 1
+
+            let current_choices = app.get_current_choices();
+            period_results["values"] = []
+            for (let i = 0; i < current_choices.length; i++) {
+                period_results["values"].push({
+                    "value": current_choices[i].value,
+                    "owner": current_choices[i].owner,
+                    "rank": app.choices[i],
+                })
+
+                if(i == app.instructions.example_prize_index) {
+                    period_results["prize"] = current_choices[i].value;
+                }
+            }
+
+            app.session_player.period_results = [];
+            app.session_player.period_results.push(period_results);
+            app.session.world_state.session_players[app.session_player.id].status = "Finished_Ranking";
+        }
+        else
+        {
+            app.session.world_state.session_players[app.session_player.id].status = message_data.player_status;
+        }
+    } 
+    else
+    {
         app.choices_error_message = message_data.error_message;
     }
 },
@@ -81,6 +127,40 @@ submit_choices_sequential : function submit_choices_sequential() {
 
     if(app.session.world_state.current_experiment_phase == 'Instructions') 
     {
+        let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
+        let period_results = {}
+        let current_choices = app.get_current_choices();
+        let current_period = app.session.world_state.current_period;
+
+        period_results["priority_score"] = app.get_current_priority_score();
+        period_results["order"] = app.instructions.example_prize_index+1;
+        period_results["period_number"] = 1       
+        period_results["values"] = []
+
+        for (let i = 0; i < current_choices.length; i++) {
+            let rank = 0;
+
+            if(i == app.choice) {
+                rank = 1;
+            }
+            period_results["values"].push({
+                "value": current_choices[i].value,
+                "owner": (rank == 1) ? app.session_player.id : null,
+                "rank": rank,
+            })
+
+            if(i == app.choice) {
+                period_results["prize"] = current_choices[i].value;
+            }
+        }
+        app.session_player.period_results = [];
+        app.session_player.period_results.push(period_results);
+        app.session.world_state.session_players[app.session_player.id].status = "Finished_Ranking";     
+        
+        let current_values =  app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period];
+        current_values[app.choice].owner = app.session_player.id;
+
+        app.session_player.current_instruction_complete = app.instructions.action_page_1;
 
     }
     else
@@ -99,7 +179,7 @@ submit_choices_sequential : function submit_choices_sequential() {
 /**
  * handle the response from the server after submitting choices sequentially
  */
-take_choices_sequential(message_data) {
+take_choices_sequential: function take_choices_sequential(message_data) {
     if (message_data.status === "success") {
         let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
         let current_period = app.session.world_state.current_period;
@@ -126,9 +206,16 @@ send_ready_to_go_on : function send_ready_to_go_on() {
     app.timer_running = false; // stop the timer
 
     app.session.world_state.session_players[app.session_player.id].status = "Waiting";
-    app.send_message("ready_to_go_on", 
-                    {},
-                     "group"); 
+
+    if(app.session.world_state.current_experiment_phase == 'Instructions') {
+        app.session_player.current_instruction_complete = app.instructions.action_page_2;
+    }
+    else
+    {
+        app.send_message("ready_to_go_on", 
+                        {},
+                        "group"); 
+    }
 },
 
 /**
@@ -161,6 +248,12 @@ take_start_next_period : function take_start_next_period(message_data) {
  * get active player id
  */
 get_active_player_id : function get_active_player_id() {
+
+    if(app.session.world_state.current_experiment_phase == 'Instructions')
+    {
+        return app.session_player.id;
+    }
+
     let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
     let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
     let current_period = app.session.world_state.current_period;

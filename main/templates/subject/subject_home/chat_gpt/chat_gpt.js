@@ -3,7 +3,7 @@
  *  */ 
 send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_data) {
 
-    if(app.working) {
+    if(app.chat_working || app.working) {
         return;
     }
 
@@ -36,6 +36,11 @@ take_process_chat_gpt_prompt : function take_chat_gpt_response(message_data) {
         app.chat_history.unshift(message_data.response);        
     } else {
         
+    }
+
+    if(app.session.world_state.current_experiment_phase == 'Instructions') {
+        app.session_player.current_instruction_complete = app.instructions.action_page_3;
+        app.session.world_state.session_players[app.session_player.id].status = "Waiting";
     }
 },
 
