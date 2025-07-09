@@ -282,7 +282,10 @@ let app = Vue.createApp({
          */
         do_reload: function do_reload()
         {
-
+            if(app.session.world_state.current_experiment_phase == 'Run')
+            {
+                app.setup_timer();
+            }
         },
 
         /** send winsock request to get session info
@@ -457,8 +460,7 @@ let app = Vue.createApp({
             if(app.session.world_state.current_experiment_phase == 'Run' || 
                 app.session.world_state.current_experiment_phase == 'Instructions')
             {
-                app.session.world_state = message_data.world_state;
-                
+                app.session.world_state = message_data.world_state;                
                 app.do_reload();
             }
         },

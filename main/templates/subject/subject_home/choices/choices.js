@@ -208,6 +208,12 @@ take_start_next_period : function take_start_next_period(message_data) {
  * get active player id
  */
 get_active_player_id : function get_active_player_id() {
+
+    if(app.session.world_state.current_experiment_phase == 'Instructions')
+    {
+        return app.session_player.id;
+    }
+
     let parameter_set_player = app.get_parameter_set_player_from_player_id(app.session_player.id);
     let group = app.session.world_state.groups[parameter_set_player.parameter_set_group.toString()];
     let current_period = app.session.world_state.current_period;
