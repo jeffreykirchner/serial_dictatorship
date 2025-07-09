@@ -458,8 +458,9 @@ let app = Vue.createApp({
             }
 
             if(app.session.world_state.current_experiment_phase == 'Run' || 
-                app.session.world_state.current_experiment_phase == 'Instructions')
+               app.session.world_state.current_experiment_phase == 'Instructions')
             {
+                app.session_player.period_results = [];
                 app.session.world_state = message_data.world_state;                
                 app.do_reload();
             }
