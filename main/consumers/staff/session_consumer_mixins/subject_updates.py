@@ -133,6 +133,9 @@ class SubjectUpdatesMixin():
         session_player = self.world_state_local["session_players"][str(player_id)]
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
 
+        if session_player["status"] != SubjectStatus.CHATTING:
+            return
+
         session_player["status"] = SubjectStatus.FINISHED_CHATTING
 
         # store event
@@ -142,9 +145,9 @@ class SubjectUpdatesMixin():
                                    period_number=self.world_state_local["current_period"],
                                    group_number=parameter_set_player["parameter_set_group"],
                                    data=event_data,))
-        
-        # await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
-        # self.session_events = []
+
+        await SessionEvent.objects.abulk_create(self.session_events, ignore_conflicts=True)
+        self.session_events = []
 
         # check if all subjects are ready
         all_ready = True
@@ -174,7 +177,7 @@ class SubjectUpdatesMixin():
             await self.send_message(message_to_self=result, message_to_group=None,
                                     message_type="update_status", send_to_client=True, send_to_group=False)
         
-        await self.store_world_state()
+        await self.store_world_state(force_store=True)
     
     async def update_done_chatting(self, event):
         '''
@@ -208,6 +211,9 @@ class SubjectUpdatesMixin():
         session_player = self.world_state_local["session_players"][str(player_id)]
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
         groups = self.world_state_local["groups"]
+
+        if session_player["status"] != SubjectStatus.RANKING:
+            return
 
         #check if there is one choice per rank
         if len(choices) != self.parameter_set_local["group_size"]:
@@ -368,6 +374,9 @@ class SubjectUpdatesMixin():
         group = groups[str(parameter_set_player["parameter_set_group"])]
         current_period = self.world_state_local["current_period"]
 
+        if session_player["status"] != SubjectStatus.RANKING:
+            return
+
         #check if choice is an integer
         if not isinstance(choice, int):
             status = "fail"
@@ -514,6 +523,9 @@ class SubjectUpdatesMixin():
         player_id = self.session_players_local[event["player_key"]]["id"]        
         session_player = self.world_state_local["session_players"][str(player_id)]
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
+
+        if session_player["status"] != SubjectStatus.REVIEWING_RESULTS:
+            return
 
         session_player["status"] = SubjectStatus.WAITING
 
