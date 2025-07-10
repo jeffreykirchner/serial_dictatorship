@@ -151,7 +151,7 @@ class SessionEventAdmin(admin.ModelAdmin):
 
     readonly_fields=['session']
 
-    list_display = ['session', 'period_number', 'group_number','type']
+    list_display = ['session', 'period_number', 'group_number','session_player','type']
 
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
