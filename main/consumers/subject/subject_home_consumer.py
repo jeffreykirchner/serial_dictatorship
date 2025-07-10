@@ -14,7 +14,6 @@ from .subject_home_consumer_mixins import *
 class SubjectHomeConsumer(SocketConsumerMixin, 
                           StaffSubjectUpdateMixin, 
                           GetSessionMixin, 
-                          ChatMixin,
                           NameMixin,
                           InstructionsMixin,
                           PhaseMixin,
