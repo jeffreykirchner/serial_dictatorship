@@ -118,6 +118,7 @@
                 class="col-md text-center">
                 <button type="button" 
                         title = "Submit your choices"
+                        id = "submit_choices_button_id"
                         v-bind:class="tick_tock=='tick' ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'" 
                         v-bind:disabled="reconnecting || working"
                         v-on:click="session.parameter_set.experiment_mode == 'Simultaneous' ? submit_choices_simultaneous() : submit_choices_sequential()">
@@ -133,6 +134,7 @@
             <div v-else-if="session.world_state.session_players[session_player.id].status == 'Reviewing_Results'"
                 class="col-md text-center">
                 <button type="button" 
+                        id="ready_to_go_on_button_id"
                         title = "Ready to go to the next period"
                         v-bind:class="tick_tock=='tick' ? 'btn btn-outline-success btn-lg' : 'btn btn-success btn-lg'"
                         v-on:click="send_ready_to_go_on()">

@@ -7,6 +7,11 @@ send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_dat
         return;
     }
 
+    let session_player = app.session.world_state.session_players[app.session_player.id];
+    if(session_player.status != "Chatting") {
+        return;
+    }
+
     app.chat_working = true;
 
     let prompt = {"role":"user", "content": app.chat_text};
