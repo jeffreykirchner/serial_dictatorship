@@ -1,5 +1,16 @@
 {%if session.parameter_set.test_mode%}
 
+/**
+ * return random number between min and max inclusive
+ */
+random_number: function random_number(min, max){
+    //return a random number between min and max
+    min = Math.ceil(min);
+    max = Math.floor(max+1);
+    return Math.floor(Math.random() * (max - min) + min);
+},
+
+
 do_test_mode: function do_test_mode(){
 
     if(worker) worker.terminate();
@@ -99,76 +110,96 @@ do_test_mode_run: function do_test_mode_run()
 {
     //do chat
     let go = true;
-
-    if(go)
-        if(app.chat_text != "")
-        {
-            document.getElementById("send_chat_id").click();
-            go=false;
-        }
     
     if(app.session.world_state.finished) return;
         
     if(go)
-        switch (app.random_number(1, 3)){
-            case 1:
-                app.do_test_mode_chat();
-                break;
-            
-            case 2:                
-                app.test_mode_move();
-                break;
-            case 3:
-                
-                break;
+    {
+        let session_player = app.session.world_state.session_players[app.session_player.id];
+        let parameter_set = app.session.parameter_set;
+        if(session_player.status == "Chatting")
+        {
+            app.do_test_mode_chat();
         }
+        else if(session_player.status == "Ranking")
+        {
+            if(parameter_set.experiment_mode == "Simultaneous")
+            {
+                app.do_test_mode_ranking();
+            }
+            else
+            {
+
+            }
+        }
+        else if(session_player.status == "Reviewing_Results")
+        {
+            app.do_test_mode_reviewing_results();
+        }
+    }
 },
 
 /**
- * test mode chat
+ * test during chat phase
  */
-do_test_mode_chat: function do_test_mode_chat(){
+do_test_mode_chat: function do_test_mode_chat()
+{
+    if (app.chat_working) return;
 
-    app.chat_text = app.random_string(5, 20);
+    if(app.random_number(1, 5) == 1)
+    {
+        //send chat message
+        app.chat_text = "Hello " + app.random_string(5, 20) + "!";
+        document.getElementById("send_chat_id").click();       
+    }
+    else if(app.random_number(1, 30) == 1)
+    {
+        //send done chatting
+        app.send_done_chatting();
+    }
+    else if(app.random_number(1, 100) == 1)
+    {
+        //send clear chat gpt history
+        app.send_clear_chat_gpt_history();
+    }
 },
 
 /**
- * test mode move to a location
+ * randomly rank the choices
  */
-test_mode_move: function test_mode_move(){
+do_test_mode_ranking: function do_test_mode_ranking()
+{
 
-    if(app.session.world_state.finished) return;
-
-    let obj = app.session.world_state.session_players[app.session_player.id];
-    let current_period_id = app.session.world_state.session_periods_order[app.session.world_state.current_period-1];
-
-    if(!current_period_id) return;
-   
-    if(!app.test_mode_location_target || 
-        app.get_distance(app.test_mode_location_target,  obj.current_location) <= 25)
+    if(app.random_number(1, 30) != 1)
     {
-         //if near target location, move to a new one
-
-        let rn = app.random_number(0, Object.keys(app.session.world_state.tokens[current_period_id]).length-1);
-        let r = Object.keys(app.session.world_state.tokens[current_period_id])[rn];
-        
-        app.test_mode_location_target = app.session.world_state.tokens[current_period_id][r].current_location;
-    }
-    else if(app.get_distance(app.test_mode_location_target,  obj.current_location)<1000)
-    {
-        //object is close move to it
-        obj.target_location = app.test_mode_location_target;
-    }
-    else
-    {
-        //if far from target location, move to intermediate location
-        obj.target_location = app.get_point_from_angle_distance(obj.current_location.x, 
-                                                        obj.current_location.y,
-                                                        app.test_mode_location_target.x,
-                                                        app.test_mode_location_target.y,
-                                                        app.random_number(300,1000))
+        return;
     }
 
-    app.target_location_update();
+    let group_size = app.session.parameter_set.group_size;
+    let choices = [];
+
+    //ranomly fill the choices array with numbers 1 to group_size
+    for(let i=1;i<=group_size;i++)
+    {
+        choices.push(i);
+    }
+    //shuffle the choices array
+    choices.sort(() => Math.random() - 0.5);
+
+    app.choices = choices;
+    document.getElementById("submit_choices_button_id").click();
 },
-{%endif%}
+
+/**
+ * test during reviewing results phase
+ */
+do_test_mode_reviewing_results: function do_test_mode_reviewing_results()
+{
+    if(app.random_number(1, 30) != 1)
+    {
+        return;
+    }
+    document.getElementById("ready_to_go_on_button_id").click();
+},
+
+{% endif %}

@@ -39,3 +39,20 @@ get_earnings_display: function get_earnings_display(earnings)
         return "$" + v.toFixed(2);
     }
 },
+
+/**
+ * returns a random string of a random length between min_length and max_length
+ */
+random_string: function random_string(min_length, max_length){
+
+    let s = "";
+    let r = app.random_number(min_length, max_length);
+
+    for(let i=0;i<r;i++)
+    {
+        let v = app.random_number(48, 122);
+        s += String.fromCharCode(v);
+    }
+
+    return s;
+},
