@@ -56,6 +56,8 @@ validate and submit subject choices to the server
  */
 submit_choices_simultaneous : function submit_choices_simultaneous() {
 
+    if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking') return;
+
     // if(app.session.world_state.current_experiment_phase == 'Instructions') 
     // {
 
@@ -165,6 +167,7 @@ submit_choices_sequential : function submit_choices_sequential() {
     }
     else
     {
+        if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking') return;
         if(app.working) return; // don't submit if already working
         app.timer_running = false; // stop the timer
 
@@ -202,6 +205,7 @@ take_choices_sequential: function take_choices_sequential(message_data) {
  * send ready to go on to the server
  */
 send_ready_to_go_on : function send_ready_to_go_on() {
+    if(app.session.world_state.session_players[app.session_player.id].status != 'Reviewing_Results') return;
     if(app.working) return; // don't send if already working
     app.timer_running = false; // stop the timer
 
@@ -325,7 +329,7 @@ timer_expired : function timer_expired() {
         else if(app.session.world_state.session_players[app.session_player.id].status == 'Chatting') {
             app.send_done_chatting();
         }
-        else
+        else if(app.session.world_state.session_players[app.session_player.id].status == 'Ranking')
         {
             if(app.session.parameter_set.experiment_mode == 'Sequential') {
                 // if the active player did not submit choices, submit choices with empty array
