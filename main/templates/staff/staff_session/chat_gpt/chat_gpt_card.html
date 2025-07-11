@@ -23,8 +23,7 @@
                         <div class="user_chat">
                             P[[get_parameter_set_player_from_player_id(c.session_player_id).player_number]]: [[c.prompt]]
                         </div>                        
-                        <div class="assistant_chat">
-                            <span v-if="c.code_found"><code>[[c.response]]</code></span>
+                        <div class="assistant_chat">                            
                             <span v-else v-html="c.response"></span>
                         </div>                       
                     </div>                       
