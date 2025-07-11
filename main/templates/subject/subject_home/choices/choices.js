@@ -18,7 +18,7 @@ get_current_choices : function get_current_choices() {
         result[1].owner = -1;
 
         if(app.session_player.current_instruction_complete >= app.instructions.action_page_1 && 
-           app.choice) 
+           app.choice != null) 
         {
             result[app.choice].owner = app.session_player.id;
         }
@@ -159,8 +159,8 @@ submit_choices_sequential : function submit_choices_sequential() {
         app.session_player.period_results.push(period_results);
         app.session.world_state.session_players[app.session_player.id].status = "Finished_Ranking";     
         
-        let current_values =  app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period];
-        current_values[app.choice].owner = app.session_player.id;
+        // let current_values =  app.session.world_state.groups[parameter_set_player.parameter_set_group].values[current_period];
+        // current_values[app.choice].owner = app.session_player.id;
 
         app.session_player.current_instruction_complete = app.instructions.action_page_1;
 

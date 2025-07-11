@@ -212,8 +212,9 @@ class SubjectUpdatesMixin():
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
         groups = self.world_state_local["groups"]
 
-        if session_player["status"] != SubjectStatus.RANKING:
-            return
+        if self.world_state_local["current_experiment_phase"] == ExperimentPhase.RUN:
+            if session_player["status"] != SubjectStatus.RANKING:
+                return
 
         #check if there is one choice per rank
         if len(choices) != self.parameter_set_local["group_size"]:
