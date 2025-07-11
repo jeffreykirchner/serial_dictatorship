@@ -105,53 +105,14 @@ class InterfaceMixin():
         
         content = ""
         try:
-            content = response['choices'][0]['message']['content']
-            code_found = 0
+            content = response['choices'][0]['message']['content']            
 
             content = strip_tags(content)
             content = markdown.markdown(content)
 
-            # if "<button" in content.lower() or "&lt;button" in content.lower():
-            #     code_found = 1
-
-            # if "<script" in content.lower() or "&lt;script" in content.lower():
-            #     code_found = 1
-            
-            # if "fetch(" in content.lower():
-            #     content = "Error: Invalid prompt"
-
-            # if "<form" in content.lower() or "&lt;form" in content.lower():
-            #     content = "Error: Invalid prompt"
-            
-            # if "xmlhttprequest " in content.lower():
-            #     content = "Error: Invalid prompt"
-
-            # if "img" in content.lower():
-            #     content = "Error: Invalid prompt"
-            
-            # if "a href" in content.lower():
-            #     code_found = 1
-            
-            # if "html" in content.lower() or "&lt;html" in content.lower():
-            #     code_found = 1
-
-            # if "body" in content.lower() or "&lt;body" in content.lower():
-            #     code_found = 1
-
-            # #remove any html events but leave tags
-            # event_free_content = re.sub(r'\s+on\w+\s*=\s*(".*?"|\'.*?\'|[^\s>]+)', '', content, flags=re.IGNORECASE)
-            # if event_free_content != content:
-            #     code_found = 1
-
-            # code_found = 0
-
-            # if strip_tags(content) != content:
-            #    code_found = True
-
             session_player.chat_gpt_prompt.append({
                 "role": "assistant",
                 "content": content,
-                "code_found": code_found
             })
 
         except Exception as e:
@@ -163,12 +124,11 @@ class InterfaceMixin():
 
         result = {
             "status": "success",            
-            "response": {"role":"assistant", "content": content, "code_found": code_found},
+            "response": {"role":"assistant", "content": content},
         }
 
         result_staff = {"prompt": prompt,
                         "response": content,
-                        "code_found": code_found,
                         "session_player_id": self.session_player_id}
 
         # store event

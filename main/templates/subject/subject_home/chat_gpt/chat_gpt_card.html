@@ -38,9 +38,8 @@
                         <div v-if="c.role=='user'">
                             [[c.content]]
                         </div>
-                        <div v-else>
-                            <span v-if="c.code_found"><code>[[c.content]]</code></span>
-                            <span v-else v-html="c.content"></span>
+                        <div v-else>                            
+                            <span v-html="c.content"></span>
                         </div>
                         <span v-if="index == 0">[[scroll_chat_gpt_history_to_bottom('chat_message_' + index)]]</span>
                     </div>                       
