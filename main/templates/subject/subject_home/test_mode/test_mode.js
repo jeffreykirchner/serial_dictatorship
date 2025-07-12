@@ -152,13 +152,13 @@ do_test_mode_chat: function do_test_mode_chat(do_imidiate = false)
 {
     if (app.chat_working) return;
 
-    if(app.random_number(1, 5) == 1 || do_imidiate )
+    if(app.random_number(1, 10) == 1 || do_imidiate )
     {
         //send chat message
         app.chat_text = "Hello " + app.random_string(5, 20) + "!";
         document.getElementById("send_chat_id").click();       
     }
-    else if(app.random_number(1, 30) == 1)
+    else if(app.random_number(1, 45) == 1)
     {
         //send done chatting
         app.send_done_chatting();
@@ -202,7 +202,7 @@ do_test_mode_ranking: function do_test_mode_ranking(do_imidiate = false)
 do_test_mode_sequential: function do_test_mode_sequential(do_imidiate = false)
 {
 
-    if(app.random_number(1, 30) != 1 && !do_imidiate)
+    if(app.random_number(1, 10) != 1 && !do_imidiate)
     {
         return;
     }
@@ -218,7 +218,7 @@ do_test_mode_sequential: function do_test_mode_sequential(do_imidiate = false)
         }
     }
 
-    // document.getElementById("submit_choices_button_id").click();
+    document.getElementById("submit_choices_button_id").click();
 },
 
 /**
