@@ -81,21 +81,27 @@ do_test_mode_instructions: function do_test_mode_instructions()
 
     }else
     {
+        let session_player = app.session.world_state.session_players[app.session_player.id];
+        let parameter_set = app.session.parameter_set;
+
         //take action if needed to complete page
         switch (app.session_player.current_instruction)
         {
-            case 1:
+            case app.instructions.action_page_1:
+                if(parameter_set.experiment_mode == "Simultaneous")
+                {   
+                    app.do_test_mode_ranking(true);
+                }
+                else
+                {
+                    app.do_test_mode_sequential(true);
+                }
                 break;
-            case 2:
-                
+            case app.instructions.action_page_2:
+                app.do_test_mode_reviewing_results(true);
                 break;
-            case 3:
-                
-                break;
-            case 4:
-                
-                break;
-            case 5:
+            case app.instructions.action_page_3:
+                app.do_test_mode_chat(true);
                 break;
         }   
     }
@@ -119,22 +125,22 @@ do_test_mode_run: function do_test_mode_run()
         let parameter_set = app.session.parameter_set;
         if(session_player.status == "Chatting")
         {
-            app.do_test_mode_chat();
+            app.do_test_mode_chat(false);
         }
         else if(session_player.status == "Ranking")
         {
             if(parameter_set.experiment_mode == "Simultaneous")
             {
-                app.do_test_mode_ranking();
+                app.do_test_mode_ranking(false);
             }
             else
             {
-
+                app.do_test_mode_sequential(false);
             }
         }
         else if(session_player.status == "Reviewing_Results")
         {
-            app.do_test_mode_reviewing_results();
+            app.do_test_mode_reviewing_results(false);
         }
     }
 },
@@ -142,17 +148,17 @@ do_test_mode_run: function do_test_mode_run()
 /**
  * test during chat phase
  */
-do_test_mode_chat: function do_test_mode_chat()
+do_test_mode_chat: function do_test_mode_chat(do_imidiate = false)
 {
     if (app.chat_working) return;
 
-    if(app.random_number(1, 5) == 1)
+    if(app.random_number(1, 10) == 1 || do_imidiate )
     {
         //send chat message
         app.chat_text = "Hello " + app.random_string(5, 20) + "!";
         document.getElementById("send_chat_id").click();       
     }
-    else if(app.random_number(1, 30) == 1)
+    else if(app.random_number(1, 45) == 1)
     {
         //send done chatting
         app.send_done_chatting();
@@ -167,10 +173,10 @@ do_test_mode_chat: function do_test_mode_chat()
 /**
  * randomly rank the choices
  */
-do_test_mode_ranking: function do_test_mode_ranking()
+do_test_mode_ranking: function do_test_mode_ranking(do_imidiate = false)
 {
 
-    if(app.random_number(1, 30) != 1)
+    if(app.random_number(1, 30) != 1 && !do_imidiate)
     {
         return;
     }
@@ -191,11 +197,36 @@ do_test_mode_ranking: function do_test_mode_ranking()
 },
 
 /**
+ * test during ranking phase
+ */
+do_test_mode_sequential: function do_test_mode_sequential(do_imidiate = false)
+{
+
+    if(app.random_number(1, 10) != 1 && !do_imidiate)
+    {
+        return;
+    }
+
+    let choices = app.get_current_choices();
+
+    for(let i=0;i<choices.length;i++)
+    {
+        if(!choices[i].owner)
+        {
+            app.choice = i;
+            break
+        }
+    }
+
+    document.getElementById("submit_choices_button_id").click();
+},
+
+/**
  * test during reviewing results phase
  */
-do_test_mode_reviewing_results: function do_test_mode_reviewing_results()
+do_test_mode_reviewing_results: function do_test_mode_reviewing_results(do_imidiate = false)
 {
-    if(app.random_number(1, 30) != 1)
+    if(app.random_number(1, 30) != 1 && !do_imidiate)
     {
         return;
     }
