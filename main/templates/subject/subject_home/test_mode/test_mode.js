@@ -193,7 +193,12 @@ do_test_mode_ranking: function do_test_mode_ranking(do_imidiate = false)
     choices.sort(() => Math.random() - 0.5);
 
     app.choices = choices;
-    document.getElementById("submit_choices_button_id").click();
+
+    let button = document.getElementById("submit_choices_button_id");
+    if(button)
+    {
+        button.click();
+    }
 },
 
 /**
@@ -218,7 +223,11 @@ do_test_mode_sequential: function do_test_mode_sequential(do_imidiate = false)
         }
     }
 
-    document.getElementById("submit_choices_button_id").click();
+    let button = document.getElementById("submit_choices_button_id");
+    if(button)
+    {
+        button.click();
+    }
 },
 
 /**
