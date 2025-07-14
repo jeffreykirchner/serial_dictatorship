@@ -224,7 +224,7 @@ class Session(models.Model):
 
         # current player choices and results
         self.world_state["choices"] = {}
-        self.world_state["outcomes"] = {}
+        self.world_state["auto_submit"] = {}
 
         self.save()
 
@@ -351,6 +351,7 @@ class Session(models.Model):
 
             top_row.append("Prize")
             top_row.append("Optimal Prize")
+            top_row.append("Auto Submit")
 
             writer.writerow(top_row)
 
@@ -381,6 +382,7 @@ class Session(models.Model):
                     
                     row.append(summary_data[i]["prize"])
                     row.append(summary_data[i]["expected_order"])
+                    row.append(summary_data[i]["auto_submit"])
 
                     writer.writerow(row)
 
@@ -432,18 +434,25 @@ class Session(models.Model):
         '''
 
         if type == "choices_sequential":
-            return world_state["groups"][str(group_number)]["values"][str(period_number)][data["choice"]-1]["value"]
+            v = f"choice: {world_state["groups"][str(group_number)]["values"][str(period_number)][data["choice"]-1]["value"]} | "
+            v += f"Auto Submit: {data['auto_submit']}"
+            return v
         elif type == "choices_simultaneous":
-            s = ""
+            s = "choices: "
             for c in data["choices"]:
                 if s != "":
                     s += ", "
                 s += world_state["groups"][str(group_number)]["values"][str(period_number)][c-1]["value"] 
+
+            s += f" | Auto Submit: {data['auto_submit']}"
             return s
         elif type == "chat_gpt_prompt":
             return f'{data["prompt"]} | {strip_tags(data["response"])}'
-
-
+        elif type == "ready_to_go_on":
+            return f"Auto Submit: {data['auto_submit']}"
+        elif type == "done_chatting":
+            return f"Auto Submit: {data['auto_submit']}"
+        
         return ""
     
     def get_download_recruiter_csv(self):

@@ -80,13 +80,15 @@ take_clear_chat_gpt_history: function take_clear_chat_gpt_history(message_data) 
 /**
  * send done chatting
  */
-send_done_chatting: function send_done_chatting() {
+send_done_chatting: function send_done_chatting(auto_submit = false) {
 
     app.chat_working = true;
     app.session.world_state.session_players[app.session_player.id].status = "Finished_Chatting";
 
     app.send_message("done_chatting", 
-                     {"current_period": app.session.world_state.current_period}, 
+                     {"current_period": app.session.world_state.current_period,
+                      "auto_submit": auto_submit,
+                     }, 
                      "group");
 },
 

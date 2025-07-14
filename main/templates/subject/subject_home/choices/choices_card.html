@@ -121,7 +121,7 @@
                         id = "submit_choices_button_id"
                         v-bind:class="tick_tock=='tick' ? 'btn btn-primary btn-lg' : 'btn btn-secondary btn-lg'" 
                         v-bind:disabled="reconnecting || working"
-                        v-on:click="session.parameter_set.experiment_mode == 'Simultaneous' ? submit_choices_simultaneous() : submit_choices_sequential()">
+                        v-on:click="session.parameter_set.experiment_mode == 'Simultaneous' ? submit_choices_simultaneous(false) : submit_choices_sequential(false)">
 
                     <span v-if="session.parameter_set.experiment_mode == 'Simultaneous'">Submit Your Choices</span>
                     <span v-if="session.parameter_set.experiment_mode == 'Sequential'">Confirm Choice</span>

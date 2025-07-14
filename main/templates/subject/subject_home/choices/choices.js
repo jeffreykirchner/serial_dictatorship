@@ -54,7 +54,7 @@ get_current_priority_score : function get_current_priority_score() {
 /**
 validate and submit subject choices to the server
  */
-submit_choices_simultaneous : function submit_choices_simultaneous() {
+submit_choices_simultaneous : function submit_choices_simultaneous(auto_submit = false) {
 
     if(app.session.world_state.session_players[app.session_player.id].status != 'Ranking') return;
 
@@ -71,7 +71,9 @@ submit_choices_simultaneous : function submit_choices_simultaneous() {
         app.working = true;
 
         app.send_message("choices_simultaneous", 
-                        {"choices": app.choices},
+                        {"choices": app.choices,
+                         "auto_submit": auto_submit
+                        },
                         "group"); 
     // }
 },
@@ -125,7 +127,7 @@ take_choices_simultaneous: function take_choices_simultaneous(message_data) {
 /**
  * submit choices sequentially
  */
-submit_choices_sequential : function submit_choices_sequential() {
+submit_choices_sequential : function submit_choices_sequential(auto_submit = false) {
 
     if(app.session.world_state.current_experiment_phase == 'Instructions') 
     {
@@ -174,7 +176,9 @@ submit_choices_sequential : function submit_choices_sequential() {
         app.choices_error_message = "";
         app.working = true;
         app.send_message("choices_sequential", 
-                        {"choice": app.choice},
+                        {"choice": app.choice,
+                         "auto_submit": auto_submit,
+                        },
                         "group");
     }
 },
@@ -204,7 +208,7 @@ take_choices_sequential: function take_choices_sequential(message_data) {
 /**
  * send ready to go on to the server
  */
-send_ready_to_go_on : function send_ready_to_go_on() {
+send_ready_to_go_on : function send_ready_to_go_on(auto_submit = false) {
     if(app.session.world_state.session_players[app.session_player.id].status != 'Reviewing_Results') return;
     if(app.working) return; // don't send if already working
     app.timer_running = false; // stop the timer
@@ -217,7 +221,7 @@ send_ready_to_go_on : function send_ready_to_go_on() {
     else
     {
         app.send_message("ready_to_go_on", 
-                        {},
+                        {"auto_submit": auto_submit,},
                         "group"); 
     }
 },
@@ -324,10 +328,10 @@ timer_expired : function timer_expired() {
     try {
 
         if(app.session.world_state.session_players[app.session_player.id].status == 'Reviewing_Results') {
-            app.send_ready_to_go_on();
+            app.send_ready_to_go_on(true);
         }
         else if(app.session.world_state.session_players[app.session_player.id].status == 'Chatting') {
-            app.send_done_chatting();
+            app.send_done_chatting(true);
         }
         else if(app.session.world_state.session_players[app.session_player.id].status == 'Ranking')
         {
@@ -341,10 +345,11 @@ timer_expired : function timer_expired() {
                         let choice = choices[i];
                         if(!choice.owner) {
                             app.choice = i;
+                            break;
                         }
                     }
 
-                    app.submit_choices_sequential();
+                    app.submit_choices_sequential(true);
                 }
             }
             else if(app.session.parameter_set.experiment_mode == 'Simultaneous') {
@@ -356,7 +361,7 @@ timer_expired : function timer_expired() {
                     app.choices.push(i+1);
                 }
 
-                app.submit_choices_simultaneous();
+                app.submit_choices_simultaneous(true);
             }
         }
     }

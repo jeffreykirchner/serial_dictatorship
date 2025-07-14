@@ -122,8 +122,16 @@ class SubjectUpdatesMixin():
             return
         
         logger = logging.getLogger(__name__)
-        
+
         event_data = event["message_text"]
+        
+        try:
+            auto_submit = event_data["auto_submit"]
+        except KeyError:
+            logger.warning(f"done_chatting: invalid event data, {event['message_text']}")
+            return
+
+
         status = "success"
         error_message = ""
 
@@ -203,6 +211,7 @@ class SubjectUpdatesMixin():
 
         try:
             choices = event_data["choices"]    
+            auto_submit = event_data["auto_submit"]
         except KeyError:
             logger.warning(f"choices: invalid choices, {event['message_text']}")
             return
@@ -240,6 +249,8 @@ class SubjectUpdatesMixin():
 
             if self.world_state_local["current_experiment_phase"] == "Run":
                 self.world_state_local["choices"][str(player_id)] = choices
+                self.world_state_local["auto_submit"][str(player_id)] = auto_submit
+
                 session_player["status"] = SubjectStatus.FINISHED_RANKING
 
                 self.session_events.append(SessionEvent(session_id=self.session_id, 
@@ -300,7 +311,8 @@ class SubjectUpdatesMixin():
                         period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
                         period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
                         period_results[str(p)]["period_number"] = current_period
-                        
+                        period_results[str(p)]["auto_submit"] =  self.world_state_local["auto_submit"][str(p)]
+
                         period_results[str(p)]["values"] = []
                         for i in range(len(player_choices)):
                             period_results[str(p)]["values"].append({
@@ -364,6 +376,7 @@ class SubjectUpdatesMixin():
 
         try:
             choice = event_data["choice"]
+            auto_submit = event_data["auto_submit"]
         except KeyError:
             logger.warning(f"choice: invalid choice, {event['message_text']}")
             return
@@ -397,6 +410,8 @@ class SubjectUpdatesMixin():
 
         if status == "success":
             self.world_state_local["choices"][str(player_id)] = choice
+            self.world_state_local["auto_submit"][str(player_id)] = auto_submit
+
             session_player["status"] = SubjectStatus.FINISHED_RANKING
             group["values"][str(current_period)][choice]["owner"] = player_id
             group["values"][str(current_period)][choice]["expected_order"] = True
@@ -445,7 +460,8 @@ class SubjectUpdatesMixin():
                         period_results[str(p)]["order"] = group["session_players"][str(p)][str(current_period)]["order"]
                         period_results[str(p)]["period_number"] = current_period
                         period_results[str(p)]["expected_order"] = group["values"][str(current_period)][prize_index]["expected_order"]
-                        
+                        period_results[str(p)]["auto_submit"] =  self.world_state_local["auto_submit"][str(p)]
+
                         period_results[str(p)]["values"] = []
                         for i in range(len(group["values"][str(current_period)])):
                             period_results[str(p)]["values"].append({
@@ -521,6 +537,12 @@ class SubjectUpdatesMixin():
 
         event_data = event["message_text"]
 
+        try:
+            auto_submit = event_data["auto_submit"]
+        except KeyError:
+            logger.warning(f"ready_to_go_on: invalid event data, {event['message_text']}")
+            return
+
         player_id = self.session_players_local[event["player_key"]]["id"]        
         session_player = self.world_state_local["session_players"][str(player_id)]
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
@@ -573,6 +595,7 @@ class SubjectUpdatesMixin():
     
                 # reset choices
                 self.world_state_local["choices"] = {}
+                self.world_state_local["auto_submit"] = {}
 
                 #set active player group index to 0
                 for g in self.world_state_local["groups"]:
