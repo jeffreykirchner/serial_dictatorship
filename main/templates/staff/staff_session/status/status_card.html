@@ -77,11 +77,14 @@
                                [[p.prize]]
                             </td>    
                             <td class="text-nowrap">
-                                <span v-if="p.expected_order" v-html="<i class='fas fa-check'></i>"></span>                                
-                                <span v-else v-html="<i class='fas fa-times'></i>"></span>                                
+                                <span v-if="p.expected_order" class="text-success">                                    
+                                    <i class='fas fa-check'></i>
+                                </span>                                
                             </td>         
                             <td class="text-nowrap">
-
+                                <span v-if="p.auto_submit" class="text-danger">                                    
+                                    <i class='fas fa-times'></i>
+                                </span>     
                             </td>         
                         </tr>
                     </tbody>
