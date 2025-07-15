@@ -200,6 +200,9 @@ let app = Vue.createApp({
                 case "update_done_chatting":
                     app.take_done_chatting(message_data);
                     break;
+                case "update_rescue_subject":
+                    app.take_rescue_subject(message_data);
+                    break;
             }
 
             app.first_load_done = true;
@@ -463,6 +466,13 @@ let app = Vue.createApp({
                 app.session_player.period_results = [];
                 app.session.world_state = message_data.world_state;                
                 app.do_reload();
+            }
+        },
+
+        take_rescue_subject: function take_rescue_subject(message_data){
+            if(message_data.value == "success")
+            {
+                app.session.world_state = message_data.world_state;
             }
         },
 
