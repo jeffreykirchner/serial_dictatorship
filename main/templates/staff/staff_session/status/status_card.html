@@ -43,7 +43,13 @@
                             </th>
                             <th scope="col" class = "text-center">
                                 Prize
-                            </th>                
+                            </th> 
+                            <th scope="col" class = "text-center">
+                                Optimial Choice
+                            </th>              
+                            <th scope="col" class = "text-center">
+                                Auto Submit
+                            </th>  
                         </tr>
                     </thead>
                     <tbody id="player_list">
@@ -69,7 +75,17 @@
                             </td>
                             <td class="text-nowrap">
                                [[p.prize]]
-                            </td>                      
+                            </td>    
+                            <td class="text-nowrap">
+                                <span v-if="p.expected_order" class="text-success">                                    
+                                    <i class='fas fa-check'></i>
+                                </span>                                
+                            </td>         
+                            <td class="text-nowrap">
+                                <span v-if="p.auto_submit" class="text-danger">                                    
+                                    <i class='fas fa-times'></i>
+                                </span>     
+                            </td>         
                         </tr>
                     </tbody>
                    
