@@ -44,6 +44,8 @@ get_status_table_values : function get_status_table_values() {
                 v.priority_score = period_result.priority_score;
                 v.order = period_result.order;
                 v.prize = parseFloat(period_result.prize).toFixed(2);
+                v.expected_order = period_result.expected_order;
+                v.auto_submit = period_result.auto_submit;
             }
 
             output.push(v);
