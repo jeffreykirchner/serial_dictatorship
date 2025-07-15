@@ -16,6 +16,7 @@ class InterfaceMixin():
     '''
     interface actions from subject screen mixin
     '''
+    @check_message_for_me 
     async def update_rescue_subject(self, event):
         '''
         update rescue subject
