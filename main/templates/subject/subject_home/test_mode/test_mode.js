@@ -155,7 +155,7 @@ do_test_mode_chat: function do_test_mode_chat(do_imidiate = false)
     if(app.random_number(1, 10) == 1 || do_imidiate )
     {
         //send chat message
-        app.chat_text = "Hello " + app.random_string(5, 20) + "!";
+        app.chat_text = "list 10 more cool facts";
         document.getElementById("send_chat_id").click();       
     }
     else if(app.random_number(1, 45) == 1)

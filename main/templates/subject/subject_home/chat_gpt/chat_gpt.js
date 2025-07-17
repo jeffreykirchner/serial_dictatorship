@@ -17,7 +17,7 @@ send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_dat
     let prompt = {"role":"user", "content": app.chat_text};
 
     app.chat_history.unshift(prompt);
-
+    app.scroll_chat_gpt_history_to_bottom("chat_message_0");
     //set to font awesome spinner
     app.chat_button_text = '<i class="fas fa-spinner fa-spin"></i>';   
 
@@ -38,7 +38,8 @@ take_process_chat_gpt_prompt : function take_chat_gpt_response(message_data) {
     app.chat_button_text = 'Chat <i class="far fa-comments"></i>';
 
     if (message_data.status == "success") {       
-        app.chat_history.unshift(message_data.response);        
+        app.chat_history.unshift(message_data.response);     
+        app.scroll_chat_gpt_history_to_bottom("chat_message_1");   
     } else {
         
     }
@@ -112,10 +113,10 @@ take_done_chatting: function take_done_chatting(message_data) {
  */
 scroll_chat_gpt_history_to_bottom: function scroll_chat_gpt_history_to_bottom(id) {
     Vue.nextTick(() => {
-        if (app.last_scroll_chat_gpt_history_to_bottom == id) {
-            return;
-        }
-        app.last_scroll_chat_gpt_history_to_bottom = id;        
+        // if (app.last_scroll_chat_gpt_history_to_bottom == id) {
+        //     return;
+        // }
+        // app.last_scroll_chat_gpt_history_to_bottom = id;        
         document.getElementById(id).scrollIntoView();
     });
 },
