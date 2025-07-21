@@ -311,6 +311,82 @@ class TestSubjectConsumer(TestCase):
         self.assertEqual(world_state['current_experiment_phase'], 'Run')
         self.assertEqual(world_state['current_period'], 2)
 
+    @pytest.mark.asyncio
+    async def test_submit_simultanious_double_submit(self):
+        '''
+        test submitting simultanious choices twice fails
+        '''
+
+        communicator_subject = []
+        communicator_staff = None
+
+        logger = logging.getLogger(__name__)
+        logger.info(f"called from test {sys._called_from_test}" )
+
+        communicator_subject, communicator_staff = await self.set_up_communicators(communicator_subject, communicator_staff)
+        communicator_subject, communicator_staff = await self.start_session(communicator_subject, communicator_staff)
+
+        await communicator_staff.send_json_to({"message_type": "get_world_state_local", "message_text": {}})
+        response = await communicator_staff.receive_json_from()
+        world_state = response['message']['message_data']
+
+        session = await Session.objects.prefetch_related('parameter_set').aget(id=self.session.id)
+
+        self.assertEqual(world_state['current_experiment_phase'], 'Run')
+        self.assertEqual(session.parameter_set.experiment_mode, ExperimentMode.SIMULTANEOUS)
+
+        #advance past chat
+        await self.advance_past_chat(communicator_subject, communicator_staff)
+
+        #subject 0 subjects a valid choice set
+        message = {"message_type" : "choices_simultaneous",
+                   "message_text" : {"choices": [1,2,3,4], "auto_submit": False,},
+                   "message_target" : "group"}
+        await communicator_subject[0].send_json_to(message)
+
+        response = await communicator_subject[0].receive_json_from()
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'success')
+
+        #staff response
+        response = await communicator_staff.receive_json_from()
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'success')
+
+        #subjecct 0 tries to submit again, no response should be received
+        await communicator_subject[0].send_json_to(message)
+        response = await communicator_subject[0].receive_nothing()
+        self.assertTrue(response, "Subject should not be able to submit choices again.")
+
+        response = await communicator_staff.receive_nothing()
+        self.assertTrue(response, "Staff should not receive a response for double submission.")
+
+
+    async def test_submit_sequential(self):
+        '''
+        test submitting sequential choices
+        '''
+
+        communicator_subject = []
+        communicator_staff = None
+
+        logger = logging.getLogger(__name__)
+        logger.info(f"called from test {sys._called_from_test}" )
+
+        session = await Session.objects.prefetch_related('parameter_set').aget(id=self.session.id)
+        session.parameter_set.experiment_mode = ExperimentMode.SEQUENTIAL
+        await session.parameter_set.asave()
+
+        communicator_subject, communicator_staff = await self.set_up_communicators(communicator_subject, communicator_staff)
+        communicator_subject, communicator_staff = await self.start_session(communicator_subject, communicator_staff)
+
+        await communicator_staff.send_json_to({"message_type": "get_world_state_local", "message_text": {}})
+        response = await communicator_staff.receive_json_from()
+        world_state = response['message']['message_data']
+
+        self.assertEqual(world_state['current_experiment_phase'], 'Run')
+        self.assertEqual(session.parameter_set.experiment_mode, ExperimentMode.SEQUENTIAL) 
+        
             
 
 
