@@ -358,6 +358,9 @@ class SubjectUpdatesMixin():
         '''
         event_data = json.loads(event["group_data"])
 
+        if event_data.get("status") == "fail":
+            return  
+
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
 
@@ -513,6 +516,9 @@ class SubjectUpdatesMixin():
         update choice from subject
         '''
         event_data = json.loads(event["group_data"])
+
+        if event_data.get("status") == "fail":
+            return
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
