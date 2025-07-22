@@ -200,6 +200,55 @@ class TestSubjectConsumer(TestCase):
                     self.assertEqual(response['message']['message_type'],'update_result')
                     message_data = response['message']['message_data']
     
+    async def submit_choices_sequential(self, communicator_subjects, communicator_staff):
+        '''
+        submit choices sequentially
+        '''
+        logger = logging.getLogger(__name__)
+
+        await communicator_staff.send_json_to({"message_type": "get_world_state_local", "message_text": {}})
+        response = await communicator_staff.receive_json_from()
+        world_state = response['message']['message_data']
+
+        #submit choices in one at a time
+        c = 0
+        for g in world_state['groups']:
+            group = world_state['groups'][g]
+            for index, player_id in enumerate(group['player_order']["1"]):
+
+                c+=1
+
+                logger.info(f"submitting choice for player {player_id} in group {g}")
+
+                message = {"message_type" : "choices_sequential",
+                           "message_text" : {"choice": index, "auto_submit": False,},
+                           "message_target" : "group"}
+                await communicator_subjects[int(player_id)].send_json_to(message)
+
+                if c < len(world_state['session_players']):
+                    #subject response from group memebers
+                    for j in group['player_order']["1"]:
+                        response = await communicator_subjects[int(j)].receive_json_from()
+                        self.assertEqual(response['message']['message_type'],'update_choices_sequential')
+                        message_data = response['message']['message_data']
+                        self.assertEqual(message_data['status'],'success')
+
+                    #staff response
+                    response = await communicator_staff.receive_json_from()
+                    message_data = response['message']['message_data']
+                    self.assertEqual(message_data['status'],'success')
+                else:
+                    #staff response
+                    response = await communicator_staff.receive_json_from()
+                    self.assertEqual(response['message']['message_type'],'update_result')
+                    message_data = response['message']['message_data']
+
+                    #subject response
+                    for cs in communicator_subjects:
+                        response = await communicator_subjects[int(cs)].receive_json_from()
+                        self.assertEqual(response['message']['message_type'],'update_result')
+                        message_data = response['message']['message_data']
+    
     async def ready_to_go_on(self, communicator_subjects, communicator_staff):
         '''
         ready to go on
@@ -405,24 +454,65 @@ class TestSubjectConsumer(TestCase):
         self.assertEqual(world_state['current_experiment_phase'], 'Run')
         self.assertEqual(session.parameter_set.experiment_mode, ExperimentMode.SEQUENTIAL) 
 
+       
+        communicator_subject = list(communicator_subjects.items())[1][1]
+
+        #send empty choice
+        message = {"message_type" : "choices_sequential",
+                   "message_text" : {"choice": None, "auto_submit": False,},
+                   "message_target" : "group"}
+        await communicator_subject.send_json_to(message)
+        response = await communicator_subject.receive_json_from()
+
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'fail')
+        self.assertEqual(message_data['error_message'], "Select a prize.")
+
+        #send invalid choice
+        message = {"message_type" : "choices_sequential",
+                   "message_text" : {"choice": 'a', "auto_submit": False,},
+                   "message_target" : "group"}
+        await communicator_subject.send_json_to(message)
+        response = await communicator_subject.receive_json_from()
+
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'fail')
+        self.assertEqual(message_data['error_message'], "Select a prize.")
+
+        #send invalid choice
+        message = {"message_type" : "choices_sequential",
+                   "message_text" : {"choice": 5, "auto_submit": False,},
+                   "message_target" : "group"}
+        await communicator_subject.send_json_to(message)
+        response = await communicator_subject.receive_json_from()
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'fail')
+        self.assertEqual(message_data['error_message'], "Choice must be between A and D.")
+
+        #choose out of turn
+        message = {"message_type" : "choices_sequential",
+                   "message_text" : {"choice": 1, "auto_submit": False,},
+                   "message_target" : "group"}
+        await communicator_subject.send_json_to(message)
+        response = await communicator_subject.receive_json_from()
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'fail')
+        self.assertEqual(message_data['error_message'], "It is not your turn to choose.")
+
         #send choices in one at a time
-        for g in world_state['groups']:
-            group = world_state['groups'][g]
-            for index, player_id in enumerate(group['player_order']["1"]):
+        await self.submit_choices_sequential(communicator_subjects, communicator_staff)
 
-                message = {"message_type" : "choices_sequential",
-                           "message_text" : {"choice": index, "auto_submit": False,},
-                           "message_target" : "group"}
-                await communicator_subjects[int(player_id)].send_json_to(message)
+        #ready to go on
+        await self.ready_to_go_on(communicator_subjects, communicator_staff)
 
-                response = await communicator_subjects[int(player_id)].receive_json_from()
-                message_data = response['message']['message_data']
-                self.assertEqual(message_data['status'],'success')
+        #verify world state current period is 2
+        await communicator_staff.send_json_to({"message_type": "get_world_state_local", "message_text": {}})
+        response = await communicator_staff.receive_json_from()
+        world_state = response['message']['message_data']
 
-                #staff response
-                response = await communicator_staff.receive_json_from()
-                message_data = response['message']['message_data']
-                self.assertEqual(message_data['status'],'success')
+        self.assertEqual(world_state['current_experiment_phase'], 'Run')
+        self.assertEqual(world_state['current_period'], 2)
+               
         
             
 
