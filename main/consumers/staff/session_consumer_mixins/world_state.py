@@ -39,5 +39,26 @@ class WorldStateMixin():
         await Session.objects.filter(id=self.session_id).aupdate(world_state=self.world_state_local)
 
         #logger.info(f"store_world_state, session {self.session_id} updated")
+    
+
+    async def get_world_state_local(self, event):
+        '''
+        return world state local
+        '''
+
+        # session = await Session.objects.aget(id=self.session_id)
+
+        self.world_state_local = self.world_state_local
+
+        await self.send_message(message_to_self=self.world_state_local, message_to_group=None,
+                                message_type=event['type'], send_to_client=True, send_to_group=False)
+        
+    async def set_world_state_local(self, event):
+        '''
+        set world state local
+        '''
+        self.world_state_local = event["message_text"]["world_state"]
+
+        await self.get_world_state_local(event)
 
        

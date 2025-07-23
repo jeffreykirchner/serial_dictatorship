@@ -12,6 +12,11 @@ send_process_chat_gpt_prompt : function send_process_chat_gpt_prompt(message_dat
         return;
     }
 
+    //check for empty prompt
+    if(app.chat_text.trim().length == 0) {
+        return;
+    }
+
     app.chat_working = true;
 
     let prompt = {"role":"user", "content": app.chat_text};

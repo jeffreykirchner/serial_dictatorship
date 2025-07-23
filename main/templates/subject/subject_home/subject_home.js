@@ -359,6 +359,11 @@ let app = Vue.createApp({
             app.help_modal.hide();
 
             app.notices_seen = [];
+            app.choices = [];
+            app.choice = null;
+            app.chat_working = false;
+            app.working = false;
+            app.timer_running = false;
         },
             
 
@@ -464,6 +469,8 @@ let app = Vue.createApp({
                app.session.world_state.current_experiment_phase == 'Instructions')
             {
                 app.session_player.period_results = [];
+                app.choices = [];
+                app.choice = null;
                 app.session.world_state = message_data.world_state;                
                 app.do_reload();
             }

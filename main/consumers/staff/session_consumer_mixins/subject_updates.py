@@ -358,6 +358,9 @@ class SubjectUpdatesMixin():
         '''
         event_data = json.loads(event["group_data"])
 
+        if event_data.get("status") == "fail":
+            return  
+
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
 
@@ -398,15 +401,15 @@ class SubjectUpdatesMixin():
         #the minium value for a choice is 0 and the maximum is group_size-1
         elif choice < 0 or choice >= self.parameter_set_local["group_size"]:
             status = "fail"
-            error_message = f"Choice must be between 0 and {self.parameter_set_local['group_size'] - 1}."
+            error_message = f"Choice must be between A and {chr(self.parameter_set_local['group_size'] - 1 + 65)}."
         #check if is this player's turn
         elif group["player_order"][str(current_period)][group["active_player_group_index"]] != str(player_id):
             status = "fail"
             error_message = "It is not your turn to choose."
         #check if player has already made a choice
-        elif str(player_id) in self.world_state_local["choices"]:
-            status = "fail"
-            error_message = "You have already made a choice."
+        # elif str(player_id) in self.world_state_local["choices"]:
+        #     status = "fail"
+        #     error_message = "You have already made a choice."
 
         if status == "success":
             self.world_state_local["choices"][str(player_id)] = choice
@@ -513,6 +516,9 @@ class SubjectUpdatesMixin():
         update choice from subject
         '''
         event_data = json.loads(event["group_data"])
+
+        if event_data.get("status") == "fail":
+            return
 
         await self.send_message(message_to_self=event_data, message_to_group=None,
                                 message_type=event['type'], send_to_client=True, send_to_group=False)
