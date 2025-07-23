@@ -407,9 +407,9 @@ class SubjectUpdatesMixin():
             status = "fail"
             error_message = "It is not your turn to choose."
         #check if player has already made a choice
-        elif str(player_id) in self.world_state_local["choices"]:
-            status = "fail"
-            error_message = "You have already made a choice."
+        # elif str(player_id) in self.world_state_local["choices"]:
+        #     status = "fail"
+        #     error_message = "You have already made a choice."
 
         if status == "success":
             self.world_state_local["choices"][str(player_id)] = choice
