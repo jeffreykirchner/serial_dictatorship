@@ -137,7 +137,7 @@ class TestSubjectConsumer(TestCase):
         
         for index, cs in enumerate(communicator_subjects):
             i = communicator_subjects[cs]
-            # logger.info(f"submitting done_chatting for {i.scope['session_player_id']}")
+            logger.info(f"submitting done_chatting for {i.scope['session_player_id']}")
             await i.send_json_to(message)
 
             #staff response
@@ -415,7 +415,7 @@ class TestSubjectConsumer(TestCase):
         message_data = response['message']['message_data']
         self.assertEqual(message_data['status'],'success')
 
-        #subjecct 0 tries to submit again, no response should be received
+        #subject 0 tries to submit again, no response should be received
         await communicator_subject.send_json_to(message)
         response = await communicator_subject.receive_nothing()
         self.assertTrue(response, "Subject should not be able to submit choices again.")
@@ -569,9 +569,117 @@ class TestSubjectConsumer(TestCase):
 
         response = await communicator_staff.receive_nothing()
         self.assertTrue(response, "Staff should not receive a response for double submission.")
-               
+
+    @pytest.mark.asyncio
+    async def test_ready_to_go_on_double_submit(self):
+        '''
+        test double submission of ready to go on
+        '''
+
+        communicator_subjects = {}
+        communicator_staff = None
+
+        logger = logging.getLogger(__name__)
+        logger.info(f"called from test {sys._called_from_test}" )
+
+        communicator_subjects, communicator_staff = await self.set_up_communicators(communicator_subjects, communicator_staff)
+        communicator_subjects, communicator_staff = await self.start_session(communicator_subjects, communicator_staff)
+
+        #advance past chat
+        await self.advance_past_chat(communicator_subjects, communicator_staff)
+
+        #submit choices simultaneous
+        await self.submit_choices_simultaneous(communicator_subjects, communicator_staff)
+
+        player_id = next(iter(communicator_subjects))
+        communicator_subject = communicator_subjects[player_id]
+
+        message = {'message_type' : 'ready_to_go_on',
+                   'message_text' : {'auto_submit': False},
+                   'message_target' : 'group',}
         
-            
+        await communicator_subject.send_json_to(message)
+        
+        #check staff response
+        response = await communicator_staff.receive_json_from()
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'success')
+        self.assertEqual(message_data['player_status'],'Waiting')
+
+        #subject tries to submit again, no response should be received
+        await communicator_subject.send_json_to(message)
+        response = await communicator_staff.receive_nothing()
+        self.assertTrue(response, "Subject should not receive a response for double submission.")
+
+    @pytest.mark.asyncio
+    async def test_submit_wrong_message_type_simultaneous(self):
+        '''
+        test submitting a message with the wrong type is ignored
+        '''
+
+        communicator_subjects = {}
+        communicator_staff = None
+
+        logger = logging.getLogger(__name__)
+        logger.info(f"called from test {sys._called_from_test}" )
+
+        communicator_subjects, communicator_staff = await self.set_up_communicators(communicator_subjects, communicator_staff)
+        communicator_subjects, communicator_staff = await self.start_session(communicator_subjects, communicator_staff)
+
+        await communicator_staff.send_json_to({"message_type": "get_world_state_local", "message_text": {}})
+        response = await communicator_staff.receive_json_from()
+        world_state = response['message']['message_data']
+
+        session = await Session.objects.prefetch_related('parameter_set').aget(id=self.session.id)
+
+        self.assertEqual(world_state['current_experiment_phase'], 'Run')
+        self.assertEqual(session.parameter_set.experiment_mode, ExperimentMode.SIMULTANEOUS)
+
+        player_id = first_key = next(iter(communicator_subjects))
+        communicator_subject = communicator_subjects[player_id]
+
+        #send choices during chat
+        message = {"message_type" : "choices_simultaneous",
+                    "message_text" : {"choices": [1,2,3,4], "auto_submit": False,},
+                    "message_target" : "group"}
+        
+        await communicator_subject.send_json_to(message)
+
+        #send ready to go on during chat
+        message = {'message_type' : 'ready_to_go_on',
+                   'message_text' : {'auto_submit': False},
+                   'message_target' : 'group',}
+        
+        await communicator_subject.send_json_to(message)
+
+        #advance past chat
+        await self.advance_past_chat(communicator_subjects, communicator_staff)
+
+        #send chat during choices (allowed to pass)
+        message = {'message_type': 'process_chat_gpt_prompt',
+                   'message_text': {"prompt":"hello",
+                                    "current_period": 1,},
+                   'message_target': 'self',}
+
+        await communicator_subject.send_json_to(message)
+        response = await communicator_subject.receive_json_from()
+        message_data = response['message']['message_data']
+        self.assertEqual(message_data['status'],'success')
+
+        response = await communicator_staff.receive_json_from()
+        self.assertEqual(response['message']['message_type'],'update_process_chat_gpt_prompt')
+
+        #send chat complete
+        message = {'message_type': 'done_chatting',
+                   'message_text': {"current_period": 1, "auto_submit": True},
+                   'message_target': 'group',}
+        
+        await communicator_subject.send_json_to(message)
+        response = await communicator_subject.receive_nothing()
+        self.assertTrue(response, "Subject should not receive a response for wrong message type.")
+
+        response = await communicator_staff.receive_nothing()
+        self.assertTrue(response, "Staff should not receive a response for wrong message type.")
 
 
         
