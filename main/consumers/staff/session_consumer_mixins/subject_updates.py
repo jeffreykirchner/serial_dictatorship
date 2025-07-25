@@ -142,6 +142,7 @@ class SubjectUpdatesMixin():
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
 
         if session_player["status"] != SubjectStatus.CHATTING:
+            logger.warning(f"done_chatting: player {player_id} is not in CHATTING status, current status: {session_player['status']}")
             return
 
         session_player["status"] = SubjectStatus.FINISHED_CHATTING
@@ -223,6 +224,7 @@ class SubjectUpdatesMixin():
 
         if self.world_state_local["current_experiment_phase"] == ExperimentPhase.RUN:
             if session_player["status"] != SubjectStatus.RANKING:
+                logger.warning(f"ready_to_go_on: player {player_id} is not in RANKING status, current status: {session_player['status']}")
                 return
 
         #check if there is one choice per rank
@@ -392,6 +394,7 @@ class SubjectUpdatesMixin():
         current_period = self.world_state_local["current_period"]
 
         if session_player["status"] != SubjectStatus.RANKING:
+            logger.warning(f"choices_sequential: player {player_id} is not in RANKING status, current status: {session_player['status']}")
             return
 
         #check if choice is an integer
@@ -554,6 +557,7 @@ class SubjectUpdatesMixin():
         parameter_set_player = self.parameter_set_local["parameter_set_players"][str(session_player["parameter_set_player_id"])]
 
         if session_player["status"] != SubjectStatus.REVIEWING_RESULTS:
+            logger.warning(f"ready_to_go_on: player {player_id} is not in REVIEWING_RESULTS status, current status: {session_player['status']}")
             return
 
         session_player["status"] = SubjectStatus.WAITING
