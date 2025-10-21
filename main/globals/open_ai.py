@@ -4,6 +4,7 @@ import base64
 import json
 
 from openai import AzureOpenAI
+from openai import AsyncAzureOpenAI
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
@@ -19,6 +20,12 @@ client = AzureOpenAI(
     api_version="2025-01-01-preview",
 )
 
+async_client = AsyncAzureOpenAI(
+    azure_endpoint=endpoint,
+    api_key=subscription_key,
+    api_version="2025-01-01-preview",
+)
+
 def chat_gpt_generate_completion(messages):
     """
     generate a completion using the Azure OpenAI client.
@@ -29,6 +36,31 @@ def chat_gpt_generate_completion(messages):
 
     try:
         response = client.chat.completions.create(
+            model=deployment,
+            messages=messages,
+            max_tokens=800,
+            temperature=1,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0,
+            stop=None,
+            stream=False
+        )
+
+        return response.to_json()
+    except Exception as e:
+        return json.dumps({ "error": str(e)}, cls=DjangoJSONEncoder)
+    
+async def async_chat_gpt_generate_completion(messages):
+    """
+    generate a completion using the async Azure OpenAI client.
+    
+    :param messages: List of messages to send to the model.
+    :return: The generated completion response.
+    """
+
+    try:
+        response = await async_client.chat.completions.create(
             model=deployment,
             messages=messages,
             max_tokens=800,
