@@ -7,6 +7,7 @@ import markdown
 from asgiref.sync import sync_to_async
 from main.decorators import check_message_for_me
 from main.globals import chat_gpt_generate_completion
+from main.globals import async_chat_gpt_generate_completion
 from django.utils.html import strip_tags
 
 from main.models import SessionPlayer
@@ -100,7 +101,7 @@ class InterfaceMixin():
             "content":prompt,
         })
 
-        response = await sync_to_async(chat_gpt_generate_completion, thread_sensitive=self.thread_sensitive)(session_player.chat_gpt_prompt)
+        response = await async_chat_gpt_generate_completion(session_player.chat_gpt_prompt)
         response = json.loads(response)
         # logger.info(f"ChatGPT response: {response}")
         
