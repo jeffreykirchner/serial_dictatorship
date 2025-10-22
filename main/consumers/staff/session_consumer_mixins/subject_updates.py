@@ -303,11 +303,16 @@ class SubjectUpdatesMixin():
                         period_results[str(p)]["expected_order"] = True
                         #check if player value of choices are in order from highest to lowest
                         for i in range(len(player_choices)-1):
-                            v1 = player_choices[i]-1
-                            v2 = player_choices[i+1]-1
-                            if group["values"][str(current_period)][v1]["value"] < group["values"][str(current_period)][v2]["value"]:
-                                period_results[str(p)]["expected_order"] = False
-                                break
+                            for j in range(len(player_choices)-1):
+                                v1 = player_choices[i]-1
+                                v2 = player_choices[j]-1
+
+                                if v1 < v2 and Decimal(group["values"][str(current_period)][i]["value"]) < Decimal(group["values"][str(current_period)][j]["value"]):
+                                    period_results[str(p)]["expected_order"] = False
+                                    break
+                                elif v1 > v2 and Decimal(group["values"][str(current_period)][i]["value"]) > Decimal(group["values"][str(current_period)][j]["value"]):
+                                    period_results[str(p)]["expected_order"] = False
+                                    break
 
                         #store period results
                         period_results[str(p)]["priority_score"] = group["session_players"][str(p)][str(current_period)]["priority_score"]
@@ -424,7 +429,7 @@ class SubjectUpdatesMixin():
 
             #check if there is a remaining higher unclaimed value
             for i in group["values"][str(current_period)]:
-                if not i["owner"] and i["value"] > group["values"][str(current_period)][choice]["value"]:
+                if not i["owner"] and Decimal(i["value"]) > Decimal(group["values"][str(current_period)][choice]["value"]):
                     group["values"][str(current_period)][choice]["expected_order"] = False
             
             self.session_events.append(SessionEvent(session_id=self.session_id, 
