@@ -158,11 +158,6 @@ do_test_mode_chat: function do_test_mode_chat(do_imidiate = false)
         app.chat_text = "list 10 more cool facts";
         document.getElementById("send_chat_id").click();       
     }
-    else if(app.random_number(1, 45) == 1)
-    {
-        //send done chatting
-        app.send_done_chatting();
-    }
     else if(app.random_number(1, 100) == 1)
     {
         //send clear chat gpt history
