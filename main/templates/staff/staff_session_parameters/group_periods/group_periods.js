@@ -27,5 +27,8 @@ send_update_parameter_set_group_period: function send_update_parameter_set_group
 */
 send_auto_fill_parameter_set_group_periods: function send_auto_fill_parameter_set_group_periods(group_id){
     app.working = true;
-    app.send_message("auto_fill_parameter_set_group_periods", {"session_id" : app.session.id});                                       
+    app.send_message("auto_fill_parameter_set_group_periods", 
+                    {"session_id" : app.session.id,
+                     "repeat_after_period" : app.group_periods_repeat_after_period
+                    });
 },

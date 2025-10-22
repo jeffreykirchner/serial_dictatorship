@@ -49,7 +49,7 @@ class ParameterSetGroup(models.Model):
         '''    
         self.save()
 
-    def update_parameter_set_group_periods(self):
+    def update_parameter_set_group_periods(self, repeat_after_period):
         '''
         update parameter set group periods
         '''
@@ -62,7 +62,7 @@ class ParameterSetGroup(models.Model):
             for i in range(self.parameter_set_group_periods.count(), period_count):
                 period = ParameterSetGroupPeriod(parameter_set_group=self, period_number=i+1)
                 period.save()
-                period.setup()
+                period.setup(repeat_after_period)
         else:
             # remove excess periods
             for period in self.parameter_set_group_periods.order_by('-period_number'):
