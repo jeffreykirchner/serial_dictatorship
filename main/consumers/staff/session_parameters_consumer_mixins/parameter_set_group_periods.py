@@ -84,6 +84,7 @@ def take_auto_fill_parameter_set_group_periods(data):
     # logger.info(f"Add parameterset group: {data}")
 
     session_id = data["session_id"]
+    repeat_after_period = data["repeat_after_period"]
 
     try:        
         session = Session.objects.get(id=session_id)
@@ -96,7 +97,7 @@ def take_auto_fill_parameter_set_group_periods(data):
 
     #create new group periods
     for i in session.parameter_set.parameter_set_groups.all():
-        i.update_parameter_set_group_periods()
+        i.update_parameter_set_group_periods(repeat_after_period=repeat_after_period)
         
     session.parameter_set.update_json_fk(update_group_periods=True)
 

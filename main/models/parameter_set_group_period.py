@@ -50,7 +50,7 @@ class ParameterSetGroupPeriod(models.Model):
 
         return message
     
-    def setup(self):
+    def setup(self, repeat_after_period=None):
         '''
         default setup
         '''
@@ -60,34 +60,45 @@ class ParameterSetGroupPeriod(models.Model):
 
         self.values = ""
 
-        #randomly assign values from possible values
-        for i in range(self.parameter_set_group.parameter_set.group_size):
-            index = random.randint(0, len(possible_values) - 1)
+        if repeat_after_period and self.period_number > repeat_after_period:
+            # repeat values from earlier period
+            source_period_number = self.period_number - repeat_after_period
+     
+            source_period = self.parameter_set_group.parameter_set_group_periods.get(period_number=source_period_number)
+            self.values = source_period.values
+            self.priority_scores = source_period.priority_scores
+            self.player_order = source_period.player_order
 
-            if self.values == "":
-                self.values = possible_values[index]
-            else:
-                self.values += "," + possible_values[index]
-           
-            possible_values.pop(index)
-        
-        #randomly assign priority scores       
-        self.priority_scores = ""
-        for i in range(self.parameter_set_group.parameter_set.group_size):
-            score = random.randint(1, self.parameter_set_group.parameter_set.max_priority_score)
-            if self.priority_scores == "":
-                self.priority_scores = str(score)
-            else:
-                self.priority_scores += "," + str(score)
-        
-        #assign player order based on priority scores, with highest score first, ties broken by random order
-        if self.priority_scores:
-            scores = list(map(int, self.priority_scores.split(",")))
-            order = sorted(range(len(scores)), key=lambda k: (-scores[k], random.random()))
-            self.player_order = ",".join(str(i + 1) for i in order)
         else:
-            self.player_order = ",".join(str(i + 1) for i in range(self.parameter_set_group.parameter_set.group_size))
+            #randomly assign values from possible values
+            for i in range(self.parameter_set_group.parameter_set.group_size):
+                index = random.randint(0, len(possible_values) - 1)
 
+                if self.values == "":
+                    self.values = possible_values[index]
+                else:
+                    self.values += "," + possible_values[index]
+            
+                possible_values.pop(index)
+            
+            #randomly assign priority scores       
+            self.priority_scores = ""
+            for i in range(self.parameter_set_group.parameter_set.group_size):
+                score = random.randint(1, self.parameter_set_group.parameter_set.max_priority_score)
+                if self.priority_scores == "":
+                    self.priority_scores = str(score)
+                else:
+                    self.priority_scores += "," + str(score)
+            
+            #assign player order based on priority scores, with highest score first, ties broken by random order
+            if self.priority_scores:
+                scores = list(map(int, self.priority_scores.split(",")))
+                order = sorted(range(len(scores)), key=lambda k: (-scores[k], random.random()))
+                self.player_order = ",".join(str(i + 1) for i in order)
+            else:
+                self.player_order = ",".join(str(i + 1) for i in range(self.parameter_set_group.parameter_set.group_size))
+
+        
         self.save()
     
     def update_json_local(self):

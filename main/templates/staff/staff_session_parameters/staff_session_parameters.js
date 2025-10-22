@@ -34,7 +34,6 @@ let app = Vue.createApp({
                         id:0,
                     },
 
-
                     parameterset_form_ids: {{parameterset_form_ids|safe}},
 
                     upload_file: null,
@@ -54,6 +53,9 @@ let app = Vue.createApp({
 
                     //form paramters
                     session_import : null,
+
+                    //page variables
+                    group_periods_repeat_after_period : 10,
                 }},
     methods: {
 

@@ -5,6 +5,13 @@
         </span>      
 
         <span class="float-end">
+            <input type="number" 
+                   class="form-control form-control-sm d-inline-block me-2" 
+                   style="width: 100px;" 
+                   v-model.number="group_periods_repeat_after_period"
+                   v-bind:disabled="session.started || reconnecting || working"
+                   title="Repeat every N periods auto-filling">
+
             <button class="btn btn-outline-success btn-sm"
                     type="button"
                     title="Update and randomize values"
